@@ -1,0 +1,12 @@
+.layout {
+  min-height: 250vh;
+  background-color: #f9fafb;
+
+  &__main {
+    // flex: 1;
+    &__main-container {
+      max-width: 1536px;
+      margin: 0 auto;
+    }
+  }
+}

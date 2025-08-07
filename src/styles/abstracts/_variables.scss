@@ -1,0 +1,58 @@
+// Color Variables
+$primary-blue: #2563eb;
+$primary-blue-50: #eff6ff;
+$primary-blue-100: #dbeafe;
+$primary-blue-600: #2563eb;
+
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-500: #6b7280;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+
+$white: #ffffff;
+$transparent: transparent;
+
+// Spacing Variables
+$spacing-1: 0.25rem;  // 4px
+$spacing-2: 0.5rem;   // 8px
+$spacing-3: 0.75rem;  // 12px
+$spacing-4: 1rem;     // 16px
+$spacing-5: 1.25rem;  // 20px
+$spacing-6: 1.5rem;   // 24px
+$spacing-8: 2rem;     // 32px
+$spacing-16: 4rem;    // 64px
+$spacing-20: 5rem;    // 80px
+
+// Font Sizes
+$text-xs: 0.75rem;    // 12px
+$text-sm: 0.875rem;   // 14px
+$text-base: 1rem;     // 16px
+$text-lg: 1.125rem;   // 18px
+$text-xl: 1.25rem;    // 20px
+$text-2xl: 1.5rem;    // 24px
+
+// Font Weights
+$font-medium: 500;
+$font-bold: 700;
+
+// Border Radius
+$rounded: 0.25rem;    // 4px
+$rounded-lg: 0.5rem;  // 8px
+$rounded-full: 9999px;
+
+// Shadows
+$shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+$shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+$shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+
+// Z-index
+$z-navigation: 1000;
+$z-header: 100;
+
+// Breakpoints
+$mobile: 480px;
+$tablet: 768px;
+$desktop: 1024px;
+$wide: 1280px;

@@ -1,0 +1,188 @@
+// 기본 버튼 스타일
+.btn {
+    // 기본 스타일 (base)
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; // gap-2
+    white-space: nowrap;
+    border-radius: 0.375rem; // rounded-md
+    font-size: 0.875rem; // text-sm
+    font-weight: 500; // font-medium
+    transition: all 0.2s ease;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+  
+    // 비활성화 상태
+    &:disabled {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+  
+    // SVG 아이콘 처리
+    svg {
+      pointer-events: none;
+      flex-shrink: 0;
+      width: 1rem;
+      height: 1rem;
+  
+      &:not([class*='size-']) {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+  
+    // 포커스 스타일
+    &:focus-visible {
+      outline: 3px solid rgba(59, 130, 246, 0.5);
+      outline-offset: 2px;
+    }
+  
+    // aria-invalid 상태
+    &[aria-invalid="true"] {
+      outline: 2px solid rgba(239, 68, 68, 0.2);
+      
+      @media (prefers-color-scheme: dark) {
+        outline: 2px solid rgba(239, 68, 68, 0.4);
+      }
+    }
+  }
+  
+  // Variant 스타일들
+  .btn--default {
+    background-color: #3b82f6; // bg-primary (blue-500)
+    color: white;
+  
+    &:hover:not(:disabled) {
+      background-color: rgba(59, 130, 246, 0.9);
+    }
+  }
+  
+  .btn--destructive {
+    background-color: #ef4444; // bg-destructive (red-500)
+    color: white;
+  
+    &:hover:not(:disabled) {
+      background-color: rgba(239, 68, 68, 0.9);
+    }
+  
+    &:focus-visible {
+      outline-color: rgba(239, 68, 68, 0.2);
+      
+      @media (prefers-color-scheme: dark) {
+        outline-color: rgba(239, 68, 68, 0.4);
+      }
+    }
+  
+    @media (prefers-color-scheme: dark) {
+      background-color: rgba(239, 68, 68, 0.6);
+    }
+  }
+  
+  .btn--outline {
+    border: 1px solid #d1d5db; // border-gray-300
+    background-color: transparent;
+    color: #374151; // text-gray-700
+  
+    &:hover:not(:disabled) {
+      background-color: #f3f4f6; // bg-gray-100
+      color: #111827; // text-gray-900
+    }
+  
+    @media (prefers-color-scheme: dark) {
+      border-color: #4b5563; // dark:border-gray-600
+      color: #d1d5db; // dark:text-gray-300
+      background-color: rgba(75, 85, 99, 0.3);
+  
+      &:hover:not(:disabled) {
+        background-color: rgba(75, 85, 99, 0.5);
+      }
+    }
+  }
+  
+  .btn--secondary {
+    background-color: #f3f4f6; // bg-gray-100
+    color: #374151; // text-gray-700
+  
+    &:hover:not(:disabled) {
+      background-color: rgba(243, 244, 246, 0.8);
+    }
+  
+    @media (prefers-color-scheme: dark) {
+      background-color: #4b5563; // dark:bg-gray-600
+      color: #d1d5db; // dark:text-gray-300
+    }
+  }
+  
+  .btn--ghost {
+    background-color: transparent;
+    color: #374151; // text-gray-700
+  
+    &:hover:not(:disabled) {
+      background-color: #f3f4f6; // bg-gray-100
+      color: #111827; // text-gray-900
+    }
+  
+    @media (prefers-color-scheme: dark) {
+      color: #d1d5db;
+  
+      &:hover:not(:disabled) {
+        background-color: rgba(75, 85, 99, 0.5);
+      }
+    }
+  }
+  
+  .btn--link {
+    background-color: transparent;
+    color: #3b82f6; // text-blue-500
+    text-decoration-line: underline;
+    text-underline-offset: 4px;
+  
+    &:hover:not(:disabled) {
+      text-decoration-line: underline;
+    }
+  }
+  
+  // Size 스타일들
+  .btn--default {
+    height: 2.25rem; // h-9
+    padding: 0.5rem 1rem; // py-2 px-4
+  
+    // SVG가 있을 때 패딩 조정
+    &:has(> svg) {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+  }
+  
+  .btn--sm {
+    height: 2rem; // h-8
+    border-radius: 0.375rem; // rounded-md
+    gap: 0.375rem; // gap-1.5
+    padding: 0.25rem 0.75rem; // px-3
+  
+    &:has(> svg) {
+      padding-left: 0.625rem;
+      padding-right: 0.625rem;
+    }
+  }
+  
+  .btn--lg {
+    height: 2.5rem; // h-10
+    border-radius: 0.375rem; // rounded-md
+    padding: 0.5rem 1.5rem; // px-6
+  
+    &:has(> svg) {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+  
+  .btn--icon {
+    width: 2.25rem; // size-9
+    height: 2.25rem;
+    border-radius: 0.375rem; // rounded-md
+    padding: 0;
+  }

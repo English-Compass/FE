@@ -1,12 +1,50 @@
-# React + Vite
+# 1. 클론
+git clone https://github.com/English-Compass/FE.git
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# 2. 디렉토리 이동
+cd FE
 
-Currently, two official plugins are available:
+# 3. 패키지 설치
+npm install
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+# 4. 개발 서버 실행
+npm run dev
 
-## Expanding the ESLint configuration
+# 📘 영어 학습 웹 애플리케이션
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+React + Vite 기반의 AI 영어 학습 웹앱입니다.  
+학습 목적, 실력에 따른 맞춤 커리큘럼과 실시간 피드백, OTT 기반 콘텐츠 추천을 제공합니다.
+
+## 🚀 주요 기능
+
+- 카카오 로그인 및 사용자 정보 입력
+- 학습 목적 및 난이도 설정 (CEFR 기준)
+- AI 기반 단어/문장 학습, 퀴즈 제공
+- 학습 피드백 및 틀린 문제 리뷰
+- 관심사 기반 미디어 추천 (OTT 연동)
+- 마이페이지에서 학습 통계 및 진도 확인
+
+## 🧩 주요 화면
+
+- **랜딩 페이지**: 로그인 진입 (카카오)
+- **추가 정보 입력**: 학습 목적 및 레벨 선택
+- **대시보드**: 홈, 미디어, 학습, 리뷰, 마이페이지
+- **하단 바**: 홈 / 미디어 / 학습 / 리뷰 / 마이페이지
+- **상단 바**: 사용자 이름, 마이페이지, 로그아웃
+
+## 📁 폴더 구조
+
+
+src/
+├── assets/            # 이미지, 아이콘 등
+├── components/        # 공통 컴포넌트
+├── hooks/             # 커스텀 훅
+├── layouts/           # 페이지 레이아웃
+├── pages/             # 주요 페이지 (홈, 학습 등)
+├── routes/            # 라우팅 설정
+├── services/          # API 요청 모듈
+├── store/             # 상태 관리 (예: Zustand)
+├── styles/            # SCSS / 전역 스타일
+├── App.jsx
+└── main.jsx
+
