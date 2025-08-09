@@ -15,7 +15,7 @@ import MyPage from "../pages/dashboard/MyPage";
 // auth
 // import LandingPage from "../pages/landing/LandingPage";
 // import LoginPage from "../pages/landing/LoginPage";
-// import AddInfoPage from "../pages/landing/AddInfoPage";
+import AddInfoPage from "../pages/landing/AddInfoPage";
 
 
 const AllRoutes = () => {
@@ -24,8 +24,8 @@ const AllRoutes = () => {
     return (
         <Routes>
             {/* <Route path="/landing" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/add-info" element={<AddInfoPage />} /> */}
+            <Route path="/login" element={<LoginPage />} /> */}
+            <Route path="/add-info" element={<AddInfoPage />} />
             <Route element={<Layout />}>
                 {/* 기본 경로를 홈으로 리다이렉트 */}
                 <Route path="/" element={<Navigate to="/dashboard/home" replace />} />

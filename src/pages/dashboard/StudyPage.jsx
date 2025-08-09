@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SelectType } from '../../components/study/SelectType';
 
-const StudyPage = () => {
+export default function StudyPage() {
+  const navigate = useNavigate();
+
   return (
-    <div className="page">
-      <h1 className="page__title">학습</h1>
+    <div className='study-page'>
+      <SelectType navigate={navigate}/>
     </div>
-  );
-};
-
-export default StudyPage;
+  )
+}

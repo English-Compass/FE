@@ -1,12 +1,15 @@
 .layout {
-  min-height: 250vh;
+  min-height: 165vh;
   background-color: #f9fafb;
 
   &__main {
-    // flex: 1;
     &__main-container {
       max-width: 1536px;
       margin: 0 auto;
     }
+  }
+
+   @media (min-width: 768px ) {
+    min-height: 200vh;
   }
 }
