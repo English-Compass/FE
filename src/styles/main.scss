@@ -1,10 +1,24 @@
 // Main SCSS Entry Point
 
 // 1. Abstracts
-@import 'abstracts/variables';
+@use 'abstracts/variables';
 
 // 2. reset
-@import 'base/reset';
+@use 'base/reset';
+
+// 3. UI Components
+@use 'ui/badge';
+@use 'ui/button';
+@use 'ui/card';
+@use 'ui/progress';
+@use 'ui/textarea';
+
+// 4. Component Styles  
+@use 'components/conversation';
+@use 'components/media';
+
+// Tailwind CSS
+@import 'tailwindcss';
 
 
 

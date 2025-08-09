@@ -1,6 +1,5 @@
 import React from 'react';
 import * as ProgressPrimitive from '@radix-ui/react-progress';
-import '../../styles/ui/_progress.scss';
 
 export function Progress( { className = '', value = 0, ...props }) { 
     return (

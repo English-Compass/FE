@@ -1,0 +1,420 @@
+.conversation-page {
+  min-height: 100vh;
+  padding: 16px;
+  background-color: var(--color-background);
+  
+  // Quick Actions Grid
+  .quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    
+    .action-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+      
+      .action-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+      
+      .action-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      
+      .action-description {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+    }
+  }
+  
+  // Scenario Selection Grid
+  .scenarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    
+    .scenario-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+      
+      &.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        
+        &:hover {
+          transform: none;
+          box-shadow: none;
+        }
+      }
+      
+      .scenario-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        
+        .scenario-icon {
+          font-size: 2rem;
+        }
+        
+        .level-badges {
+          display: flex;
+          gap: 0.25rem;
+          flex-wrap: wrap;
+        }
+      }
+      
+      .scenario-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--color-foreground);
+        margin-bottom: 0.5rem;
+      }
+      
+      .scenario-description {
+        font-size: 0.875rem;
+        color: var(--color-muted-foreground);
+        line-height: 1.5;
+        margin-bottom: 1rem;
+      }
+    }
+  }
+  
+  // 커스텀 상황 설정 css 시작  
+  .custom-situation {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    &__header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    &__back-button {
+      background: transparent;
+      border: none;
+      color: #6b7280;
+      cursor: pointer;
+      border-radius: 0.375rem;
+      transition: all 0.3s ease;
+
+      &:hover {
+        color: #374151;
+        background: #f9fafb;
+      }
+    }
+
+    &__card {
+      width: 100%;
+    }
+
+    .input-label {
+      display: block;
+      font-weight: 600;
+      color: var(--color-foreground);
+      margin-bottom: 0.5rem;
+    }
+    
+    .situation-input {
+      width: 100%;
+      min-height: 120px;
+      padding: 1rem;
+      border: 2px solid #e5e7eb;
+      background-color: #f9fafb;
+      border-radius: 8px;
+      font-size: 1rem;
+      resize: vertical;
+      transition: border-color 0.3s ease;
+      
+      &:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+    }
+  
+    
+    .tips-section {
+      background: #f0f9ff;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      
+      .tips-title {
+        font-weight: 600;
+        color: #1e40af;
+        margin-bottom: 0.5rem;
+      }
+      
+      .tips-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        
+        li {
+          font-size: 0.875rem;
+          color: #1e40af;
+          margin-bottom: 0.25rem;
+        }
+      }
+    }
+    .custom-situation__start-button {
+      width: 100%;
+      background-color: #1e88e5;
+      margin-top: 1rem;
+      &:hover {
+        background-color: oklch(48.8% 0.243 264.376);
+      }
+    }
+  }
+
+  // 커스텀 상황 설정 css 끝  
+  
+  // 회화 연습 디테일 css 시작  
+  .situation-detail-section {
+    .situation-list {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    
+    .situation-option {
+      width: 100%;
+      padding: 1rem;
+      text-align: left;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        border-color: var(--color-primary);
+        background: #f8faff;
+      }
+      
+      .situation-text {
+        font-size: 1rem;
+        color: var(--color-foreground);
+        line-height: 1.5;
+        font-weight: 500;
+      }
+    }
+  }
+  // 회화 연습 디테일 css 끝  
+
+  // 채팅 연습 css 시작 
+  .conversation-practice {
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    
+    // 모바일 대응
+    @media (max-width: 768px) {
+      padding: 1rem;
+    }
+    
+    // 헤더 섹션 
+    > div:first-child {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    // 채팅 카드 
+    .chat-card {
+      height: 26rem;
+      display: flex;
+      flex-direction: column;
+      
+      // 카드 헤더
+      .chat-header {
+        .chat-title {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+      }
+      
+      // 카드 컨텐츠 
+      .chat-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        
+        // 메시지 영역 
+        > div:first-child {
+          flex: 1;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          max-height: 16rem;
+          
+          .message {
+            display: flex;
+            
+            
+            &.user-message {
+              justify-content: flex-end;
+            }
+            
+            &.ai-message {
+              justify-content: flex-start;
+            }
+            
+            // 메시지 버블
+            > div {
+              max-width: 20rem; // max-w-xs
+              padding: 0.5rem 1rem; // px-4 py-2
+              border-radius: 0.5rem; // rounded-lg
+              
+              @media (min-width: 1024px) {
+                max-width: 28rem; // lg:max-w-md
+              }
+              
+              // 사용자 메시지 
+              &.user-bubble {
+                background-color: #2563eb;
+                color: white;
+              }
+              
+              // AI 메시지 
+              &.ai-bubble {
+                background-color: #f3f4f6;
+                color: #1f2937;
+              }
+              
+              // 피드백 섹션 
+              .feedback-section {
+                margin-top: 0.5rem;
+                padding-top: 0.5rem;
+                border-top: 1px solid #e5e7eb;
+                
+                // 
+                > div {
+                  font-size: 0.75rem;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 0.25rem;
+                }
+              }
+            }
+          }
+        }
+        
+        // 입력 영역 
+        > div:last-child {
+          display: flex;
+          gap: 0.5rem;
+          
+          // 입력 래퍼 
+          > div:first-child {
+            flex: 1;
+            position: relative;
+            
+            // Input 
+            input {
+              width: 100%;
+              padding-right: 3rem;
+              background-color: #f3f4f6;
+              border-radius: 0.25rem;
+              padding: 0.25rem;
+            }
+            
+            // 마이크 버튼 
+            button {
+              position: absolute;
+              right: 0.5rem;
+              top: 50%;
+              transform: translateY(-50%);
+              padding: 0.25rem;
+              border-radius: 0.25rem;
+              background: none;
+              border: none;
+              cursor: pointer;
+              transition: color 0.15s ease-in-out;
+              
+              
+              &.listening {
+                color: #ef4444;
+              }
+              
+              &:not(.listening) {
+                color: #9ca3af;
+                
+                &:hover {
+                  color: #4b5563;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // 연습 팁 카드
+    .practice-tips-card {
+      .practice-tips {
+        padding: 1rem;
+        
+        h4 {
+          font-weight: 500;
+          margin-bottom: 0.5rem;
+        }
+        
+        .tips-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1rem;
+          font-size: 0.875rem;
+          color: #4b5563;
+          
+          @media (min-width: 768px) {
+            grid-template-columns: repeat(3, 1fr);
+          }
+          
+          > div {
+            strong {
+              font-weight: 600;
+              color: var(--color-foreground);
+            }
+          }
+        }
+      }
+    }
+  } 
+ }
+
+// 채팅 연습 css 끝 
+// Responsive Design
+@media (max-width: 768px) {
+  .conversation-page {
+    .quick-actions-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .scenarios-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

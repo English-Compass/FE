@@ -1,5 +1,4 @@
 import React from "react";
-import '../../styles/ui/_card.scss';
 
 export function Card({ className = "", ...props }) {
   return (

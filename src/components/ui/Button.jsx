@@ -1,6 +1,5 @@
 import React from "react";
 import * as Slot  from "@radix-ui/react-slot";
-import "../../styles/ui/_button.scss";
 
 // Button 컴포넌트
 function Button({ 

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card.jsx';
-import { Badge } from '../ui/Badge.jsx';
-import { Button } from '../ui/Button.jsx';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
 
 export function ConversationCard({ user, navigate }) {
   const conversationTopics = [

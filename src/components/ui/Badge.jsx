@@ -1,6 +1,5 @@
 import React from "react";
-import * as Slot from "@radix-ui/react-slot";
-import "../../styles/ui/_badge.scss"; 
+import * as Slot from "@radix-ui/react-slot"; 
 
 export function Badge({
   className = "",

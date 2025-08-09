@@ -10,7 +10,7 @@ import MediaPage from "../pages/dashboard/MediaPage";
 import StudyPage from "../pages/dashboard/StudyPage";
 import ReviewPage from "../pages/dashboard/ReviewPage";
 import MyPage from "../pages/dashboard/MyPage";
-// import ConversationPage from "../pages/dashboard/ConversationPage";
+import ConversationPage from "../pages/dashboard/ConversationPage";
 
 // auth
 // import LandingPage from "../pages/landing/LandingPage";
@@ -36,7 +36,7 @@ const AllRoutes = () => {
                 <Route path="/dashboard/study" element={<StudyPage />} />
                 <Route path="/dashboard/review" element={<ReviewPage />} />
                 <Route path="/dashboard/my" element={<MyPage />} />
-                {/* <Route path="/dashboard/conversation" element={<ConversationPage />} /> */}
+                <Route path="/dashboard/conversation" element={<ConversationPage />} />
             </Route>
         </Routes>
     );
