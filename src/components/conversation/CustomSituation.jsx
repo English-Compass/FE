@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Textarea } from '../ui/Textarea';
+import { Textarea } from '../ui/textarea';
 import { ArrowLeft } from 'lucide-react';
 
 export function CustomSituation({ onBack, onStartConversation }) {

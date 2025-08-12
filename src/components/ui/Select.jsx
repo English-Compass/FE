@@ -7,7 +7,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
 } from "lucide-react";
-import "./_select.scss";
+import "../../styles/ui/_select.scss";
 
 function Select({ ...props }) {
   return <SelectPrimitive.Root data-slot="select" {...props} />;

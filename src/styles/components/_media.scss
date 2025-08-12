@@ -1,12 +1,12 @@
 .media-page {
-  padding: 1rem 1.5rem;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   
   // 모바일 대응
   @media (max-width: 640px) {
-    padding: 1rem;
+    padding: 2.5rem;
   }
   
   // 미디어 헤더

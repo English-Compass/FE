@@ -1,0 +1,414 @@
+.my-page {
+    padding: 2rem;
+
+    @media (min-width: 768px) {
+        padding: 2.5rem;
+    }
+
+    & > * + * {
+        margin-top: 1.5rem; 
+    }
+}
+
+.my-page__header {
+    
+    h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1f2937; // text-gray-800
+    }
+
+    p {
+        color: #4b5563;
+        font-size: 1.25rem;
+    }
+}
+
+.my-page__tabs {
+    width: 100%;
+    &-list {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        height: auto;
+        gap: 1rem;
+        width: 100% !important; 
+    }
+}
+
+// ProfileTab css start
+.profile-tab {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+// ProfileTab css end
+
+// ProfileView css start
+.profile-view {
+
+    & > * + * {
+        margin: 1.5rem 0; 
+    }
+
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    &__avatar {
+        width: 6rem;
+        height: 6rem;
+
+        &-fallback {
+            background-color: #dbeafe; // bg-blue-100
+            color: #2563eb; // text-blue-600
+            font-size: 1.5rem; // text-2xl
+        }
+    }
+}
+
+.profile-view__info {
+    & > * + * {
+        margin-top: 0.5rem; 
+    }
+
+    &-name {
+        font-size: 1.5rem; // text-2xl
+        font-weight: 700; // font-bold
+        color: #1f2937; // text-gray-800
+    }
+
+    &-email {
+        color: #4b5563; // text-gray-600
+    }
+
+    &-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+}
+
+.profile-view__content {
+    & > * + * {
+        margin: 3.5rem 0; 
+    }
+
+    &-h4 {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    &-p {
+        color: #4b5563;
+    }
+
+    &-keywords {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    &-badge {
+        font-size: 1.25rem;
+    }
+}
+
+// ProfileView css end
+
+// ProfileEdit css start
+// ProfileEdit css end
+
+// AccountManagement css start
+.account-management {
+    &__title {
+        color: oklch(57.7% 0.245 27.325);
+    }
+
+    &__content {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    &__content-notice {
+        font-size: 1.25rem;
+        color: #6b7280;
+    }
+
+    &__content-button {
+        width: 100%;
+        justify-content: start;
+        color: rgb(55, 65, 81);
+    }
+}
+// AccountManagement css end
+
+// StatsBoard css start
+.stats-board {
+    border-color: #e5e7eb; 
+    &__title {
+        display: flex; 
+        align-items: center;
+        gap: 0.5rem; // space-x-2
+
+        &-icon {
+            width: 1.25rem; // w-5
+            height: 1.25rem; // h-5
+            color: #6b7280; // text-gray-600
+        }
+    }
+
+    &__content {
+        & > * + * {
+            margin-top: 1.5rem; 
+        }
+        &-total {
+            display: grid;
+            gap: 1.5rem;
+
+            @media (min-width: 768px) {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            &-item {
+                text-align: center;
+
+                &-value {
+                    font-size: 1.875rem; // text-3xl
+                    font-weight: 700; // font-bold
+                    color: #111827; // text-gray-900
+                    margin-bottom: 0.5rem; // mb-2
+                }
+
+                &-label {
+                    font-size: 1.25rem;
+                    color: #4b5563; // text-gray-600
+                }
+
+            }
+        }
+
+        &-weekly {
+            &-title {
+                font-weight: 500;
+                font-size: 1.25rem;
+            }
+            &-chart {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 0.5rem;
+            }
+            
+            .day-item {
+                text-align: center;
+            }
+            .day-label {
+                font-size: 0.75rem; // text-xs
+                color: #4b5563; // text-gray-600
+                margin-bottom: 0.5rem; // mb-2
+            }
+            .day-bar {
+                background-color: #f3f4f6; // bg-gray-100
+                border-radius: 0.5rem; // rounded-lg
+                padding: 0.75rem; // p-3
+            }
+            .day-value {
+                font-size: 0.875rem; // text-sm
+                font-weight: 500; // font-medium
+                color: #111827; // text-gray-900
+            } 
+        }
+
+        &-analysis {
+            background-color: #f9fafb; // bg-gray-50
+            padding: 1rem; // p-4
+            border-radius: 0.5rem; // rounded-lg
+            border: 1px solid #e5e7eb; // border border-gray-200
+
+            &-title {
+                font-weight: 500; // font-medium
+                color: #111827; // text-gray-900
+                margin-bottom: 0.5rem; // mb-2
+            }
+        }
+
+    }
+
+}
+// StatsBoard css end
+
+// StatsGrid css start
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    
+    @media (min-width: 768px) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    &__content {
+        margin-top: 1rem;
+        padding: 1rem;
+        text-align: center;
+
+        &-value {
+            font-size: 1.275rem; // text-3xl
+            font-weight: 700; // font-bold
+            margin-bottom: 0.25rem;
+        }
+
+        &-label {
+            font-size: 0.875rem; // text-sm
+            color: #4b5563; // text-gray-600
+        }
+    }
+}
+
+// StatsGrid css end
+// CalendarTab css start
+.calendar-tab {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &-title {
+        padding: 1.5rem;
+        &-icon {
+            font-size: 1.5rem;
+        }
+        &-text {
+            margin: 0 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #1f2937;
+        }
+    }
+
+    &-button {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        &-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+    }
+    &-content {
+        margin-top: 1.5rem;
+        &-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            text-align: center;
+            font-size: 1.5rem;
+            &-item {
+                font-size: 1.5rem;
+            }
+        }
+        &-day {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+
+            &-item {
+                aspect-ratio: 1/1;
+            }
+            &-cell {
+                width: 100%;
+                height: 100%;
+                border-radius: 0.5rem;
+                border: 1px solid transparent;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+
+                &:hover {
+                    opacity: 0.8;
+                }
+
+                &--level-0 {
+                    background-color: #f3f4f6;
+                    border-color: #e5e7eb;
+                }
+          
+                &--level-1 {
+                    background-color: #bbf7d0;
+                    border-color: #86efac;
+                }
+          
+                &--level-2 {
+                    background-color: #86efac;
+                    border-color: #4ade80;
+                }
+          
+                &--level-3 {
+                    background-color: #4ade80;
+                    border-color: #22c55e;
+                }
+        
+                &--level-4 {
+                    background-color: #22c55e;
+                border-color: #16a34a;
+                }
+        
+                &-number {
+                    font-size: 1.5rem;
+                    font-weight: 500;
+        
+                    &--inactive {
+                        color: #6b7280;
+                    }
+                    &--active {
+                        color: #ffffff;
+                    }
+                }
+            }
+            &-empty {
+                width: 100%;
+                height: 100%;
+            }
+        }
+    }
+    &-legend {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+
+        &-activity {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1rem;
+            color: #4b5563;
+
+            &-scale {
+                gap: 0.02rem;
+                display: flex;
+
+                &-item {
+                    width: 0.75rem;
+                    height: 0.75rem;
+                    border-radius: 0.125rem;
+                }
+            }
+        }
+        
+        &-summary {
+            color: #4b5563;
+            font-size: 0.875rem;
+        }
+    }
+
+}
+
+// CalendarTab css end

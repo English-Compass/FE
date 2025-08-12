@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export function LearningTips() {

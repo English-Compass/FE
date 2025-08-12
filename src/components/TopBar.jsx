@@ -2,8 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
-import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/Avatar.jsx';
-import { Button } from '../components/ui/Button.jsx';
+import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar.jsx';
+import { Button } from './ui/button.jsx';
 import '../styles/components/_topbar.scss';
 
 const TopBar = () => {

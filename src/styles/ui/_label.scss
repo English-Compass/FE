@@ -1,0 +1,29 @@
+.label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; // gap-2
+    font-size: 0.875rem; // text-sm
+    line-height: 1; // leading-none
+    font-weight: 500; // font-medium
+    user-select: none; // select-none
+  
+    // Group disabled state
+    .group[data-disabled="true"] & {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+  
+    // Peer disabled state
+    &:has(+ :disabled),
+    &:has(+ [disabled]) {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  
+    // Alternative peer disabled selector (if above doesn't work in all browsers)
+    .peer:disabled ~ &,
+    .peer[disabled] ~ & {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }

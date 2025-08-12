@@ -1,5 +1,7 @@
 // Main SCSS Entry Point
 
+@use 'tailwindcss';
+
 // 1. Abstracts
 @use 'abstracts/variables';
 
@@ -17,8 +19,7 @@
 @use 'components/conversation';
 @use 'components/media';
 
-// Tailwind CSS
-@import 'tailwindcss';
+
 
 
 

@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
-import { Card, CardContent } from '../ui/Card';
-import { Badge } from '../ui/Badge'
+import { Card, CardContent } from '../ui/card';
+import { Badge } from '../ui/badge'
 import AppContext from "../../context/AppContext";
 
 export function SelectType() {   
