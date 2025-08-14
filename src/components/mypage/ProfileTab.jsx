@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { useApp } from '../../context/AppContext';
 import ProfileView from './ProfileView';
-import ProfileEdit from './ProfileEdit';
+import ProfileEdit from './ProfileEdit.jsx';
 import AccountManagementCard from './AccountManagement';
 
 export default function ProfileTab() {
