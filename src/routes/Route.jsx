@@ -13,8 +13,8 @@ import MyPage from "../pages/dashboard/MyPage";
 import ConversationPage from "../pages/dashboard/ConversationPage";
 
 // auth
-// import LandingPage from "../pages/landing/LandingPage";
-// import LoginPage from "../pages/landing/LoginPage";
+import LandingPage from "../pages/landing/LandingPage";
+import KakaoCallback from "../pages/landing/KaKaoCallback";
 import AddInfoPage from "../pages/landing/AddInfoPage";
 
 
@@ -23,9 +23,9 @@ const AllRoutes = () => {
     
     return (
         <Routes>
-            {/* <Route path="/landing" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} /> */}
+            <Route path="/landing" element={<LandingPage />} /> 
             <Route path="/add-info" element={<AddInfoPage />} />
+            <Route path="/kakao-callback" element={<KakaoCallback />} />
             <Route element={<Layout />}>
                 {/* 기본 경로를 홈으로 리다이렉트 */}
                 <Route path="/" element={<Navigate to="/dashboard/home" replace />} />
