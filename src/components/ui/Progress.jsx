@@ -6,6 +6,8 @@ export function Progress( { className = '', value = 0, ...props }) {
         <ProgressPrimitive.Root
             data-slot="progress"
             className={`progress-root ${className}`}
+            value={value}
+            max={100}
             {...props}
         >
             <ProgressPrimitive.Indicator 

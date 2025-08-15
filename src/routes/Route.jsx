@@ -1,6 +1,5 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useApp } from "../context/AppContext.jsx";
 
 import Layout from "../layouts/Layout.jsx";
 
@@ -17,10 +16,9 @@ import LandingPage from "../pages/landing/LandingPage";
 import KakaoCallback from "../pages/landing/KaKaoCallback";
 import AddInfoPage from "../pages/landing/AddInfoPage";
 
+import WorkBook from "../components/study/WorkBook";
 
 const AllRoutes = () => {
-    const { user } = useApp();
-    
     return (
         <Routes>
             <Route path="/landing" element={<LandingPage />} /> 
@@ -34,6 +32,7 @@ const AllRoutes = () => {
                 <Route path="/dashboard/home" element={<HomePage />} />
                 <Route path="/dashboard/media" element={<MediaPage />} />
                 <Route path="/dashboard/study" element={<StudyPage />} />
+                <Route path="/dashboard/study/workbook" element={<WorkBook />} />
                 <Route path="/dashboard/review" element={<ReviewPage />} />
                 <Route path="/dashboard/my" element={<MyPage />} />
                 <Route path="/dashboard/conversation" element={<ConversationPage />} />

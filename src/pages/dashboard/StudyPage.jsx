@@ -6,7 +6,7 @@ export default function StudyPage() {
   const navigate = useNavigate();
 
   return (
-    <div className='study-page'>
+    <div className="!p-4 !sm:p-6 !space-y-6">
       <SelectType navigate={navigate}/>
     </div>
   )
