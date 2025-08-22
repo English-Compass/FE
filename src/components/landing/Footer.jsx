@@ -8,7 +8,7 @@ export default function Footer() {
       return (
         <footer className="bg-gray-900 text-white !py-8">
           <div className="container !mx-auto !px-4">
-            <div className="flex md:flex-row items-center !space-x-2 !mb-4 md:mb-0">
+            <div className="flex md:flex-row items-center !space-x-2 !mb-4">
                 <BookOpen className="h-6 w-6 text-blue-400" />
                 <span className="text-lg">English Compass</span>
             </div>

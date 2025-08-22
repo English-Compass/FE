@@ -6,7 +6,7 @@ import Footer from "../../components/landing/Footer";
 
 export default function LandingPage({ onKakaoLogin }) {
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen">
             <Header />
             <HeroSection onKakaoLogin={onKakaoLogin}/>
             <FeaturesSection />

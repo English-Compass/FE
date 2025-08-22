@@ -91,14 +91,38 @@ export default function ConversationPage() {
   const [selectedScenario, setSelectedScenario] = useState(null);
   const [conversation, setConversation] = useState([]);
 
-  // Mock conversation responses
+  // TODO: API 연동 - AI 대화 응답 생성
+  // const getAIResponse = async (userMessage, conversationContext) => {
+  //   const response = await fetch('http://localhost:8080/api/conversation/respond', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Authorization': `Bearer ${localStorage.getItem('token')}`,
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify({
+  //       userMessage: userMessage,
+  //       scenario: selectedScenario?.id,
+  //       conversationHistory: conversation.map(msg => ({
+  //         role: msg.type,
+  //         content: msg.message
+  //       }))
+  //     })
+  //   });
+  //   return response.json();
+  // };
+
+  // Mock conversation responses (더미 데이터)
   const getAIResponse = () => {
     const responses = [
       "That's interesting! Can you tell me more about that?",
       "I understand. What do you think about this situation?",
       "Great point! How would you handle this differently?",
       "Thank you for sharing. Can you elaborate on that?",
-      "That makes sense. What's your next step?"
+      "That makes sense. What's your next step?",
+      "Could you please repeat that? I want to make sure I understand correctly.",
+      "Excellent! Your pronunciation is getting better.",
+      "Let me help you with that grammar point...",
+      "What would you say in this situation in your native language?"
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   };

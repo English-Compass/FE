@@ -78,8 +78,9 @@
 //   --sidebar-ring: oklch(0.439 0 0);
 // }
 
-@theme inline {
-  --color-background: var(--background);
+@layer theme {
+  :root {
+    --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -117,6 +118,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  }
 }
 
 // @layer base {

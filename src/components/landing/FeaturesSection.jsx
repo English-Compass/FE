@@ -28,7 +28,7 @@ export default function FeaturesSection() {
         return (
             <div className="bg-white rounded-lg border shadow-sm text-center !p-6 hover:shadow-lg transition-shadow duration-300">
                 <div className="!mb-6">
-                    <Icon className={`h-12 w-12 ${iconColor} mx-auto !mb-4`} />
+                    <Icon className={`h-12 w-12 ${iconColor} !mx-auto !mb-4`} />
                     <h3 className="text-xl font-semibold text-gray-800">{title}</h3>
                 </div>
                 <div>

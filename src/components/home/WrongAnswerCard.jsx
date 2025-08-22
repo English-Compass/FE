@@ -9,21 +9,21 @@ export function WrongAnswerCard({ navigate }) {
     { id: 2, question: "Fill in the blank: I _____ to the store yesterday.", options: ['go', 'went', 'going', 'gone'] }
   ];
   return (
-    <Card className="wrong-quiz-card">
+    <Card className="bg-white/20">
       <CardHeader>
-        <CardTitle className="wrong-quiz-title">
+        <CardTitle className="flex items-center gap-2 !mb-1.5">
           <span>❌</span>
           <span>오답 퀴즈</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="wrong-quiz-description">
+      <CardContent className="text-lg text-gray-600 !p-4 flex flex-col gap-2">
         <p>틀렸던 문제들을 다시 풀어보세요</p>
         {wrongQuizzes.map((quiz, index) => (
-        <div key={quiz.id} className="wrong-quiz-item">
-  <p className="wrong-quiz-question">
+        <div key={quiz.id} className="!p-4 bg-red-50 border border-red-200 rounded-lg">
+  <p className="text-lg text-gray-600 !mb-3">
     Q{index + 1}. {quiz.question}
   </p>
-  <div className="wrong-quiz-options">
+  <div className="flex gap-2">
     {quiz.options.slice(0, 2).map((option, optIndex) => (
       <Badge key={optIndex} variant="secondary">
         {option}
@@ -33,13 +33,13 @@ export function WrongAnswerCard({ navigate }) {
   </div>
 </div>
     ))}
-<Badge variant="destructive" className="wrong-quiz-badge">
+{/* <Badge variant="destructive" className="!mb-4">
   {wrongQuizzes.length}문제 대기 중
-</Badge>
+</Badge> */}
         <Button
           variant="outline"
-          size="sm"
-          className="wrong-quiz-button"
+          size="lg"
+          className="w-full"
           onClick={() => navigate('/dashboard/review')}
         >
           오답 풀기

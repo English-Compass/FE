@@ -9,16 +9,11 @@ export default function HowItWorksSection() {
         },
         {
           number: 2,
-          title: "레벨 테스트",
-          description: "받아쓰기와 말하기로 현재 실력을 확인하세요"
-        },
-        {
-          number: 3,
           title: "맞춤 설정",
           description: "난이도와 학습 목적을 선택하세요"
         },
         {
-          number: 4,
+          number: 3,
           title: "학습 시작",
           description: "AI와 함께 체계적인 영어 학습을 시작하세요"
         }
@@ -40,7 +35,7 @@ export default function HowItWorksSection() {
         <section className="!py-16 bg-white">
             <div className="container !mx-auto !px-4">
                 <h3 className="text-3xl text-center !mb-12">어떻게 시작하나요?</h3>
-                <div className="grid md:grid-cols-4 gap-6">
+                <div className="grid md:grid-cols-3 gap-6">
                 {steps.map((step) => (
                     <Step
                     key={step.number}

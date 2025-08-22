@@ -1,57 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
 import { useApp } from '../../context/AppContext';
 
-export function Sentence({ 
+export function SentenceInterpretationQuestion({ 
   question, 
   selectedAnswer, 
   showResult, 
   onAnswerSelect,
-  onQuestionLoad // 학습용 props 추가
+  onQuestionLoad
 }) {
   const { selectedType, formData, STUDY_TYPES, REVIEW_MESSAGES } = useApp();
   const [currentQuestion, setCurrentQuestion] = useState(question);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // API 호출 함수
-    const fetchSentenceQuestion = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // 1. README에 명시된 API 엔드포인트로 요청합니다.
-        // 특정 유형의 문제 하나만 가져오는 API가 필요합니다. (예: /api/quizzes/random?type=sentence)
-        const response = await fetch(`http://localhost:8080/api/quizzes/random?type=sentence&level=${formData.level}`);
-  
-        if (!response.ok) {
-          throw new Error(`서버 응답 오류: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        // 2. 서버에서 받은 데이터로 상태를 업데이트합니다.
-        setCurrentQuestion(data);
-        
-        // 3. 부모 컴포넌트(StudySession)에 문제 정보를 전달합니다.
-        if (onQuestionLoad) {
-          onQuestionLoad(data);
-        }
-  
-      } catch (err) {
-        console.error('문장 문제 로드 실패:', err);
-        setError('문제를 불러오는데 실패했습니다. API 서버가 실행 중인지 확인해주세요.');
-      } finally {
-        setLoading(false);
+  const fetchSentenceInterpretationQuestion = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`http://localhost:8080/api/quizzes/random?type=sentence-interpretation&level=${formData.level}`);
+
+      if (!response.ok) {
+        throw new Error(`서버 응답 오류: ${response.status}`);
       }
-    };
-  
-    // 학습 모드에서 문제 로드
-    useEffect(() => {
-      if (!question) {
-        fetchSentenceQuestion();
-      }}, [question]);
+      
+      const data = await response.json();
+      setCurrentQuestion(data);
+      
+      if (onQuestionLoad) {
+        onQuestionLoad(data);
+      }
+
+    } catch (err) {
+      console.error('문장 해석 문제 로드 실패:', err);
+      setError('문제를 불러오는데 실패했습니다. API 서버가 실행 중인지 확인해주세요.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!question) {
+      fetchSentenceInterpretationQuestion();
+    }
+  }, [question]);
 
   if (loading) {
     return (
@@ -60,7 +54,7 @@ export function Sentence({
           <div className="flex items-center justify-center !py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto !mb-4"></div>
-              <p className="text-gray-600">문법 문제를 준비하고 있어요...</p>
+              <p className="text-gray-600">문장 해석 문제를 준비하고 있어요...</p>
             </div>
           </div>
         </CardContent>
@@ -75,7 +69,7 @@ export function Sentence({
           <div className="text-center !py-12">
             <p className="text-red-600 !mb-4">⚠️ {error}</p>
             <button 
-              onClick={fetchSentenceQuestion} 
+              onClick={fetchSentenceInterpretationQuestion}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               다시 시도
@@ -90,15 +84,15 @@ export function Sentence({
 
   const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
   const studyType = STUDY_TYPES?.find(type => type.id === selectedType);
-  const isStudyMode = !currentQuestion.date; // 날짜가 없으면 학습 모드
+  const isStudyMode = !currentQuestion.date;
 
   return (
     <Card className="w-full max-w-4xl !px-4 !py-8">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              📝 {isStudyMode ? '문법 학습' : currentQuestion.category}
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              📖 {isStudyMode ? '문장 해석' : currentQuestion.category}
             </Badge>
             {studyType && (
               <Badge variant="secondary">
@@ -112,13 +106,9 @@ export function Sentence({
             <Badge variant="secondary">{currentQuestion.date}</Badge>
           )}
         </div>
-        <CardTitle className="text-lg leading-relaxed !mt-4">
-          {currentQuestion.question}
-        </CardTitle>
       </CardHeader>
       
       <CardContent className="!space-y-4">
-        {/* 복습 모드: 이전 틀린 답안 */}
         {!isStudyMode && showResult && currentQuestion.userAnswer && (
           <div className="bg-red-50 !p-3 rounded-lg border border-red-200">
             <p className="text-sm text-red-700">
@@ -127,15 +117,23 @@ export function Sentence({
           </div>
         )}
 
-        {/* 문법 문제 특화: 빈칸 하이라이팅 */}
-        <div className="bg-blue-50 !p-4 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-700 font-medium !mb-2">📝 문법 문제</p>
-          <p className="text-blue-800">
-            빈칸에 들어갈 가장 적절한 답을 선택하세요.
+        <div className="bg-green-50 !p-4 rounded-lg border border-green-200">
+          <p className="text-sm text-green-700 font-medium !mb-2">📖 문장 해석</p>
+          <p className="text-green-800">
+            영어 문장의 올바른 한국어 해석을 선택하세요.
           </p>
         </div>
 
-        {/* 답변 옵션 */}
+        <div className="bg-gray-50 !p-4 rounded-lg border border-gray-200">
+          <p className="text-lg font-semibold text-blue-800 leading-relaxed">
+            {currentQuestion.question}
+          </p>
+        </div>
+
+        <CardTitle className="text-lg !mt-6 !mb-4 text-gray-700">
+          올바른 해석을 선택하세요:
+        </CardTitle>
+
         <div className="!space-y-3">
           {currentQuestion.options.map((option, index) => (
             <button
@@ -178,7 +176,6 @@ export function Sentence({
           ))}
         </div>
 
-        {/* 결과 및 설명 */}
         {showResult && (
           <div className={`!p-4 rounded-lg ${
             isCorrect 
@@ -205,12 +202,11 @@ export function Sentence({
             <p className={`text-sm !mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
               {isCorrect 
                 ? (isStudyMode 
-                    ? '훌륭합니다! 문법 규칙을 정확히 적용하셨네요.' 
+                    ? '훌륭합니다! 문장의 의미를 정확히 파악하셨네요.' 
                     : (REVIEW_MESSAGES?.CORRECT?.description || '정답입니다!'))
                 : `정답은 "${currentQuestion.correctAnswer}" 입니다.`
               }
             </p>
-            {/* 학습 모드에서 추가 설명 */}
             {isStudyMode && currentQuestion.explanation && (
               <div className="!mt-3 !pt-3 border-t border-gray-200">
                 <p className="text-sm text-gray-700">

@@ -10,15 +10,15 @@ export default function WelcomeSection({ user }) {
         </p>
         {/* 사용자 관심 키워드 표시 */}
         {user?.keywords && user.keywords.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            <span className="text-sm text-gray-500">관심 키워드:</span>
+          <div className="flex flex-wrap gap-2 !mt-3">
+            <span className="text-lg text-gray-500">관심 키워드:</span>
             {user.keywords.slice(0, 5).map((keyword, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
+              <Badge key={index} variant="outline" className="text-lg">
                 {keyword}
               </Badge>
             ))}
             {user.keywords.length > 5 && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-lg">
                 +{user.keywords.length - 5}개 더
               </Badge>
             )}

@@ -1,11 +1,12 @@
 import React from 'react';
 import { Button } from '../../components/ui/button';
 import { Progress } from '../../components/ui/progress';
-import { useApp } from '../../context/AppContext';
 
 import { Word } from '../question-types/Word';
-import { Sentence } from '../question-types/Sentence';
-import { Speech } from '../question-types/Speech';
+import { SentenceInterpretationQuestion } from '../question-types/SentenceInterpretationQuestion';
+import { FillInTheBlankQuestion } from '../question-types/FillInTheBlankQuestion';
+import { SynonymSentenceQuestion } from '../question-types/SynonymSentenceQuestion';
+import { SynonymQuestion } from '../question-types/SynonymQuestion';
 
 export function ReviewQuiz({ 
   question, 
@@ -18,13 +19,12 @@ export function ReviewQuiz({
   onNext, 
   onBackToList 
 }) {
-  const { QUESTION_TYPE_MAPPING } = useApp();
   const progress = ((currentIndex + 1) / totalQuestions) * 100;
 
   
   // 문제 타입에 따른 컴포넌트 매핑
   const getQuestionComponent = () => {
-    const questionType = QUESTION_TYPE_MAPPING[question.category];
+    const questionType = question.questionType || question.category || 'word';
     
     const commonProps = {
       question,
@@ -36,10 +36,14 @@ export function ReviewQuiz({
     switch (questionType) {
       case 'word':
         return <Word {...commonProps} />;
-      case 'sentence':
-        return <Sentence {...commonProps} />;
-      case 'speech':
-        return <Speech {...commonProps} />;
+      case 'sentence-interpretation':
+        return <SentenceInterpretationQuestion {...commonProps} />;
+      case 'fill-in-blank':
+        return <FillInTheBlankQuestion {...commonProps} />;
+      case 'synonym-sentence':
+        return <SynonymSentenceQuestion {...commonProps} />;
+      case 'synonym':
+        return <SynonymQuestion {...commonProps} />;
       default:
         return <Word {...commonProps} />; // 기본값
     }

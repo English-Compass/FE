@@ -11,7 +11,7 @@ export default function HeroSection() {
     return (
         <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white !py-20">
                 <div className="container !mx-auto !px-4 text-center">
-                    <div className="max-w-3xl mx-auto">
+                    <div className="max-w-3xl !mx-auto">
                     <h2 className="text-4xl !md:text-5xl !mb-6">
                         AI와 함께하는
                         <br />
@@ -25,7 +25,7 @@ export default function HeroSection() {
                     
                     <div className="flex flex-col items-center !space-y-4">
                         <Button 
-                        className="!bg-yellow-400 !text-black hover:!bg-yellow-500 !px-8 !py-4 text-lg rounded-md transition-colors flex items-center"
+                        className="!bg-yellow-400 !text-black hover:!bg-yellow-500 !px-10 !py-6 text-lg !rounded-md transition-colors flex items-center"
                         onClick={handleLogin}
                         >
                         <svg className="!w-5 !h-5 !mr-3" viewBox="0 0 24 24" fill="currentColor">
@@ -33,8 +33,8 @@ export default function HeroSection() {
                         </svg>
                         카카오로 시작하기
                         </Button>
-                        <p className="text-sm text-white/80">
-                        간편하게 시작하고 3분만에 맞춤 학습을 받아보세요
+                        <p className="text-lg text-white/80">
+                        간편하게 맞춤형 학습을 시작해 보세요!
                         </p>
                     </div>
                     </div>

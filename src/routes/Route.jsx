@@ -10,13 +10,12 @@ import StudyPage from "../pages/dashboard/StudyPage";
 import ReviewPage from "../pages/dashboard/ReviewPage";
 import MyPage from "../pages/dashboard/MyPage";
 import ConversationPage from "../pages/dashboard/ConversationPage";
+import WordbookPage from "../pages/dashboard/WordbookPage";
 
 // auth
 import LandingPage from "../pages/landing/LandingPage";
 import KakaoCallback from "../pages/landing/KaKaoCallback";
 import AddInfoPage from "../pages/landing/AddInfoPage";
-
-import WorkBook from "../components/study/WorkBook";
 
 const AllRoutes = () => {
     return (
@@ -32,10 +31,10 @@ const AllRoutes = () => {
                 <Route path="/dashboard/home" element={<HomePage />} />
                 <Route path="/dashboard/media" element={<MediaPage />} />
                 <Route path="/dashboard/study" element={<StudyPage />} />
-                <Route path="/dashboard/study/workbook" element={<WorkBook />} />
                 <Route path="/dashboard/review" element={<ReviewPage />} />
                 <Route path="/dashboard/my" element={<MyPage />} />
                 <Route path="/dashboard/conversation" element={<ConversationPage />} />
+                <Route path="/dashboard/wordbook" element={<WordbookPage />} />
             </Route>
         </Routes>
     );
