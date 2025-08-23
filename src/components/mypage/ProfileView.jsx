@@ -4,33 +4,33 @@ import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar'
 
 export default function ProfileView({ user, getDifficultyText }) {
   return (
-    <div className="profile-view">
-      <div className="profile-view__header">
-        <Avatar className="profile-view__avatar">
+    <div className="!space-y-6">
+      <div className="flex items-center gap-6">
+        <Avatar className="w-20 h-20">
           <AvatarImage src={user?.profileImage} />
-          <AvatarFallback className="profile-view__avatar-fallback">
+          <AvatarFallback className="bg-blue-100 text-blue-600 text-2xl">
             {user?.name?.charAt(0)}
           </AvatarFallback>
         </Avatar>
-        <div className="profile-view__info">
-          <h3 className="profile-view__info-name">{user?.name}</h3>
-          <p className="profile-view__info-email">{user?.email}</p>
-          <div className="profile-view__info-badge">
+        <div className="!space-y-2">
+          <h3 className="text-2xl font-bold text-gray-800">{user?.name}</h3>
+          <p className="text-gray-600">{user?.email}</p>
+          <div className="flex items-center gap-2">
             <Badge variant="outline">Level {user?.level}</Badge>
             <Badge variant="secondary">{getDifficultyText(user?.level)}</Badge>
           </div>
         </div>
       </div>
-        <div className="profile-view__content">
+        <div className="!my-14">
             <div>
-                <h4 className='profile-view__content-h4'>현재 실력</h4>
-                <p className="profile-view__content-p">Level {user?.level} - {getDifficultyText(user?.level)}</p>
+                <h4 className='font-semibold text-gray-800 !mb-2'>현재 실력</h4>
+                <p className="flex flex-wrap gap-2">Level {user?.level} - {getDifficultyText(user?.level)}</p>
             </div>
             <div>
-                <h4 className="profile-view__content-h4">관심 키워드</h4>
-                <div className="profile-view__content-keywords">
+                <h4 className="font-semibold text-gray-800 !mb-2">관심 키워드</h4>
+                <div className="flex flex-wrap gap-2">
                 {user?.keywords?.map((keyword, index) => (
-                    <Badge key={index} variant="outline" className="profile-view__content-badge">
+                    <Badge key={index} variant="outline" className="text-sm">
                     {keyword}
                     </Badge>
                 ))}

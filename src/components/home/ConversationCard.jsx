@@ -8,7 +8,7 @@ export function ConversationCard({ user, navigate }) {
     '면접 상황', '레스토랑', '여행 상황', '비즈니스 미팅'
   ];
   return (
-    <Card className="bg-white/20">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <span>💬</span>

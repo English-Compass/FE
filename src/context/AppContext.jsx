@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const AppContext = createContext(null);
 
@@ -220,6 +220,15 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  // 페이지 스크롤을 맨 위로 리셋하는 함수
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  };
+
   const value = {
     user,
     setUser,
@@ -280,6 +289,7 @@ export const AppProvider = ({ children }) => {
     handleCategoryToggle,
     handleKeywordToggle,
     resetAdditionalInfo,
+    scrollToTop,
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 
 import { MediaHeader } from '../../components/media/MediaHeader';
@@ -70,7 +70,11 @@ const MEDIA_CONTENT = [
 ];
 
 export default function MediaPage() {
-  const { user, formData } = useApp();
+  const { user, formData, scrollToTop } = useApp();
+
+  useEffect(() => {
+    scrollToTop();
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [mediaContent, setMediaContent] = useState(MEDIA_CONTENT);
   const [loading, setLoading] = useState(false);

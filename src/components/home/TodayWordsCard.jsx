@@ -23,7 +23,7 @@ export function TodayWordsCard({ words }) {
     navigate('/dashboard/wordbook');
   };
   return (
-    <Card className="bg-white/20">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <span>📚</span>
@@ -32,7 +32,7 @@ export function TodayWordsCard({ words }) {
         </CardTitle>
       </CardHeader>
       <CardContent className='flex flex-col gap-2'>
-        {words.map((word, index) => (
+        {words.slice(0, 3).map((word, index) => (
           <div key={index} className="bg-gray-50 border border-gray-300 rounded-lg !p-4">
             <div className="flex justify-between">
               <h4>{word.word}</h4>

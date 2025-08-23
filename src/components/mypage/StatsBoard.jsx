@@ -1,45 +1,44 @@
-// src/components/mypage/stats/StatsBoard.js
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Clock } from 'lucide-react';
 
 export default function StatsBoard({ studyStats, weeklyHours }) {
   return (
-    <Card className="stats-board">
+    <Card className='!mt-6'>
       <CardHeader>
-        <CardTitle className="stats-board__title">
-          <Clock className="stats-board__title-icon" />
+        <CardTitle className="flex items-center !space-x-2">
+          <Clock className="w-5 h-5 text-gray-600" />
           <span>학습 시간 통계</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="stats-board__content">
-        <div className="stats-board__content-total">
-            <div className="stats-board__content-total-item">
-                <div className="stats-board__content-total-item-value">{studyStats.totalHours}시간</div>
-                <p className="stats-board__content-total-item-label">총 학습 시간</p>
+      <CardContent className="!space-y-6">
+        <div className="grid md:grid-cols-2 gap-6">
+            <div className="text-center">
+                <div className="text-3xl font-bold text-gray-900 !mb-2">{studyStats.totalHours}시간</div>
+                <p className="text-gray-600">총 학습 시간</p>
             </div>
-            <div className="stats-board__content-total-item">
-                <div className="stats-board__content-total-item-value">
+            <div className="text-center">
+                <div className="text-3xl font-bold text-gray-900 !mb-2">
                 {(studyStats.totalHours / 7).toFixed(1)}시간
                 </div>
-                <p className="stats-board__content-total-item-label">일평균 학습 시간</p>
+                <p className="text-gray-600">일평균 학습 시간</p>
             </div>
         </div>
-        <div className="stats-board__content-weekly">
-            <h4 className="stats-board__content-weekly-title">이번 주 학습 시간</h4>
-            <div className="stats-board__content-weekly-chart">
+        <div>
+            <h4 className="font-medium text-gray-900 !mb-4">이번 주 학습 시간</h4>
+            <div className="grid grid-cols-7 gap-2">
                 {weeklyHours.map((day, index) => (
-                <div key={index} className="day-item">
-                    <div className="day-label">{day.day}</div>
-                    <div className="day-bar">
-                    <div className="day-value">{day.hours}h</div>
+                <div key={index} className="text-center">
+                    <div className="text-xs text-gray-600 !mb-2">{day.day}</div>
+                    <div className="bg-gray-100 rounded-lg !p-3">
+                    <div className="text-sm font-medium text-gray-900">{day.hours}h</div>
                     </div>
                 </div>
                 ))}
             </div>
         </div>
-        <div className="stats-board__analysis">
-            <h4 className="stats-board__analysis-title">📊 이번 주 분석</h4>
+        <div className="bg-gray-50 !p-4 rounded-lg border border-gray-200">
+            <h4 className="font-medium text-gray-900 !mb-4">📊 이번 주 분석</h4>
             {/* ... (JSX for weekly analysis) ... */}
         </div>
       </CardContent>

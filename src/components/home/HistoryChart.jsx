@@ -10,7 +10,7 @@ export default function StudyHistoryChart() {
     const { weeklyHours, QUESTION_TYPES, STUDY_TYPES } = useApp();
 
     return (
-    <div className="space-y-6">
+    <div className="!space-y-6">
         {/* 차트 섹션 */}
         <Card>
         <CardHeader>

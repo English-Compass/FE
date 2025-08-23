@@ -17,11 +17,13 @@ export default function ReviewPage() {
     setReviewShowResult,
     reviewQuestions,
     setReviewQuestions,
-    REVIEW_MODES
+    REVIEW_MODES,
+    scrollToTop
   } = useApp();
 
-  // 컴포넌트 마운트 시 복습 문제 데이터 로드
+  // 컴포넌트 마운트 시 복습 문제 데이터 로드 및 스크롤 리셋
   useEffect(() => {
+    scrollToTop();
     // TODO: 실제 프로덕션에서는 아래의 API 호출로 대체
     // const fetchReviewQuestions = async () => {
     //   try {

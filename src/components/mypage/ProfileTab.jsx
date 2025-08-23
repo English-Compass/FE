@@ -32,7 +32,7 @@ export default function ProfileTab() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="profile-tab">
+          <CardTitle className="flex items-center justify-between">
             프로필 정보
             <Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
               {isEditing ? '취소' : '편집'}

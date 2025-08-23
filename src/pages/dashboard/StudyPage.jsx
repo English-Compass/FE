@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SelectType } from '../../components/study/SelectType';
 import StudySession from '../../components/study/StudySession';
@@ -12,8 +12,13 @@ export default function StudyPage() {
     setCurrentStep, 
     setSelectedType,
     studyResults,
-    setStudyResults
+    setStudyResults,
+    scrollToTop
   } = useApp();
+
+  useEffect(() => {
+    scrollToTop();
+  }, []);
 
   // 학습 유형 선택 완료 후 학습 세션 화면으로 이동
   const handleTypeSelected = () => {

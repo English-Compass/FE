@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,8 +6,6 @@ import { ScenarioSelection } from '../../components/conversation/ScenarioSelecti
 import { CustomSituation } from '../../components/conversation/CustomSituation';
 import { SituationDetail } from '../../components/conversation/SituationDetail';
 import { ConversationPractice } from '../../components/conversation/ConversationPractice';
-
-import '../../styles/components/_conversation.scss';
 
 const CONVERSATION_SCENARIOS = [
   {
@@ -86,7 +84,11 @@ const CONVERSATION_SCENARIOS = [
 
 export default function ConversationPage() {
   const navigate = useNavigate();
-  const { user } = useApp();
+  const { user, scrollToTop } = useApp();
+
+  useEffect(() => {
+    scrollToTop();
+  }, []);
   const [currentStep, setCurrentStep] = useState('select');
   const [selectedScenario, setSelectedScenario] = useState(null);
   const [conversation, setConversation] = useState([]);
@@ -239,8 +241,8 @@ export default function ConversationPage() {
   };
 
   return (
-    <div className="conversation-page">
+    <>
       {renderCurrentStep()}
-    </div>
+    </>
   );
 }

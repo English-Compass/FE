@@ -6,7 +6,7 @@ import { Button } from '../ui/button';
 export function ReviewQuizCard({ quiz, navigate }) {
 
   return (
-    <Card className="bg-white/20">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <span>🔄</span>

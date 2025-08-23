@@ -21,22 +21,20 @@ export default function ProfileEdit({ user, editForm, setEditForm, onSave }) {
   const { STUDY_TYPES, KEYWORDS_BY_CATEGORY } = useApp();
 
   return (
-    <div className="profile-edit">
-      <div className="profile-edit__header">
-        <Avatar className="profile-edit__avatar">
+    <div className="!space-y-6">
+      <div className="flex items-center !space-x-6">
+        <Avatar className="w-20 h-20">
           <AvatarImage src={user?.profileImage} />
-          <AvatarFallback className="profile-edit__avatar-fallback">
+          <AvatarFallback className="bg-blue-100 text-blue-600 text-2xl">
             {user?.name?.charAt(0)}
           </AvatarFallback>
         </Avatar>
-        <div className="profile-edit__info">
-          <h3 className="profile-edit__info-name">{user?.name}</h3>
-        </div>
+        <h3 className="w-50">{user?.name}</h3>
       </div>
 
-      <div className="space-y-4 max-w-md">
+      <div className="!space-y-4 max-w-md">
         {/* '실력 수준' 선택 */}
-        <div className="space-y-2">
+        <div className="!space-y-2">
           <Label htmlFor="level">실력 수준</Label>
           <Select
             value={editForm.level}
@@ -54,11 +52,11 @@ export default function ProfileEdit({ user, editForm, setEditForm, onSave }) {
         </div>
 
         {/* '관심 키워드' 선택 */}
-        <div className="space-y-3">
+        <div className="!space-y-3">
           <Label>관심 키워드</Label>
           {editForm.keywords.length > 0 && (
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm font-medium text-blue-800 mb-2">
+            <div className="bg-blue-50 rounded-lg">
+              <p className="text-sm font-medium text-blue-800 !mb-2">
                 선택된 키워드 ({editForm.keywords.length}개)
               </p>
               <div className="flex flex-wrap gap-2">
@@ -77,10 +75,10 @@ export default function ProfileEdit({ user, editForm, setEditForm, onSave }) {
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="!space-y-4">
             {Object.entries(KEYWORDS_BY_CATEGORY).map(([categoryKey, keywords]) => (
               <div key={categoryKey}>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">
+                <h4 className="text-sm font-medium text-gray-700 !mb-2">
                   {STUDY_TYPES.find(type => type.id === categoryKey)?.title}
                 </h4>
                 <div className="flex flex-wrap gap-2">

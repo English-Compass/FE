@@ -13,18 +13,18 @@ export default function AccountManagementCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="account-management__title">계정 관리</CardTitle>
+        <CardTitle className="text-red-600">계정 관리</CardTitle>
       </CardHeader>
-      <CardContent className="account-management__content">
-        <div className="space-y-3">
-          <Button onClick={handleLogout} variant="outline" className="account-management__content-button">
+      <CardContent className="!space-y-4">
+        <div className="!space-y-3">
+          <Button onClick={handleLogout} variant="outline" className="w-full justify-start text-gray-700">
             로그아웃
           </Button>
-          <Button variant="destructive" className="account-management__content-button" onClick={handleDeleteAccount}>
+          <Button variant="destructive" className="w-full justify-start" onClick={handleDeleteAccount}>
             회원 탈퇴
           </Button>
         </div>
-        <div className="account-management__content-notice">
+        <div className="text-xs text-gray-500 bg-gray-50 !p-3 rounded-lg">
           회원 탈퇴 시 모든 학습 데이터가 영구적으로 삭제되며, 복구할 수 없습니다.
         </div>
       </CardContent>

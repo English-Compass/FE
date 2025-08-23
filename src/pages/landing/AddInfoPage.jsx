@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -17,8 +18,13 @@ export default function AddInfoPage() {
         setUser,
         handleKeywordToggle,
         setAdditionalInfoStep,
-        resetAdditionalInfo
+        resetAdditionalInfo,
+        scrollToTop
     } = useApp();
+
+    useEffect(() => {
+        scrollToTop();
+    }, []);
 
     // 사용자 정보 완성 및 대시보드로 이동
     const handleComplete = () => {

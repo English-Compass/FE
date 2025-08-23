@@ -9,9 +9,9 @@ export function WrongAnswerCard({ navigate }) {
     { id: 2, question: "Fill in the blank: I _____ to the store yesterday.", options: ['go', 'went', 'going', 'gone'] }
   ];
   return (
-    <Card className="bg-white/20">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 !mb-1.5">
+        <CardTitle className="flex items-center gap-2">
           <span>❌</span>
           <span>오답 퀴즈</span>
         </CardTitle>

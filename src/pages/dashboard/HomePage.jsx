@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useApp } from '../../context/AppContext.jsx';
@@ -13,7 +13,11 @@ import HistoryChart from '../../components/home/HistoryChart.jsx';
 
 export default function HomePage() {
     const navigate = useNavigate();
-    const { user, studyProgress } = useApp();
+    const { user, studyProgress, scrollToTop } = useApp();
+
+    useEffect(() => {
+        scrollToTop();
+    }, []);
 
     // TODO: API 연동 - 사용자 맞춤 오늘의 단어
     // const fetchTodayWords = async () => {

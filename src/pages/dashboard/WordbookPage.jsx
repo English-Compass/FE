@@ -8,7 +8,11 @@ import { useApp } from '../../context/AppContext';
 
 export default function WordbookPage() {
   const navigate = useNavigate();
-  const { formData, KEYWORDS_BY_CATEGORY, STUDY_TYPES } = useApp();
+  const { formData, KEYWORDS_BY_CATEGORY, STUDY_TYPES, scrollToTop } = useApp();
+
+  useEffect(() => {
+    scrollToTop();
+  }, []);
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

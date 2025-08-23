@@ -1,5 +1,5 @@
 .layout {
-  min-height: 165vh;
+  min-height: 100vh;
   background-color: #f9fafb;
 
   &__main {
@@ -10,6 +10,6 @@
   }
 
    @media (min-width: 768px ) {
-    min-height: 200vh;
+    min-height: 130vh;
   }
 }
