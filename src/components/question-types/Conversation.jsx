@@ -1,60 +1,68 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Badge } from '../ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
 import { useApp } from '../../context/AppContext';
 
-export function SynonymSentenceQuestion({ 
+export function Conversation({ 
   question, 
   selectedAnswer, 
   showResult, 
   onAnswerSelect,
-  onQuestionLoad
+  onQuestionLoad // 학습용 props 추가
 }) {
   const { selectedType, formData, STUDY_TYPES, REVIEW_MESSAGES } = useApp();
   const [currentQuestion, setCurrentQuestion] = useState(question);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchSynonymSentenceQuestion = async () => {
+  // API 호출 함수
+  const fetchConversationQuestion = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(`http://localhost:8080/api/quizzes/random?type=synonym-sentence&level=${formData.level}`);
+      // 1. 대화 유형의 문제를 가져오는 API를 호출합니다.
+      const response = await fetch(`http://localhost:8080/api/quizzes/random?type=conversation&level=${formData.level}`);
 
       if (!response.ok) {
         throw new Error(`서버 응답 오류: ${response.status}`);
       }
       
       const data = await response.json();
+      
+      // 2. 서버에서 받은 데이터로 상태를 업데이트합니다.
       setCurrentQuestion(data);
       
+      // 3. 부모 컴포넌트(StudySession)에 문제 정보를 전달합니다.
       if (onQuestionLoad) {
         onQuestionLoad(data);
       }
 
     } catch (err) {
-      console.error('동의어 문장 문제 로드 실패:', err);
+      console.error('대화 문제 로드 실패:', err);
       setError('문제를 불러오는데 실패했습니다. API 서버가 실행 중인지 확인해주세요.');
     } finally {
       setLoading(false);
     }
   };
 
+  // 학습 모드에서 문제 로드
   useEffect(() => {
+    // question prop이 없으면 학습 모드로 간주하고 새 문제를 가져옵니다.
     if (!question) {
-      fetchSynonymSentenceQuestion();
+      fetchConversationQuestion();
     }
   }, [question]);
 
+  // 로딩 상태 UI
   if (loading) {
     return (
       <Card className="w-full max-w-4xl !px-4 !py-8">
         <CardContent className="!p-8">
           <div className="flex items-center justify-center !py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto !mb-4"></div>
-              <p className="text-gray-600">동의어 문장 문제를 준비하고 있어요...</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto !mb-4"></div>
+              <p className="text-gray-600">대화 문제를 만들고 있어요...</p>
             </div>
           </div>
         </CardContent>
@@ -62,6 +70,7 @@ export function SynonymSentenceQuestion({
     );
   }
 
+  // 에러 상태 UI
   if (error) {
     return (
       <Card className="w-full max-w-4xl !px-4 !py-8">
@@ -69,7 +78,7 @@ export function SynonymSentenceQuestion({
           <div className="text-center !py-12">
             <p className="text-red-600 !mb-4">⚠️ {error}</p>
             <button 
-              onClick={fetchSynonymSentenceQuestion}
+              onClick={fetchConversationQuestion} 
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               다시 시도
@@ -84,33 +93,15 @@ export function SynonymSentenceQuestion({
 
   const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
   const studyType = STUDY_TYPES?.find(type => type.id === selectedType);
-  const isStudyMode = !currentQuestion.date;
-
-  // 밑줄 친 부분을 강조하는 함수
-  const renderQuestionWithUnderline = (questionText) => {
-    if (!questionText) return questionText;
-    
-    // ___로 감싸진 부분을 밑줄로 변경
-    return questionText.split(/___([^_]+)___/).map((part, index) => {
-      if (index % 2 === 1) {
-        // 홀수 인덱스는 밑줄 친 부분
-        return (
-          <span key={index} className="underline decoration-2 decoration-blue-500 font-semibold text-blue-700">
-            {part}
-          </span>
-        );
-      }
-      return part;
-    });
-  };
+  const isStudyMode = !currentQuestion.date; // 날짜가 없으면 학습 모드
 
   return (
     <Card className="w-full max-w-4xl !px-4 !py-8">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-              📝 {isStudyMode ? '동의어 문장' : currentQuestion.category}
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              💬 {isStudyMode ? '대화 완성' : currentQuestion.category}
             </Badge>
             {studyType && (
               <Badge variant="secondary">
@@ -124,35 +115,30 @@ export function SynonymSentenceQuestion({
             <Badge variant="secondary">{currentQuestion.date}</Badge>
           )}
         </div>
+        <CardTitle className="text-lg leading-relaxed !mt-4">
+          다음 대화의 빈칸에 들어갈 가장 자연스러운 말을 고르세요.
+        </CardTitle>
       </CardHeader>
       
       <CardContent className="!space-y-4">
-        {!isStudyMode && showResult && currentQuestion.userAnswer && (
-          <div className="bg-red-50 !p-3 rounded-lg border border-red-200">
-            <p className="text-sm text-red-700">
-              <span className="font-medium">이전 틀린 답안:</span> {currentQuestion.userAnswer}
-            </p>
-          </div>
-        )}
-
-        <div className="bg-purple-50 !p-4 rounded-lg border border-purple-200">
-          <p className="text-sm text-purple-700 font-medium !mb-2">📝 동의어 문장</p>
-          <p className="text-purple-800">
-            밑줄 친 부분과 같은 의미를 가진 문장을 선택하세요.
-          </p>
+        {/* 대화 내용 표시 */}
+        <div className="!space-y-3 bg-gray-50 !p-4 rounded-lg border">
+          {currentQuestion.conversation.map((line, index) => (
+            <div key={index} className={`flex ${line.speaker === 'A' ? 'justify-start' : 'justify-end'}`}>
+              <div className={`max-w-[80%] !p-3 rounded-lg ${
+                line.speaker === 'A' 
+                  ? 'bg-white border' 
+                  : 'bg-yellow-200'
+              }`}>
+                <span className="font-bold mr-2">{line.speaker}:</span>
+                <span>{line.dialogue.replace('___', '___________')}</span>
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div className="bg-gray-50 !p-4 rounded-lg border border-gray-200">
-          <p className="text-lg font-semibold text-blue-800 leading-relaxed">
-            {renderQuestionWithUnderline(currentQuestion.question)}
-          </p>
-        </div>
-
-        <CardTitle className="text-lg !mt-6 !mb-4 text-gray-700">
-          밑줄 친 부분과 같은 의미인 문장을 선택하세요:
-        </CardTitle>
-
-        <div className="!space-y-3">
+        {/* 답변 옵션 */}
+        <div className="!pt-4 !space-y-3">
           {currentQuestion.options.map((option, index) => (
             <button
               key={index}
@@ -171,7 +157,7 @@ export function SynonymSentenceQuestion({
               }`}
             >
               <div className="flex items-center !space-x-3">
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-white ${
                   selectedAnswer === option
                     ? showResult
                       ? option === currentQuestion.correctAnswer
@@ -182,11 +168,8 @@ export function SynonymSentenceQuestion({
                       ? 'border-green-500 bg-green-500'
                       : 'border-gray-300'
                 }`}>
-                  {(selectedAnswer === option || (showResult && option === currentQuestion.correctAnswer)) && (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                      <path d="M20 6 9 17l-5-5"/>
-                    </svg>
-                  )}
+                  {/* 알파벳 옵션 (A, B, C, D) */}
+                  {String.fromCharCode(65 + index)}
                 </div>
                 <span className="font-medium">{option}</span>
               </div>
@@ -194,6 +177,7 @@ export function SynonymSentenceQuestion({
           ))}
         </div>
 
+        {/* 결과 및 설명 */}
         {showResult && (
           <div className={`!p-4 rounded-lg ${
             isCorrect 
@@ -220,7 +204,7 @@ export function SynonymSentenceQuestion({
             <p className={`text-sm !mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
               {isCorrect 
                 ? (isStudyMode 
-                    ? '훌륭합니다! 문맥의 의미를 정확히 파악하셨네요.' 
+                    ? '좋아요! 대화의 흐름을 잘 파악하셨네요.' 
                     : (REVIEW_MESSAGES?.CORRECT?.description || '정답입니다!'))
                 : `정답은 "${currentQuestion.correctAnswer}" 입니다.`
               }
@@ -228,7 +212,7 @@ export function SynonymSentenceQuestion({
             {isStudyMode && currentQuestion.explanation && (
               <div className="!mt-3 !pt-3 border-t border-gray-200">
                 <p className="text-sm text-gray-700">
-                  <span className="font-medium">💡 설명:</span> {currentQuestion.explanation}
+                  <span className="font-medium">💡 해설:</span> {currentQuestion.explanation}
                 </p>
               </div>
             )}

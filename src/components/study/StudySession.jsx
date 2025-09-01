@@ -5,10 +5,8 @@ import { Badge } from '../ui/badge';
 import { useApp } from '../../context/AppContext';
 
 import { Word } from '../question-types/Word';
-import { SentenceInterpretationQuestion } from '../question-types/SentenceInterpretationQuestion';
-import { FillInTheBlankQuestion } from '../question-types/FillInTheBlankQuestion';
-import { SynonymSentenceQuestion } from '../question-types/SynonymSentenceQuestion';
-import { SynonymQuestion } from '../question-types/SynonymQuestion';
+import { Sentence } from '../question-types/Sentence';
+import { Conversation } from '../question-types/Conversation';
 
 export default function StudySession({ onStudyComplete }) {
     const { selectedType, STUDY_TYPES, formData, getDifficultyText} = useApp();
@@ -45,43 +43,27 @@ export default function StudySession({ onStudyComplete }) {
             const dummyQuestions = [
                 {
                     id: 1,
-                    question: "What does 'comprehensive' mean?",
-                    options: ["limited", "complete and thorough", "expensive", "quick"],
-                    correctAnswer: "complete and thorough",
-                    type: "word",
-                    explanation: "Comprehensive means complete and including everything that is necessary."
-                },
-                {
-                    id: 2,
-                    question: "I went to the store to buy some groceries.",
-                    options: ["나는 음식을 사러 가게에 갔다.", "나는 옷을 사러 백화점에 갔다.", "나는 책을 사러 서점에 갔다."],
-                    correctAnswer: "나는 음식을 사러 가게에 갔다.",
-                    type: "sentence-interpretation",
-                    explanation: "Groceries means food and other items sold in a grocery store."
-                },
-                {
-                    id: 3,
                     question: "The meeting was very _____ and productive.",
                     options: ["boring", "efficient", "difficult"],
                     correctAnswer: "efficient",
-                    type: "fill-in-blank",
+                    type: "word",
                     explanation: "Efficient fits the context of being productive."
                 },
                 {
-                    id: 4,
+                    id: 2,
                     question: "The project was ___challenging___ for the entire team.",
                     options: ["The task was difficult for everyone.", "The work was easy for all.", "The job was simple for the group."],
                     correctAnswer: "The task was difficult for everyone.",
-                    type: "synonym-sentence",
+                    type: "sentence",
                     explanation: "Challenging means difficult or demanding."
                 },
                 {
-                    id: 5,
-                    question: "Choose the word that means the same as 'important':",
-                    options: ["trivial", "crucial", "minor"],
-                    correctAnswer: "crucial",
-                    type: "synonym",
-                    explanation: "Crucial and important both mean having great significance."
+                    id: 3,
+                    question: "A: How was your weekend? B: _____",
+                    options: ["It was great, thanks!", "Yes, I do.", "Next Monday."],
+                    correctAnswer: "It was great, thanks!",
+                    type: "conversation",
+                    explanation: "This is the most natural response to a question about how someone's weekend was."
                 }
             ];
 
@@ -149,14 +131,10 @@ export default function StudySession({ onStudyComplete }) {
         switch (currentQuestion.type) {
             case 'word':
                 return <Word {...commonProps} />;
-            case 'sentence-interpretation':
-                return <SentenceInterpretationQuestion {...commonProps} />;
-            case 'fill-in-blank':
-                return <FillInTheBlankQuestion {...commonProps} />;
-            case 'synonym-sentence':
-                return <SynonymSentenceQuestion {...commonProps} />;
-            case 'synonym':
-                return <SynonymQuestion {...commonProps} />;
+            case 'sentence':
+                return <Sentence {...commonProps} />;
+            case 'conversation':
+                return <Conversation {...commonProps}/>;
             default:
                 return <div>지원하지 않는 문제 유형입니다: {currentQuestion.type}</div>;
         }
@@ -181,9 +159,10 @@ export default function StudySession({ onStudyComplete }) {
                         </h1>
                         <p className="text-gray-600">
                             {currentQuestionIndex + 1} / {totalQuestions} 문제 ({
-                                currentQuestion?.type === 'word' ? '어휘' : 
-                                currentQuestion?.type === 'synonym' ? '어휘' :
-                                '문법'
+                                currentQuestion?.type === 'word' ? '빈칸에 올바른 단어나 문장넣기' : 
+                                currentQuestion?.type === 'sentence' ? '밑줄친 문장과 동일한 의미의 숙어찾기' :
+                                currentQuestion?.type === 'conversation' ? '이어지는 대화맥락으로 올바른거 선택하기' :
+                                '문제'
                             })
                         </p>
                     </div>

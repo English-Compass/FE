@@ -13,11 +13,9 @@ export function QuickReview({ reviewQuestions, onStartReview, onStartWeakTypeRev
 
     const typeCount = {};
     const typeNames = {
-      'word': '단어',
-      'sentence': '문장 해석', 
-      'synonym': '동의어 찾기',
-      'sentence-interpretation': '문장 해석',
-      'fill-in-blank': '빈칸 채우기'
+      'word': '빈칸에 올바른 단어나 문장넣기',
+      'sentence': '밑줄친 문장과 동일한 의미의 숙어찾기',
+      'conversation': '이어지는 대화맥락으로 올바른거 선택하기'
     };
 
     reviewQuestions.forEach(question => {
@@ -30,9 +28,8 @@ export function QuickReview({ reviewQuestions, onStartReview, onStartWeakTypeRev
           displayName: typeNames[mappedType] || mappedType,
           icon: mappedType === 'word' ? '📝' : 
                 mappedType === 'sentence' ? '📖' :
-                mappedType === 'synonym' ? '🔗' :
-                mappedType === 'sentence-interpretation' ? '🔄' :
-                mappedType === 'fill-in-blank' ? '✏️' : '❓'
+                mappedType === 'conversation' ? '🗣️' : '❓'
+
         };
       }
       typeCount[mappedType].count++;
@@ -47,7 +44,7 @@ export function QuickReview({ reviewQuestions, onStartReview, onStartWeakTypeRev
   const hasWeakness = weaknessAnalysis.length > 0;
 
   return (
-    <div className="space-y-4">
+    <div className="!space-y-4 grid grid-cols-2 gap-4">
       {/* 전체 복습하기 카드 */}
       <Card className="bg-gradient-to-r from-blue-600 to-indigo-400 !text-white">
         <CardContent className="!p-6">
@@ -101,7 +98,7 @@ export function QuickReview({ reviewQuestions, onStartReview, onStartWeakTypeRev
       )}
 
       {/* 약점 분석 상세 카드 */}
-      {hasWeakness && (
+      {/* {hasWeakness && (
         <Card>
           <CardContent className="!p-6">
             <h3 className="text-lg font-bold text-gray-800 !mb-4">📊 문제 유형별 틀린 횟수</h3>
@@ -145,7 +142,7 @@ export function QuickReview({ reviewQuestions, onStartReview, onStartWeakTypeRev
             </p>
           </CardContent>
         </Card>
-      )}
+      )} */}
     </div>
   );
 }

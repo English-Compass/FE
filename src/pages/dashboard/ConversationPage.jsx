@@ -89,45 +89,9 @@ export default function ConversationPage() {
   useEffect(() => {
     scrollToTop();
   }, []);
+
   const [currentStep, setCurrentStep] = useState('select');
   const [selectedScenario, setSelectedScenario] = useState(null);
-  const [conversation, setConversation] = useState([]);
-
-  // TODO: API 연동 - AI 대화 응답 생성
-  // const getAIResponse = async (userMessage, conversationContext) => {
-  //   const response = await fetch('http://localhost:8080/api/conversation/respond', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  //       'Content-Type': 'application/json'
-  //     },
-  //     body: JSON.stringify({
-  //       userMessage: userMessage,
-  //       scenario: selectedScenario?.id,
-  //       conversationHistory: conversation.map(msg => ({
-  //         role: msg.type,
-  //         content: msg.message
-  //       }))
-  //     })
-  //   });
-  //   return response.json();
-  // };
-
-  // Mock conversation responses (더미 데이터)
-  const getAIResponse = () => {
-    const responses = [
-      "That's interesting! Can you tell me more about that?",
-      "I understand. What do you think about this situation?",
-      "Great point! How would you handle this differently?",
-      "Thank you for sharing. Can you elaborate on that?",
-      "That makes sense. What's your next step?",
-      "Could you please repeat that? I want to make sure I understand correctly.",
-      "Excellent! Your pronunciation is getting better.",
-      "Let me help you with that grammar point...",
-      "What would you say in this situation in your native language?"
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
 
   const handleScenarioSelect = (scenario) => {
     setSelectedScenario(scenario);
@@ -140,37 +104,8 @@ export default function ConversationPage() {
 
   const startConversation = (situation) => {
     setCurrentStep('practice');
-    const initialMessage = {
-      id: 1,
-      type: 'ai',
-      message: `Let's practice this situation: ${situation}. I'll be your conversation partner. Please start the conversation!`,
-      timestamp: new Date().toISOString()
-    };
-    setConversation([initialMessage]);
   };
 
-  const handleSendMessage = (userMessage) => {
-    const userMsg = {
-      id: conversation.length + 1,
-      type: 'user',
-      message: userMessage,
-      timestamp: new Date().toISOString()
-    };
-
-    const aiResponse = {
-      id: conversation.length + 2,
-      type: 'ai',
-      message: getAIResponse(),
-      timestamp: new Date().toISOString(),
-      feedback: {
-        pronunciation: Math.floor(Math.random() * 20) + 80,
-        grammar: Math.floor(Math.random() * 20) + 75,
-        fluency: Math.floor(Math.random() * 25) + 70
-      }
-    };
-
-    setConversation([...conversation, userMsg, aiResponse]);
-  };
 
   const handleBackToHome = () => {
     navigate('/dashboard/home');
@@ -178,12 +113,6 @@ export default function ConversationPage() {
 
   const handleBackToSelect = () => {
     setCurrentStep('select');
-    setSelectedScenario(null);
-  };
-
-  const handleReset = () => {
-    setCurrentStep('select');
-    setConversation([]);
     setSelectedScenario(null);
   };
 
@@ -221,9 +150,7 @@ export default function ConversationPage() {
         return (
           <ConversationPractice
             user={user}
-            conversation={conversation}
-            onBack={handleReset}
-            onSendMessage={handleSendMessage}
+            onBack={handleBackToSelect}
           />
         );
       

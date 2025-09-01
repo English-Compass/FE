@@ -34,10 +34,11 @@ export function ReviewList({ reviewQuestions, onQuestionRetry }) {
             </CardHeader>
             <CardContent>
                 <Tabs defaultValue="all" className="w-full">
-                    <TabsList className="grid !w-full grid-cols-3 !mb-4">
-                        <TabsTrigger value="all">전체</TabsTrigger>
-                        <TabsTrigger value="sentence">문법</TabsTrigger>
-                        <TabsTrigger value="word">어휘</TabsTrigger>
+                    <TabsList className="grid !w-full grid-cols-4 !mb-4">
+                        <TabsTrigger value="all">all</TabsTrigger>
+                        <TabsTrigger value="sentence">sentence</TabsTrigger>
+                        <TabsTrigger value="word">word</TabsTrigger>
+                        <TabsTrigger value="conversation">conversation</TabsTrigger>
                     </TabsList>
             
                     <TabsContent value="all" className="!space-y-4 !mt-4">
@@ -66,7 +67,7 @@ export function ReviewList({ reviewQuestions, onQuestionRetry }) {
                                 />
                             ))
                         ) : (
-                            <EmptyState message="문법 관련 틀린 문제가 없습니다" />
+                            <EmptyState message="sentence 관련 틀린 문제가 없습니다" />
                         )}
                     </TabsContent>
                     
@@ -81,7 +82,22 @@ export function ReviewList({ reviewQuestions, onQuestionRetry }) {
                                 />
                             ))
                         ) : (
-                            <EmptyState message="어휘 관련 틀린 문제가 없습니다" />
+                            <EmptyState message="word 관련 틀린 문제가 없습니다" />
+                        )}
+                    </TabsContent>
+
+                    <TabsContent value="conversation" className="!space-y-4 !mt-4">
+                        {reviewQuestions.filter(q => q.category === 'conversation').length > 0 ? (
+                            reviewQuestions.filter(q => q.category === 'conversation').map((question) => (
+                                <ReviewQuestionItem
+                                    key={question.id}
+                                    question={question}
+                                    onRetry={() => handleCategoryRetry(question)}
+                                    showCategory={false}
+                                />
+                            ))
+                        ) : (
+                            <EmptyState message="conversation 관련 틀린 문제가 없습니다" />
                         )}
                     </TabsContent>
                 </Tabs>

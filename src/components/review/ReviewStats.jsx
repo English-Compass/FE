@@ -12,32 +12,40 @@ export function ReviewStats({ reviewQuestions }) {
         const total = reviewQuestions.length;
         const word = reviewQuestions.filter(q => q.category === 'word').length;
         const sentence = reviewQuestions.filter(q => q.category === 'sentence').length;
+        const conversation = reviewQuestions.filter(q => q.category === 'conversation').length;
         
-        return { total, word, sentence };
+        return { total, word, sentence, conversation };
   };
 
   const stats = getStatistics();
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-4 gap-2">
       <Card>
         <CardContent className="!p-4 text-center">
           <div className="text-3xl font-bold text-red-600">{stats.total}</div>
-          <div className="text-sm text-gray-600">총 틀린 문제</div>
+          <div className="text-sm text-gray-600">total</div>
         </CardContent>
       </Card>
       
       <Card>
         <CardContent className="!p-4 text-center">
           <div className="text-3xl font-bold text-gray-600">{stats.sentence}</div>
-          <div className="text-sm text-gray-600">문법 문제</div>
+          <div className="text-sm text-gray-600">sentence</div>
         </CardContent>
       </Card>
       
       <Card>
         <CardContent className="!p-4 text-center">
           <div className="text-3xl font-bold text-gray-600">{stats.word}</div>
-          <div className="text-sm text-gray-600">어휘 문제</div>
+          <div className="text-sm text-gray-600">word</div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="!p-4 text-center">
+          <div className="text-3xl font-bold text-gray-600">{stats.conversation}</div>
+          <div className="text-sm text-gray-600">conversation</div>
         </CardContent>
       </Card>
     </div>

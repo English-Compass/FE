@@ -3,10 +3,8 @@ import { Button } from '../../components/ui/button';
 import { Progress } from '../../components/ui/progress';
 
 import { Word } from '../question-types/Word';
-import { SentenceInterpretationQuestion } from '../question-types/SentenceInterpretationQuestion';
-import { FillInTheBlankQuestion } from '../question-types/FillInTheBlankQuestion';
-import { SynonymSentenceQuestion } from '../question-types/SynonymSentenceQuestion';
-import { SynonymQuestion } from '../question-types/SynonymQuestion';
+import { Sentence } from '../question-types/Sentence';
+import { Conversation } from '../question-types/Conversation';
 
 export function ReviewQuiz({ 
   question, 
@@ -36,14 +34,10 @@ export function ReviewQuiz({
     switch (questionType) {
       case 'word':
         return <Word {...commonProps} />;
-      case 'sentence-interpretation':
-        return <SentenceInterpretationQuestion {...commonProps} />;
-      case 'fill-in-blank':
-        return <FillInTheBlankQuestion {...commonProps} />;
-      case 'synonym-sentence':
-        return <SynonymSentenceQuestion {...commonProps} />;
-      case 'synonym':
-        return <SynonymQuestion {...commonProps} />;
+      case 'sentence':
+        return <Sentence {...commonProps} />;
+      case 'conversation':
+        return <Conversation {...commonProps}/>;
       default:
         return <Word {...commonProps} />; // 기본값
     }

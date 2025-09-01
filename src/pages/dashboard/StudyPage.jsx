@@ -79,7 +79,7 @@ export default function StudyPage() {
   };
 
   return (
-    <div className="!p-4 !sm:p-6 !space-y-6">
+    <div className="h-screen overflow-y-auto !p-4 !sm:p-6 !space-y-6">
       {renderCurrentStep()}
     </div>
   );

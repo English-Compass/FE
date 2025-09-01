@@ -1,35 +1,160 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Input } from '../ui/input';
-import { ArrowLeft, MessageCircle, Mic, MicOff, Send } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Mic, MicOff } from 'lucide-react';
 
-export function ConversationPractice({ 
-  user, 
-  conversation, 
-  onBack, 
-  onSendMessage 
+const API_BASE_URL = '/api/v1';
+
+export function ConversationPractice({
+  user,
+  onBack,
 }) {
-  const [currentInput, setCurrentInput] = useState('');
+  const [sessionId, setSessionId] = useState(null);
+  const [conversation, setConversation] = useState([]);
   const [isListening, setIsListening] = useState(false);
+  const mediaRecorderRef = useRef(null);
 
-  const handleSend = () => {
-    if (currentInput.trim()) {
-      onSendMessage(currentInput);
-      setCurrentInput('');
+  useEffect(() => {
+    const startSession = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/sessions/role-playing`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            topic: 'travel',
+            difficultyLevel: 'INTERMEDIATE',
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('세션 시작 실패');
+        }
+
+        const data = await response.json();
+        setSessionId(data.sessionId);
+        setConversation([{
+          id: 'ai-greeting',
+          type: 'ai',
+          message: data.aiFirstGreeting,
+        }]);
+      } catch (error) {
+        console.error('세션 시작 오류:', error);
+      }
+    };
+
+    startSession();
+
+    return () => {
+      if (sessionId) {
+        fetch(`${API_BASE_URL}/sessions/role-playing/${sessionId}/end`, {
+          method: 'POST',
+          keepalive: true
+        });
+      }
+    };
+  }, [user.id]);
+
+const handleSendAudio = async (audioBlob) => {
+    if (!sessionId) return;
+
+    const userMessage = {
+      id: `user-${Date.now()}`,
+      type: 'user',
+      message: '음성 메시지를 보내는 중...',
+    };
+    setConversation((prev) => [...prev, userMessage]);
+
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'user_speech.webm');
+
+      const response = await fetch(
+        `${API_BASE_URL}/sessions/role-playing/${sessionId}/talk`, {
+          method: 'POST',
+          body: formData,
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('음성 메시지 전송에 실패했습니다.');
+      }
+
+      const data = await response.json();
+
+      // AI 음성 응답(audio)이 있다면 즉시 재생
+      if (data.audio) {
+        const audioPlayer = new Audio(`data:audio/mp3;base64,${data.audio}`);
+        audioPlayer.play();
+      }
+
+      // AI 응답 메시지 객체 생성 (새 변수명 사용)
+      const aiMessage = {
+        id: `ai-${Date.now()}`,
+        type: 'ai',
+        message: data.text, // AI 텍스트 응답
+        feedback: data.feedback, // 음성 평가 피드백
+        evaluationStatus: data.evaluationStatus, // 평가 상태
+      };
+      
+      // 대화 내용 업데이트
+      setConversation((prev) => {
+          const updatedConversation = [...prev];
+          // '전송 중...' 메시지를 실제 사용자 발화 내용(STT 결과)으로 변경
+          updatedConversation[updatedConversation.length - 1].message = data.userText || '음성 인식 실패';
+          return [...updatedConversation, aiMessage];
+      });
+
+    } catch (error) {
+      console.error('음성 메시지 전송 오류:', error);
+      // 에러 발생 시 '전송 중...' 메시지 제거
+      setConversation((prev) => prev.filter(msg => msg.id !== userMessage.id));
     }
   };
 
-  const toggleListening = () => {
-    setIsListening(!isListening);
-    // 그냥 더미 데이터 넣어둠
-    if (!isListening) {
-      setTimeout(() => {
-        setCurrentInput("I would like to discuss this matter further.");
-        setIsListening(false);
-      }, 2000);
+  const toggleListening = async () => {
+    if (isListening) {
+      mediaRecorderRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const newMediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = newMediaRecorder;
+        let audioChunks = [];
+
+        newMediaRecorder.ondataavailable = (event) => {
+          audioChunks.push(event.data);
+        };
+
+        newMediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            handleSendAudio(audioBlob);
+            audioChunks = [];
+            // 스트림 트랙 중지하여 마이크 아이콘 끄기
+            stream.getTracks().forEach(track => track.stop());
+          };
+        
+          newMediaRecorder.start();
+          setIsListening(true);
+        } catch (error) {
+          console.error('마이크 접근 오류:', error);
+      }
     }
+  };
+
+  const handleEndSession = async () => {
+    if (sessionId) {
+      try {
+        await fetch(`${API_BASE_URL}/sessions/role-playing/${sessionId}/end`, {
+          method: 'POST',
+        });
+      } catch (error) {
+        console.error('세션 종료 실패:', error);
+      }
+    }
+    onBack();
   };
 
   return (
@@ -38,7 +163,7 @@ export function ConversationPractice({
         <Button
           variant="ghost"
           size="ml"
-          onClick={onBack}
+          onClick={handleEndSession}
         >
           <ArrowLeft className="w-4 h-4 !mr-2" />
           새로운 연습
@@ -56,28 +181,23 @@ export function ConversationPractice({
         </CardHeader>
         
         <CardContent className="flex flex-1 flex-col !space-y-4">
-          {/* Messages */}
-          <div className='flex-1 overflow-y-auto !space-y-4 !max-h-64'>
+         <div className='flex-1 overflow-y-auto !space-y-4 !max-h-72'>
             {conversation.map((msg) => (
               <div
-                  key={msg.id}
-                  className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                key={msg.id}
+                className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-xs lg:max-w-md !px-4 !py-2 rounded-lg ${
+                    msg.type === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'
+                  }`}
                 >
-                  <div
-                    className={`max-w-xs lg:max-w-md !px-4 !py-2 rounded-lg ${
-                      msg.type === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}
-                  >
                   <p>{msg.message}</p>
+                  {/* 피드백이 존재할 경우 표시 */}
                   {msg.feedback && (
-                    <div className="!mt-2 !pt-2 border-t border-gray-200">
-                      <div className="text-xs !space-y-1">
-                        <div>발음: {msg.feedback.pronunciation}%</div>
-                        <div>문법: {msg.feedback.grammar}%</div>
-                        <div>유창성: {msg.feedback.fluency}%</div>
-                      </div>
+                    <div className="!mt-2 !pt-2 border-t border-gray-300/50 text-xs">
+                      <p className="font-semibold">피드백:</p>
+                      <p>{msg.feedback}</p>
                     </div>
                   )}
                 </div>
@@ -85,31 +205,14 @@ export function ConversationPractice({
             ))}
           </div>
 
-          {/* Input Area */}
-          <div className='flex !space-x-2'>
-            <div className='flex-1 relative'>
-              <Input
-                placeholder="메시지를 입력하세요..."
-                value={currentInput}
-                onChange={(e) => setCurrentInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                className='!pr-12'
-              />
-              <button
-                onClick={toggleListening}
-                className={`absolute right-2 top-1/2 transform -translate-y-1/2 !p-1 rounded ${
-                    isListening ? 'text-red-500' : 'text-gray-400 hover:text-gray-600'
-                  }`}
-              >
-                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-              </button>
-            </div>
+          {/* Input Area - Mic Button Only */}
+          <div className='flex justify-center items-center !pt-2'>
             <Button
-              onClick={handleSend}
-              disabled={!currentInput.trim()}
-              size="ml"
+              onClick={toggleListening}
+              size="icon"
+              className={`!w-80 h-16 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-600 hover:bg-blue-700'}`}
             >
-              <Send className="w-4 h-4" />
+              {isListening ? <MicOff className="w-8 h-8" /> : <Mic className="w-8 h-8" />}
             </Button>
           </div>
         </CardContent>

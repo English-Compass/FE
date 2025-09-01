@@ -70,9 +70,9 @@ const LEVELS = [
 
 // 문제 유형 데이터
 const QUESTION_TYPES = [
-  { id: 'word', title: '단어', icon: '💼', description: '단어 학습' },
-  { id: 'sentence', title: '문장', icon: '✈️', description: '문장 학습' },
-  { id: 'synonym', title: '대화', icon: '🏠', description: '대화 학습' },
+  { id: 'word', title: '빈칸에 올바른 단어나 문장넣기', icon: '💼', description: '단어 학습' },
+  { id: 'sentence', title: '밑줄친 문장과 동일한 의미의 숙어찾기', icon: '✈️', description: '문장 학습' },
+  { id: 'conversation', title: '이어지는 대화맥락으로 올바른거 선택하기', icon: '🏠', description: '대화 학습' },
 ];
 
 // Review 모드 상수
@@ -98,11 +98,9 @@ const REVIEW_MESSAGES = {
 
 // 문제 타입별 카테고리 매핑
 const QUESTION_TYPE_MAPPING = {
-  'word': '어휘',
-  'sentence-interpretation': '문법', 
-  'fill-in-blank': '문법',
-  'synonym-sentence': '문법',
-  'synonym': '어휘'
+  'word': '빈칸에 올바른 단어나 문장넣기',
+  'sentence': '밑줄친 문장과 동일한 의미의 숙어찾기',
+  'conversation': '이어지는 대화맥락으로 올바른거 선택하기'
 };
 
 // 커스텀 훅
@@ -116,6 +114,7 @@ export const useApp = () => {
 
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState({
+    id: 1,
     name: '김영희',
     email: 'test@example.com',
     level: 'B',
