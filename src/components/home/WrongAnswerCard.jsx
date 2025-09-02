@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 
+// API: 서버에서 사용자가 틀린 문제 목록을 가져와야 합니다.
+// 예: useEffect(() => { fetch('/api/wrong-answers').then(res => res.json()).then(data => setWrongQuizzes(data)); }, []);
+
 export function WrongAnswerCard({ navigate }) {
   const wrongQuizzes = [
     { id: 1, question: "What does 'comprehensive' mean?", options: ['simple', 'complete and thorough', 'expensive', 'quick'] },

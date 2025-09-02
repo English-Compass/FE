@@ -7,17 +7,21 @@ import { Button } from '../ui/button';
 export function TodayWordsCard({ words }) {
   const navigate = useNavigate();
 
-  // TODO: API 연동 - 오늘의 추천 단어 가져오기
-  // const fetchTodayWords = async () => {
-  //   const response = await fetch('http://localhost:8080/api/words/today', {
-  //     method: 'GET',
-  //     headers: {
-  //       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  //       'Content-Type': 'application/json'
-  //     }
-  //   });
-  //   return response.json();
-  // };
+  // API: 서버에서 오늘의 추천 단어 목록을 가져와야 합니다.
+  // useEffect(() => { 
+  //   const fetchTodayWords = async () => {
+  //     const response = await fetch('http://localhost:8080/api/words/today', {
+  //       method: 'GET',
+  //       headers: {
+  //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
+  //         'Content-Type': 'application/json'
+  //       }
+  //     });
+  //     const data = await response.json();
+  //     setWords(data);
+  //   };
+  //   fetchTodayWords();
+  // }, []);
 
   const handleMoreWords = () => {
     navigate('/dashboard/wordbook');

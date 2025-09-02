@@ -2,6 +2,9 @@ import React from 'react';
 import { MediaCard } from './MediaCard';
 import { NoResults } from './NoResults';
 
+// API: 서버에서 미디어 콘텐츠 목록을 가져와야 합니다.
+// 예: useEffect(() => { fetch('/api/media').then(res => res.json()).then(data => setFilteredContent(data)); }, []);
+
 export function MediaGrid({ filteredContent, getLevelColor, getLevelText, onWatchContent }) {
   if (filteredContent.length === 0) {
     return <NoResults />;

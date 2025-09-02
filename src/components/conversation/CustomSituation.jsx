@@ -7,8 +7,10 @@ import { ArrowLeft } from 'lucide-react';
 export function CustomSituation({ onBack, onStartConversation }) {
   const [customSituation, setCustomSituation] = useState('');
 
+  // API: 사용자가 입력한 커스텀 상황을 서버에 전송하여 대화를 시작해야 합니다.
   const handleStart = () => {
     if (customSituation.trim()) {
+      // 예: onStartConversation({ type: 'custom', detail: customSituation });
       onStartConversation(customSituation);
     }
   };

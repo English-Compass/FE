@@ -10,7 +10,7 @@ export function DailyProgressCard({ studyProgress }) {
   const progressPercentage = (studyProgress.completed / studyProgress.dailyGoal) * 100;
 
   return (
-    <Card className="bg-gradient-to-r from-blue-500 to-purple-500">
+    <Card className="bg-gradient-to-r from-blue-600 to-purple-500">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span>오늘의 학습 진행률</span>

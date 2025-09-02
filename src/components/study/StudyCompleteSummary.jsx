@@ -1,12 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
 import { useApp } from '../../context/AppContext';
 
+// 새로 추가된 추천 미디어 카드 컴포넌트
+function RecommendedMediaCard({ media }) {
+  return (
+    <Card className="hover:shadow-lg transition-shadow">
+      <CardContent className="!p-4">
+        <div className="aspect-w-16 aspect-h-9 !mb-4">
+          <img 
+            src={`https://via.placeholder.com/300x170.png?text=${media.title}`} 
+            alt={media.title} 
+            className="rounded-lg object-cover w-full h-full"
+          />
+        </div>
+        <h4 className="font-bold text-gray-800 !mb-1">{media.title}</h4>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-600">{media.platform}</span>
+          <Badge variant="secondary">{media.genre}</Badge>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function StudyCompleteSummary({ studyResults, onRestart, onGoHome }) {
   const { selectedType, STUDY_TYPES, getDifficultyText, formData } = useApp();
+  const [recommendations, setRecommendations] = useState([]);
   
   // 결과 통계 계산
   const totalQuestions = studyResults?.totalQuestions || 0;
@@ -16,9 +39,42 @@ export function StudyCompleteSummary({ studyResults, onRestart, onGoHome }) {
   
   // 선택된 학습 유형 정보
   const studyType = STUDY_TYPES.find(type => type.id === selectedType);
+
+  useEffect(() => {
+    // API: 사용자의 키워드와 난이도에 맞는 미디어 추천을 요청합니다.
+    // 이 예제에서는 더미 데이터를 사용합니다.
+    const fetchRecommendations = () => {
+        const allMedia = [
+            { id: 1, title: 'The Office', platform: 'Netflix', genre: 'Business', level: 'B' },
+            { id: 2, title: 'Friends', platform: 'HBO Max', genre: 'Daily', level: 'A' },
+            { id: 3, title: 'Silicon Valley', platform: 'HBO Max', genre: 'Business', level: 'C' },
+            { id: 4, title: 'Emily in Paris', platform: 'Netflix', genre: 'Travel', level: 'A' },
+            { id: 5, title: 'The Crown', platform: 'Netflix', genre: 'History', level: 'C' },
+            { id: 6, title: 'Modern Family', platform: 'Disney+', genre: 'Daily', level: 'B' },
+            { id: 7, title: 'House of Cards', platform: 'Netflix', genre: 'Business', level: 'C' },
+            { id: 8, title: 'Rick and Morty', platform: 'HBO Max', genre: 'Academic', level: 'C' },
+        ];
+
+        const userKeywords = formData.keywords || [];
+        const userLevel = formData.level || 'B';
+
+        // 키워드와 레벨을 기반으로 미디어 필터링
+        const filteredMedia = allMedia.filter(media => {
+            const hasKeyword = userKeywords.some(keyword => media.genre.toLowerCase().includes(keyword.toLowerCase()));
+            const isLevelMatch = media.level === userLevel;
+            return hasKeyword || isLevelMatch;
+        });
+
+        // 중복을 제거하고 3개만 선택
+        const uniqueRecommendations = [...new Map(filteredMedia.map(item => [item.id, item])).values()];
+        setRecommendations(uniqueRecommendations.slice(0, 3));
+    };
+
+    fetchRecommendations();
+  }, [formData.keywords, formData.level]);
   
   return (
-    <div className="!p-4 !sm:p-6 !space-y-6 max-w-3xl mx-auto">
+    <div className="!p-4 !sm:p-6 !space-y-6 max-w-3xl !mx-auto">
       {/* 헤더 */}
       <div className="text-center !space-y-2">
         <h1 className="text-3xl font-bold text-gray-800">🎉 학습 완료!</h1>
@@ -35,15 +91,15 @@ export function StudyCompleteSummary({ studyResults, onRestart, onGoHome }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="!space-y-4">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-2 gap-4 text-ml">
             <div>
-              <span className="text-gray-600">난이도:</span>
+              <span className="text-gray-600">난이도 : </span>
               <Badge variant="outline" className="ml-2">
                 {getDifficultyText(formData.level)}
               </Badge>
             </div>
             <div>
-              <span className="text-gray-600">선택 키워드:</span>
+              <span className="text-gray-600">선택 키워드 : </span>
               <span className="ml-2 text-gray-800">
                 {formData.keywords.join(', ') || '없음'}
               </span>
@@ -61,7 +117,7 @@ export function StudyCompleteSummary({ studyResults, onRestart, onGoHome }) {
           {/* 정확도 */}
           <div>
             <div className="flex justify-between items-center !mb-2">
-              <span className="text-sm font-medium">정확도</span>
+              <span className="text-ml font-medium">정확도</span>
               <span className="text-2xl font-bold text-blue-600">{accuracy}%</span>
             </div>
             <Progress value={accuracy} className="h-3" />
@@ -69,17 +125,17 @@ export function StudyCompleteSummary({ studyResults, onRestart, onGoHome }) {
 
           {/* 상세 통계 */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center !p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{totalQuestions}</div>
-              <div className="text-sm text-blue-700">총 문제</div>
+            <div className="text-center !p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-gray-600">{totalQuestions}</div>
+              <div className="text-ml text-gray-700">총 문제</div>
             </div>
-            <div className="text-center !p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{correctAnswers}</div>
-              <div className="text-sm text-green-700">정답</div>
+            <div className="text-center !p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-gray-600">{correctAnswers}</div>
+              <div className="text-ml text-gray-700">정답</div>
             </div>
             <div className="text-center !p-4 bg-red-50 rounded-lg">
               <div className="text-2xl font-bold text-red-600">{wrongAnswers}</div>
-              <div className="text-sm text-red-700">오답</div>
+              <div className="text-ml text-red-700">오답</div>
             </div>
           </div>
 
@@ -127,6 +183,20 @@ export function StudyCompleteSummary({ studyResults, onRestart, onGoHome }) {
           홈으로 가기
         </Button>
       </div>
+
+      {/* 추천 미디어 섹션 */}
+      {recommendations.length > 0 && (
+        <Card className="!mt-6">
+          <CardHeader>
+            <CardTitle>🎬 다음 학습으로 추천하는 미디어</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {recommendations.map(media => (
+              <RecommendedMediaCard key={media.id} media={media} />
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

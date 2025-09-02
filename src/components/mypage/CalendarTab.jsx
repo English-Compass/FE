@@ -12,6 +12,9 @@ export default function LearningCalendarTab() {
     setCurrentMonth(newDate);
   };
   
+  // API: 해당 월의 학습 기록 데이터를 서버에서 가져와야 합니다.
+  // useEffect(() => { fetch(`/api/calendar-data?month=${currentMonth}`).then(res => res.json()).then(data => setCalendarData(data)); }, [currentMonth]);
+
   // 달력 데이터를 생성하는 함수
   const generateCalendarData = (date) => {
     const year = date.getFullYear();

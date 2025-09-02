@@ -19,21 +19,9 @@ export default function HomePage() {
         scrollToTop();
     }, []);
 
-    // TODO: API 연동 - 사용자 맞춤 오늘의 단어
-    // const fetchTodayWords = async () => {
-    //   const response = await fetch('http://localhost:8080/api/dashboard/today-words', {
-    //     method: 'GET',
-    //     headers: {
-    //       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    //       'Content-Type': 'application/json'
-    //     }
-    //   });
-    //   return response.json();
-    // };
-
-    // TODO: API 연동 - 복습 퀴즈 데이터
-    // const fetchReviewQuiz = async () => {
-    //   const response = await fetch('http://localhost:8080/api/dashboard/review-quiz', {
+    // API: 대시보드에 필요한 데이터(오늘의 단어, 복습 퀴즈 등)를 가져와야 합니다.
+    // const fetchDashboardData = async () => {
+    //   const response = await fetch('http://localhost:8080/api/dashboard', {
     //     method: 'GET',
     //     headers: {
     //       'Authorization': `Bearer ${localStorage.getItem('token')}`,

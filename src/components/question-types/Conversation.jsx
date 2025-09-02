@@ -89,7 +89,7 @@ export function Conversation({
     );
   }
 
-  if (!currentQuestion) return null;
+  if (!currentQuestion || !currentQuestion.conversation) return null;
 
   const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
   const studyType = STUDY_TYPES?.find(type => type.id === selectedType);
@@ -123,7 +123,7 @@ export function Conversation({
       <CardContent className="!space-y-4">
         {/* 대화 내용 표시 */}
         <div className="!space-y-3 bg-gray-50 !p-4 rounded-lg border">
-          {currentQuestion.conversation.map((line, index) => (
+          {currentQuestion.conversation?.map((line, index) => (
             <div key={index} className={`flex ${line.speaker === 'A' ? 'justify-start' : 'justify-end'}`}>
               <div className={`max-w-[80%] !p-3 rounded-lg ${
                 line.speaker === 'A' 
@@ -139,7 +139,7 @@ export function Conversation({
 
         {/* 답변 옵션 */}
         <div className="!pt-4 !space-y-3">
-          {currentQuestion.options.map((option, index) => (
+          {currentQuestion.options?.map((option, index) => (
             <button
               key={index}
               onClick={() => onAnswerSelect(option)}

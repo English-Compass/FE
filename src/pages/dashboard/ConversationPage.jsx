@@ -7,6 +7,7 @@ import { CustomSituation } from '../../components/conversation/CustomSituation';
 import { SituationDetail } from '../../components/conversation/SituationDetail';
 import { ConversationPractice } from '../../components/conversation/ConversationPractice';
 
+// API: 회화 시나리오 목록을 서버에서 가져와야 합니다.
 const CONVERSATION_SCENARIOS = [
   {
     id: 'job-interview',

@@ -23,21 +23,29 @@ export default function StudySession({ onStudyComplete }) {
 
      // --- 데이터 로딩 ---
     useEffect(() => {
+        // API: 선택된 카테고리, 키워드, 레벨을 기반으로 서버에서 학습 문제를 가져옵니다.
         const fetchQuestions = async () => {
-            // TODO: API 연동 - 선택된 카테고리와 키워드 기반 문제 생성
-            // const response = await fetch('http://localhost:8080/api/study/questions', {
-            //   method: 'POST',
-            //   headers: {
-            //     'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            //     'Content-Type': 'application/json'
-            //   },
-            //   body: JSON.stringify({
-            //     categories: formData.selectedCategories,
-            //     keywords: formData.keywords,
-            //     level: formData.level,
-            //     count: 10
-            //   })
-            // });
+            // try {
+            //   const response = await fetch('http://localhost:8080/api/study/questions', {
+            //     method: 'POST',
+            //     headers: {
+            //       'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            //       'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({
+            //       categories: formData.selectedCategories,
+            //       keywords: formData.keywords,
+            //       level: formData.level,
+            //       count: 10
+            //     })
+            //   });
+            //   const data = await response.json();
+            //   setQuestions(data);
+            // } catch (err) {
+            //   setError('문제를 불러오는 데 실패했습니다.');
+            // } finally {
+            //   setIsLoading(false);
+            // }
 
             // 더미 데이터로 임시 구현
             const dummyQuestions = [
@@ -59,10 +67,14 @@ export default function StudySession({ onStudyComplete }) {
                 },
                 {
                     id: 3,
-                    question: "A: How was your weekend? B: _____",
+                    type: "conversation",
+                    difficulty: "초급",
+                    conversation: [
+                        { speaker: "A", dialogue: "How was your weekend?" },
+                        { speaker: "B", dialogue: "___" }
+                    ],
                     options: ["It was great, thanks!", "Yes, I do.", "Next Monday."],
                     correctAnswer: "It was great, thanks!",
-                    type: "conversation",
                     explanation: "This is the most natural response to a question about how someone's weekend was."
                 }
             ];

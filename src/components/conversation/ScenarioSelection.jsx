@@ -4,6 +4,9 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ArrowLeft } from 'lucide-react';
 
+// API: 컴포넌트가 마운트될 때 서버로부터 시나리오 목록을 가져와야 합니다.
+// 예: useEffect(() => { fetch('/api/scenarios').then(res => res.json()).then(data => setScenarios(data)); }, []);
+
 export function ScenarioSelection({ 
   user, 
   scenarios, 

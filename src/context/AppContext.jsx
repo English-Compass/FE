@@ -18,7 +18,7 @@ const KEYWORDS_BY_CATEGORY = {
   daily: ['가족', '친구', '선생님', '쇼핑', '식당', '병원']
 };
 
-// TODO: API 연동 - 사용자 학습 통계
+// API: 사용자의 학습 통계 데이터를 가져와야 합니다.
 // const fetchUserStats = async () => {
 //   const response = await fetch('http://localhost:8080/api/user/statistics', {
 //     method: 'GET',

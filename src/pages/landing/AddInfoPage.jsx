@@ -28,6 +28,7 @@ export default function AddInfoPage() {
 
     // 사용자 정보 완성 및 대시보드로 이동
     const handleComplete = () => {
+        // API: 사용자가 설정한 추가 정보(레벨, 키워드)를 서버에 전송하여 저장해야 합니다.
         if (formData.keywords.length > 0) {
             // 사용자 정보 설정
             setUser({

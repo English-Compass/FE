@@ -19,22 +19,33 @@ export default function WordbookPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
 
-  // TODO: API 연동 구현 예정
-  // const fetchRecommendedWords = async (keywords, level) => {
-  //   const response = await fetch('http://localhost:8080/api/words/recommendations', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  //       'Content-Type': 'application/json'
-  //     },
-  //     body: JSON.stringify({
-  //       keywords: keywords,
-  //       level: level,
-  //       limit: 50
-  //     })
-  //   });
-  //   return response.json();
-  // };
+  // API: 사용자의 키워드와 레벨에 맞는 추천 단어 목록을 서버에서 가져와야 합니다.
+  // useEffect(() => {
+  //   const fetchRecommendedWords = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await fetch('http://localhost:8080/api/words/recommendations', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Authorization': `Bearer ${localStorage.getItem('token')}`,
+  //           'Content-Type': 'application/json'
+  //         },
+  //         body: JSON.stringify({
+  //           keywords: formData.keywords || [],
+  //           level: formData.level,
+  //           limit: 50
+  //         })
+  //       });
+  //       const data = await response.json();
+  //       setWords(data);
+  //     } catch (err) {
+  //       console.error("Failed to fetch words:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchRecommendedWords();
+  // }, [formData.keywords, formData.level]);
 
   // 키워드 기반 단어 추천 (임시 데이터)
   const generateRecommendedWords = (keywords) => {

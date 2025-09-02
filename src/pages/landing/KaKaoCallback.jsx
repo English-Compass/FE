@@ -21,7 +21,7 @@ export default function KakaoCallback() {
 
     const handleKakaoLogin = async (code) => {
         try {
-            // 백엔드 API 호출
+            // API: 백엔드에 인가 코드를 전송하여 카카오 로그인을 처리하고 JWT 토큰을 발급받습니다.
             const response = await fetch('/api/auth/kakao', {
                 method: 'POST',
                 headers: {

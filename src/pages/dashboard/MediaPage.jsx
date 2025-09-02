@@ -5,7 +5,7 @@ import { MediaHeader } from '../../components/media/MediaHeader';
 import { LearningTips } from '../../components/media/LearningTips';
 import { MediaGrid } from '../../components/media/MediaGrid';
 
-// TODO: API 연동 구현 예정
+// API: 사용자의 레벨과 선호도에 맞는 미디어 콘텐츠 목록을 가져와야 합니다.
 // const fetchMediaContent = async (userLevel, preferences) => {
 //   const response = await fetch('http://localhost:8080/api/media/recommendations', {
 //     method: 'GET',

@@ -8,6 +8,9 @@ import { X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useApp } from '../../context/AppContext';
 
+// API: '저장' 버튼 클릭 시, 수정된 사용자 프로필 정보를 서버에 전송하여 업데이트해야 합니다.
+// 예: const handleSave = () => { fetch('/api/user/profile', { method: 'PUT', body: JSON.stringify(editForm) }); };
+
 export default function ProfileEdit({ user, editForm, setEditForm, onSave }) {
   const handleKeywordToggle = (keyword) => {
     setEditForm(prev => ({

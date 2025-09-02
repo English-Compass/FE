@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { ReviewQuestionItem } from './ReviewQuestionItem';
 
+// API: 서버에서 사용자가 틀린 문제 목록을 가져와 `reviewQuestions` 상태를 설정해야 합니다.
+// 예: useEffect(() => { fetch('/api/review-questions').then(res => res.json()).then(data => setReviewQuestions(data)); }, []);
+
 export function ReviewList({ reviewQuestions, onQuestionRetry }) {
     // 특정 인덱스의 문제 다시 풀기
     const handleRetry = (questionIndex) => {

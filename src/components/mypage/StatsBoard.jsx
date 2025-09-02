@@ -2,6 +2,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Clock } from 'lucide-react';
 
+// API: 서버에서 사용자의 학습 통계 데이터(총 학습 시간, 주간 학습 시간 등)를 가져와야 합니다.
+// 예: useEffect(() => { fetch('/api/user/stats').then(res => res.json()).then(data => setStudyStats(data)); }, []);
+
 export default function StatsBoard({ studyStats, weeklyHours }) {
   return (
     <Card className='!mt-6'>

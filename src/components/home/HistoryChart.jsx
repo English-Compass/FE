@@ -5,6 +5,9 @@ import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { useApp } from '../../context/AppContext';
 
+// API: 사용자의 학습 기록 데이터(주간 학습 시간, 유형별 정답률 등)를 서버에서 가져와야 합니다.
+// 예: useEffect(() => { fetch('/api/history').then(res => res.json()).then(data => setHistory(data)); }, []);
+
 export default function StudyHistoryChart() {
     // reviewQuestions와 QUESTION_TYPE_MAPPING을 AppContext에서 가져옵니다.
     const { weeklyHours, QUESTION_TYPES, reviewQuestions, QUESTION_TYPE_MAPPING } = useApp();
