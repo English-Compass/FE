@@ -23,31 +23,76 @@ export default function StudySession({ onStudyComplete }) {
 
      // --- 데이터 로딩 ---
     useEffect(() => {
-        // API: 선택된 카테고리, 키워드, 레벨을 기반으로 서버에서 학습 문제를 가져옵니다.
         const fetchQuestions = async () => {
-            // try {
-            //   const response = await fetch('http://localhost:8080/api/study/questions', {
-            //     method: 'POST',
-            //     headers: {
-            //       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            //       'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({
-            //       categories: formData.selectedCategories,
-            //       keywords: formData.keywords,
-            //       level: formData.level,
-            //       count: 10
-            //     })
-            //   });
-            //   const data = await response.json();
-            //   setQuestions(data);
-            // } catch (err) {
-            //   setError('문제를 불러오는 데 실패했습니다.');
-            // } finally {
-            //   setIsLoading(false);
-            // }
-
-            // 더미 데이터로 임시 구현
+            try {
+                // 1. 학습 세션 생성
+                const sessionResponse = await fetch('http://localhost:8080/api/learning-sessions/practice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: "user_123", // 실제 사용자 ID 사용
+                        sessionType: 'PRACTICE',
+                        metadata: {
+                            categories: formData.selectedCategories,
+                            keywords: formData.keywords,
+                            level: formData.level,
+                            questionCount: 10
+                        }
+                    })
+                });
+                
+                if (!sessionResponse.ok) {
+                    throw new Error('세션 생성 실패');
+                }
+                
+                const sessionData = await sessionResponse.json();
+                const sessionId = sessionData.sessionId;
+                
+                // 2. 세션 시작
+                await fetch(`http://localhost:8080/api/learning-sessions/${sessionId}/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                // 3. 세션의 문제들 조회
+                const questionsResponse = await fetch(`http://localhost:8080/api/learning-sessions/${sessionId}/questions`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!questionsResponse.ok) {
+                    throw new Error('문제 조회 실패');
+                }
+                
+                const sessionQuestions = await questionsResponse.json();
+                
+                // SessionQuestion 형태를 StudySession에서 사용하는 형태로 변환
+                const formattedQuestions = sessionQuestions.map((sq) => ({
+                    id: sq.question.questionId,
+                    question: sq.question.content,
+                    options: sq.question.choices,
+                    correctAnswer: sq.question.correctAnswer,
+                    type: sq.question.questionType.toLowerCase(),
+                    explanation: sq.question.explanation,
+                    sessionQuestionId: sq.sessionQuestionId
+                }));
+                
+                setQuestions(formattedQuestions);
+                
+                // 세션 ID를 상태에 저장 (완료 시 필요)
+                window.currentSessionId = sessionId;
+                
+            } catch (err) {
+                console.error('API 호출 실패:', err);
+                setError('문제를 불러오는 데 실패했습니다. 네트워크를 확인해주세요.');
+                
+                // 실패 시 더미 데이터 사용
             const dummyQuestions = [
                 {
                     id: 1,
@@ -83,6 +128,7 @@ export default function StudySession({ onStudyComplete }) {
                 setQuestions(dummyQuestions);
                 setIsLoading(false);
             }, 1000);
+            }
         };
 
         fetchQuestions();
@@ -94,34 +140,66 @@ export default function StudySession({ onStudyComplete }) {
     const studyType = STUDY_TYPES.find(type => type.id === selectedType);
     
     // 이벤트 핸들러
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!selectedAnswer) return;
         
+        const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
         const newAnswer = {
             questionId: currentQuestion.id,
             selectedAnswer,
             correctAnswer: currentQuestion.correctAnswer,
-            isCorrect: selectedAnswer === currentQuestion.correctAnswer,
+            isCorrect,
             questionType: currentQuestion.type
         };
         
         setAnswers([...answers, newAnswer]);
         setShowResult(true);
+        
+        try {
+            // 세션 진행률 업데이트 API 호출
+            if (window.currentSessionId) {
+                await fetch(`http://localhost:8080/api/learning-sessions/${window.currentSessionId}/progress`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        isCorrect: isCorrect
+                    })
+                });
+            }
+        } catch (error) {
+            console.error('진행률 업데이트 API 호출 실패:', error);
+        }
     };
 
     // 다음 문제 또는 완료
-    const handleNext = () => {
+    const handleNext = async () => {
         if (currentQuestionIndex < totalQuestions - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
             setSelectedAnswer('');
             setShowResult(false);
         } else {
-            // 마지막 문제까지 제출했으면 학습 완료 처리          
+            // 마지막 문제까지 제출했으면 학습 완료 처리
             const results = {
                 totalQuestions: totalQuestions,
                 correctAnswers: answers.filter(answer => answer.isCorrect).length,
                 answers: answers
             };
+            
+            try {
+                // 세션 완료 API 호출
+                if (window.currentSessionId) {
+                    await fetch(`http://localhost:8080/api/learning-sessions/${window.currentSessionId}/complete`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('세션 완료 API 호출 실패:', error);
+            }
             
             if (onStudyComplete) {
                 onStudyComplete(results);

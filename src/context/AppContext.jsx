@@ -18,30 +18,50 @@ const KEYWORDS_BY_CATEGORY = {
   daily: ['가족', '친구', '선생님', '쇼핑', '식당', '병원']
 };
 
-// API: 사용자의 학습 통계 데이터를 가져와야 합니다.
-// const fetchUserStats = async () => {
-//   const response = await fetch('http://localhost:8080/api/user/statistics', {
-//     method: 'GET',
-//     headers: {
-//       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-//       'Content-Type': 'application/json'
-//     }
-//   });
-//   return response.json();
-// };
+// API: 사용자의 학습 통계 데이터를 가져오는 함수
+const fetchUserStats = async (userId) => {
+  try {
+    // 사용자의 평균 진행률 조회
+    const avgProgressResponse = await fetch(`http://localhost:8080/api/learning-sessions/user/${userId}/average-progress`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const averageProgress = await avgProgressResponse.json();
 
-// 학습 통계 데이터 (더미 데이터)
-const monthlyStats = {
-    totalMinutes: 680,
-    averageAccuracy: 87,
-    completedLessons: 45,
-  };
-  const studyStats = { totalHours: 24.5 };
-  const weeklyHours = [
-    { day: 'Mon', hours: 2.5 }, { day: 'Tue', hours: 3.0 }, { day: 'Wed', hours: 2.0 },
-    { day: 'Thu', hours: 4.5 }, { day: 'Fri', hours: 5.0 }, { day: 'Sat', hours: 3.5 },
-    { day: 'Sun', hours: 4.0 }
-  ];
+    // 완료된 세션 수 조회
+    const completedSessionsResponse = await fetch(`http://localhost:8080/api/learning-sessions/user/${userId}/status/COMPLETED/count`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const completedSessions = await completedSessionsResponse.json();
+
+    // 최근 30일간의 학습 세션 조회
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    
+    const recentSessionsResponse = await fetch(`http://localhost:8080/api/learning-sessions/user/${userId}/date-range?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const recentSessions = await recentSessionsResponse.json();
+
+    return {
+      averageProgress,
+      completedSessions,
+      recentSessions
+    };
+  } catch (error) {
+    console.error('사용자 통계 조회 실패:', error);
+    return null;
+  }
+};
 
 // 사용자 레벨
 const LEVELS = [
@@ -114,7 +134,7 @@ export const useApp = () => {
 
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState({
-    id: 1,
+    id: 'user_123', // API에서 사용할 실제 사용자 ID
     name: '김영희',
     email: 'test@example.com',
     level: 'B',
@@ -125,6 +145,19 @@ export const AppProvider = ({ children }) => {
     completed: 15,
     dailyGoal: 30,
   });
+
+  // 사용자 통계 데이터 상태
+  const [monthlyStats, setMonthlyStats] = useState({
+    totalMinutes: 680,
+    averageAccuracy: 87,
+    completedLessons: 45,
+  });
+  const [studyStats, setStudyStats] = useState({ totalHours: 24.5 });
+  const [weeklyHours, setWeeklyHours] = useState([
+    { day: 'Mon', hours: 2.5 }, { day: 'Tue', hours: 3.0 }, { day: 'Wed', hours: 2.0 },
+    { day: 'Thu', hours: 4.5 }, { day: 'Fri', hours: 5.0 }, { day: 'Sat', hours: 3.5 },
+    { day: 'Sun', hours: 4.0 }
+  ]);
 
   // 학습 관련 상태들
   const [currentStep, setCurrentStep] = useState('type'); // type, studysession, complete
@@ -227,6 +260,50 @@ export const AppProvider = ({ children }) => {
       behavior: 'smooth'
     });
   };
+
+  // 사용자 통계 데이터를 API에서 가져오기
+  useEffect(() => {
+    const loadUserStats = async () => {
+      const statsData = await fetchUserStats(user.id);
+      
+      if (statsData) {
+        // API 데이터를 기존 형태로 변환하여 설정
+        setMonthlyStats({
+          totalMinutes: Math.round(statsData.recentSessions.length * 15), // 세션당 평균 15분
+          averageAccuracy: Math.round(statsData.averageProgress * 100),
+          completedLessons: statsData.completedSessions,
+        });
+        
+        setStudyStats({ 
+          totalHours: Math.round((statsData.completedSessions * 15) / 60 * 10) / 10 
+        });
+        
+        // 최근 7일간 일별 학습 시간 계산
+        const last7Days = [];
+        const today = new Date();
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(date.getDate() - i);
+          const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+          
+          // 해당 날짜의 세션 수 계산
+          const sessionsOnDay = statsData.recentSessions.filter(session => {
+            const sessionDate = new Date(session.createdAt);
+            return sessionDate.toDateString() === date.toDateString();
+          }).length;
+          
+          last7Days.push({
+            day: dayName,
+            hours: Math.round(sessionsOnDay * 0.25 * 10) / 10 // 세션당 15분 = 0.25시간
+          });
+        }
+        
+        setWeeklyHours(last7Days);
+      }
+    };
+    
+    loadUserStats();
+  }, [user.id]);
 
   const value = {
     user,
