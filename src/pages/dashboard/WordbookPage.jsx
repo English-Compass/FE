@@ -19,33 +19,84 @@ export default function WordbookPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
 
-  // API: 사용자의 키워드와 레벨에 맞는 추천 단어 목록을 서버에서 가져와야 합니다.
-  // useEffect(() => {
-  //   const fetchRecommendedWords = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const response = await fetch('http://localhost:8080/api/words/recommendations', {
-  //         method: 'POST',
-  //         headers: {
-  //           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  //           'Content-Type': 'application/json'
-  //         },
-  //         body: JSON.stringify({
-  //           keywords: formData.keywords || [],
-  //           level: formData.level,
-  //           limit: 50
-  //         })
-  //       });
-  //       const data = await response.json();
-  //       setWords(data);
-  //     } catch (err) {
-  //       console.error("Failed to fetch words:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchRecommendedWords();
-  // }, [formData.keywords, formData.level]);
+  // API: Word Study API를 통해 사용자 맞춤형 단어 목록 조회
+  useEffect(() => {
+    const fetchWordStudyList = async () => {
+      setLoading(true);
+      try {
+        // Word Study API 호출 - 사용자 프로필 기반 단어 생성
+        const response = await fetch('http://localhost:8080/api/word-study/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userId: "user_123", // 실제 사용자 ID 사용
+            wordCount: 30, // 단어장은 더 많은 단어 표시
+            focusCategory: formData.selectedCategories?.length > 0 ? formData.selectedCategories[0] : null,
+            targetDifficulty: formData.level || null
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('단어 데이터 조회 실패');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.words) {
+          // API 응답 형태를 컴포넌트에서 사용하는 형태로 변환
+          const formattedWords = data.words.map(wordObj => ({
+            word: wordObj.word,
+            meaning: wordObj.koreanMeaning || wordObj.definition,
+            example: wordObj.exampleSentence,
+            level: wordObj.difficulty,
+            category: mapCategoryToEnglish(wordObj.category)
+          }));
+          
+          setWords(formattedWords);
+        } else {
+          throw new Error(data.errorMessage || '단어 데이터 처리 실패');
+        }
+        
+      } catch (err) {
+        console.error('단어장 조회 실패:', err);
+        
+        // 실패 시 더미 데이터 사용 (기존 코드 유지)
+        const recommendedWords = generateRecommendedWords(formData.keywords || []);
+        
+        if (formData.selectedCategories) {
+          formData.selectedCategories.forEach(categoryId => {
+            const categoryKeywords = KEYWORDS_BY_CATEGORY[categoryId] || [];
+            const categoryWords = generateRecommendedWords(categoryKeywords.slice(0, 2));
+            recommendedWords.push(...categoryWords);
+          });
+        }
+
+        const uniqueWords = recommendedWords.filter((word, index, arr) => 
+          arr.findIndex(w => w.word === word.word) === index
+        );
+
+        setWords(uniqueWords);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchWordStudyList();
+  }, [formData.keywords, formData.selectedCategories, formData.level, KEYWORDS_BY_CATEGORY]);
+
+  // 카테고리명 변환 함수
+  const mapCategoryToEnglish = (koreanCategory) => {
+    const categoryMap = {
+      '학업': 'academic',
+      '비즈니스': 'business',
+      '여행': 'travel',
+      '일상생활': 'daily',
+      '일상': 'daily'
+    };
+    return categoryMap[koreanCategory] || 'daily';
+  };
 
   // 키워드 기반 단어 추천 (임시 데이터)
   const generateRecommendedWords = (keywords) => {
@@ -120,31 +171,6 @@ export default function WordbookPage() {
     return uniqueWords.slice(0, 30); // 최대 30개 단어
   };
 
-  useEffect(() => {
-    setLoading(true);
-    
-    // 사용자가 선택한 키워드 기반으로 단어 추천
-    const recommendedWords = generateRecommendedWords(formData.keywords || []);
-    
-    // 추가로 선택된 카테고리의 기본 단어들도 포함
-    if (formData.selectedCategories) {
-      formData.selectedCategories.forEach(categoryId => {
-        const categoryKeywords = KEYWORDS_BY_CATEGORY[categoryId] || [];
-        const categoryWords = generateRecommendedWords(categoryKeywords.slice(0, 2)); // 카테고리당 2개 키워드
-        recommendedWords.push(...categoryWords);
-      });
-    }
-
-    // 중복 제거
-    const uniqueWords = recommendedWords.filter((word, index, arr) => 
-      arr.findIndex(w => w.word === word.word) === index
-    );
-
-    setTimeout(() => {
-      setWords(uniqueWords);
-      setLoading(false);
-    }, 500);
-  }, [formData.keywords, formData.selectedCategories, KEYWORDS_BY_CATEGORY]);
 
   // 필터링된 단어들
   const filteredWords = words.filter(word => {
