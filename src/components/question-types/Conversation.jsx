@@ -22,7 +22,7 @@ export function Conversation({
     
     try {
       // 1. 대화 유형의 문제를 가져오는 API를 호출합니다.
-      const response = await fetch(`http://localhost:8080/api/quizzes/random?type=conversation&level=${formData.level}`);
+      const response = await fetch(`http://localhost:8081/api/quizzes/random?type=conversation&level=${formData.level}`);
 
       if (!response.ok) {
         throw new Error(`서버 응답 오류: ${response.status}`);

@@ -10,7 +10,15 @@ const STUDY_TYPES = [
   { id: 'academic', title: '학술', icon: '🎓', description: '대학교, 학원, 대학원' }
 ];
 
-// 키워드 별 분류 (Quiz 디렉토리 구조 기반)
+// 카테고리 매핑: 프론트엔드 ID -> 데이터베이스 값
+const CATEGORY_MAPPING = {
+  business: 'business',
+  travel: 'travel', 
+  daily: 'daily',
+  academic: 'school'  // academic -> school 매핑
+};
+
+// 키워드 별 분류 (한국어 표시용)
 const KEYWORDS_BY_CATEGORY = {
   travel: ['배낭여행', '가족여행', '친구와 여행'],
   business: ['고객 서비스', '이메일 보고서', '미팅 회의'],
@@ -18,11 +26,34 @@ const KEYWORDS_BY_CATEGORY = {
   daily: ['쇼핑 외식', '병원 이용', '대중교통 이용']
 };
 
+// 키워드 매핑: 한국어 -> 데이터베이스 값
+const KEYWORD_MAPPING = {
+  // Travel keywords
+  '배낭여행': 'backpacking',
+  '가족여행': 'family_trip', 
+  '친구와 여행': 'trip_with_friends',
+  
+  // Business keywords  
+  '고객 서비스': 'customer_service',
+  '이메일 보고서': 'email_report',
+  '미팅 회의': 'meeting_conference',
+  
+  // Academic keywords
+  '과제 시험 준비': 'assignment_test_preparation',
+  '수업 참여': 'attending_class',
+  '학과 대화': 'department_conversation',
+  
+  // Daily keywords
+  '쇼핑 외식': 'shopping_eating_out',
+  '병원 이용': 'using_hospital', 
+  '대중교통 이용': 'using_public_transportation'
+};
+
 // API: 사용자의 학습 통계 데이터를 가져오는 함수
 const fetchUserStats = async (userId) => {
   try {
     // 사용자의 평균 진행률 조회
-    const avgProgressResponse = await fetch(`http://localhost:8080/api/learning-sessions/user/${userId}/average-progress`, {
+    const avgProgressResponse = await fetch(`http://localhost:8081/api/learning-sessions/user/${userId}/average-progress`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -31,7 +62,7 @@ const fetchUserStats = async (userId) => {
     const averageProgress = await avgProgressResponse.json();
 
     // 완료된 세션 수 조회
-    const completedSessionsResponse = await fetch(`http://localhost:8080/api/learning-sessions/user/${userId}/status/COMPLETED/count`, {
+    const completedSessionsResponse = await fetch(`http://localhost:8081/api/learning-sessions/user/${userId}/status/COMPLETED/count`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -44,7 +75,7 @@ const fetchUserStats = async (userId) => {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
     
-    const recentSessionsResponse = await fetch(`http://localhost:8080/api/learning-sessions/user/${userId}/date-range?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`, {
+    const recentSessionsResponse = await fetch(`http://localhost:8081/api/learning-sessions/user/${userId}/date-range?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -261,6 +292,16 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  // 한국어 카테고리를 영어 데이터베이스 값으로 변환
+  const mapCategoriesToEnglish = (koreanCategories) => {
+    return koreanCategories.map(category => CATEGORY_MAPPING[category] || category);
+  };
+
+  // 한국어 키워드를 영어 데이터베이스 값으로 변환  
+  const mapKeywordsToEnglish = (koreanKeywords) => {
+    return koreanKeywords.map(keyword => KEYWORD_MAPPING[keyword] || keyword);
+  };
+
   // 사용자 통계 데이터를 API에서 가져오기
   useEffect(() => {
     const loadUserStats = async () => {
@@ -366,6 +407,8 @@ export const AppProvider = ({ children }) => {
     handleKeywordToggle,
     resetAdditionalInfo,
     scrollToTop,
+    mapCategoriesToEnglish,
+    mapKeywordsToEnglish,
   };
 
   return (

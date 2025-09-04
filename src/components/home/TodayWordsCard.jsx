@@ -18,7 +18,7 @@ export function TodayWordsCard({ words: initialWords }) {
         setError(null);
         
         // Word Study API를 사용하여 사용자 맞춤형 단어 목록 생성
-        const response = await fetch('http://localhost:8080/api/word-study/generate', {
+        const response = await fetch('http://localhost:8081/api/word-study/generate', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

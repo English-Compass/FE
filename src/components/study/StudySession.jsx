@@ -9,7 +9,7 @@ import { Sentence } from '../question-types/Sentence';
 import { Conversation } from '../question-types/Conversation';
 
 export default function StudySession({ onStudyComplete }) {
-    const { selectedType, STUDY_TYPES, formData, getDifficultyText} = useApp();
+    const { selectedType, STUDY_TYPES, formData, getDifficultyText, setCurrentStep, mapCategoriesToEnglish, mapKeywordsToEnglish} = useApp();
 
         // --- 상태 관리 ---
     const [questions, setQuestions] = useState([]); // API로부터 받아온 문제 목록
@@ -25,8 +25,23 @@ export default function StudySession({ onStudyComplete }) {
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
-                // 1. 학습 세션 생성
-                const sessionResponse = await fetch('http://localhost:8080/api/learning-sessions/practice', {
+                // 카테고리가 선택되지 않았다면 에러 처리
+                if (!formData.selectedCategories || formData.selectedCategories.length === 0) {
+                    setError('학습 카테고리를 선택해주세요.');
+                    setIsLoading(false);
+                    return;
+                }
+
+                // 1. 학습 세션 생성 (한국어를 영어로 변환)
+                const englishCategories = mapCategoriesToEnglish(formData.selectedCategories);
+                const englishKeywords = mapKeywordsToEnglish(formData.keywords);
+                
+                console.log('Original categories:', formData.selectedCategories);
+                console.log('Mapped categories:', englishCategories);
+                console.log('Original keywords:', formData.keywords);
+                console.log('Mapped keywords:', englishKeywords);
+                
+                const sessionResponse = await fetch('http://localhost:8081/api/learning-sessions/practice', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -34,12 +49,12 @@ export default function StudySession({ onStudyComplete }) {
                     body: JSON.stringify({
                         userId: "user_123", // 실제 사용자 ID 사용
                         sessionType: 'PRACTICE',
-                        metadata: {
-                            categories: formData.selectedCategories,
-                            keywords: formData.keywords,
+                        sessionMetadata: JSON.stringify({
+                            categories: englishCategories,
+                            keywords: englishKeywords,
                             level: formData.level,
                             questionCount: 10
-                        }
+                        })
                     })
                 });
                 
@@ -51,7 +66,7 @@ export default function StudySession({ onStudyComplete }) {
                 const sessionId = sessionData.sessionId;
                 
                 // 2. 세션 시작
-                await fetch(`http://localhost:8080/api/learning-sessions/${sessionId}/start`, {
+                await fetch(`http://localhost:8081/api/learning-sessions/${sessionId}/start`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -59,7 +74,7 @@ export default function StudySession({ onStudyComplete }) {
                 });
                 
                 // 3. 세션의 문제들 조회
-                const questionsResponse = await fetch(`http://localhost:8080/api/learning-sessions/${sessionId}/questions`, {
+                const questionsResponse = await fetch(`http://localhost:8081/api/learning-sessions/${sessionId}/questions`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -158,7 +173,7 @@ export default function StudySession({ onStudyComplete }) {
         try {
             // 세션 진행률 업데이트 API 호출
             if (window.currentSessionId) {
-                await fetch(`http://localhost:8080/api/learning-sessions/${window.currentSessionId}/progress`, {
+                await fetch(`http://localhost:8081/api/learning-sessions/${window.currentSessionId}/progress`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -190,7 +205,7 @@ export default function StudySession({ onStudyComplete }) {
             try {
                 // 세션 완료 API 호출
                 if (window.currentSessionId) {
-                    await fetch(`http://localhost:8080/api/learning-sessions/${window.currentSessionId}/complete`, {
+                    await fetch(`http://localhost:8081/api/learning-sessions/${window.currentSessionId}/complete`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -235,7 +250,20 @@ export default function StudySession({ onStudyComplete }) {
     }
 
     if (error) {
-        return <div className="text-center !p-10 text-red-600"><h2>오류</h2><p>{error}</p></div>;
+        return (
+            <div className="text-center !p-10 text-red-600">
+                <h2>오류</h2>
+                <p>{error}</p>
+                {error.includes('카테고리') && (
+                    <Button 
+                        onClick={() => setCurrentStep('type')} 
+                        className="!mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                        카테고리 선택하러 가기
+                    </Button>
+                )}
+            </div>
+        );
     }
 
     return (

@@ -23,7 +23,7 @@ export function Sentence({
       try {
         // 1. README에 명시된 API 엔드포인트로 요청합니다.
         // 특정 유형의 문제 하나만 가져오는 API가 필요합니다. (예: /api/quizzes/random?type=sentence)
-        const response = await fetch(`http://localhost:8080/api/quizzes/random?type=sentence&level=${formData.level}`);
+        const response = await fetch(`http://localhost:8081/api/quizzes/random?type=sentence&level=${formData.level}`);
   
         if (!response.ok) {
           throw new Error(`서버 응답 오류: ${response.status}`);

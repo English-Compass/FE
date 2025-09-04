@@ -25,7 +25,7 @@ export default function WordbookPage() {
       setLoading(true);
       try {
         // Word Study API 호출 - 사용자 프로필 기반 단어 생성
-        const response = await fetch('http://localhost:8080/api/word-study/generate', {
+        const response = await fetch('http://localhost:8081/api/word-study/generate', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
