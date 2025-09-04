@@ -14,7 +14,8 @@ export function KeywordSelection({
   onPrev,
   handleKeywordToggle,
   handleSubmit,
-  canComplete
+  canComplete,
+  isSaving = false
 }) {
   const renderKeywords = (category) =>
     (KEYWORDS_BY_CATEGORY[category] || []).map((keyword) => {
@@ -33,10 +34,10 @@ export function KeywordSelection({
 
   const renderCategories = () =>
     [
-        { id: 'travel', name: '여행' },
-        { id: 'business', name: '비즈니스' },
-        { id: 'academic', name: '학술' },   
-        { id: 'daily', name: '일상' }
+        { id: 'STUDY', name: '학습' },
+        { id: 'BUSINESS', name: '비즈니스' },
+        { id: 'TRAVEL', name: '여행' },   
+        { id: 'DAILY_LIFE', name: '일상' }
     ].map(({ id, name }) => (
       <div key={id} className="!mb-4">
         <h3 className="font-semibold !mb-2">{name}</h3>
@@ -89,10 +90,10 @@ export function KeywordSelection({
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={!canComplete}
-          className="bg-blue-600 hover:bg-blue-700 text-white !px-8"
+          disabled={!canComplete || isSaving}
+          className="bg-blue-600 hover:bg-blue-700 text-white !px-8 disabled:opacity-50"
         >
-          시작하기 
+          {isSaving ? '저장 중...' : '시작하기'}
         </Button>
       </div>
     </div>

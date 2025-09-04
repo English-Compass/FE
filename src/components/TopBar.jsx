@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
@@ -6,15 +6,24 @@ import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar.jsx';
 import { Button } from './ui/button.jsx';
 import '../styles/components/_topbar.scss';
 
-const TopBar = () => {
+const TopBar = memo(() => {
     const navigate = useNavigate();
     const { user } = useApp();
+    
+    // 디버깅을 위한 로그
+    console.log('TopBar - 현재 사용자 정보:', user);
+    console.log('TopBar - 사용자 이름:', user?.name);
+    console.log('TopBar - 프로필 이미지:', user?.profileImage);
+    console.log('TopBar - 사용자 ID:', user?.id);
 
     const handleLogoClick = () => {
         navigate('/dashboard/home');
     };
 
     const handleLogout = () => {
+        // 로그아웃 시 localStorage 초기화
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         navigate('/landing');
     };
 
@@ -53,6 +62,8 @@ const TopBar = () => {
       </div>
     </header>
   );
-};
+});
+
+TopBar.displayName = 'TopBar';
 
 export default TopBar;

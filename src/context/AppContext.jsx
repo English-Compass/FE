@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AppContext = createContext(null);
 
@@ -10,12 +10,12 @@ const STUDY_TYPES = [
   { id: 'academic', title: '학술', icon: '🎓', description: '대학교, 학원, 대학원' }
 ];
 
-// 키워드 별 분류
+// 백엔드 CategoryMapper와 일치하는 키워드 분류
 const KEYWORDS_BY_CATEGORY = {
-  travel: ['배낭여행', '가족여행', '친구와 여행', '해외여행', '호텔', '관광지'],
-  business: ['회사업무', '미팅', '회의', '프레젠테이션', '비즈니스 이메일', '협상'],
-  academic: ['대학교', '학원', '대학원', '연구', '논문', '발표'],
-  daily: ['가족', '친구', '선생님', '쇼핑', '식당', '병원']
+  STUDY: ['수업 듣기', '학과 대화', '과제 시험'],
+  BUSINESS: ['회의 컨퍼런스', '고객 서비스', '이메일 보고서'],
+  TRAVEL: ['배낭여행', '가족여행', '친구여행'],
+  DAILY_LIFE: ['쇼핑 식당', '병원 방문', '대중교통']
 };
 
 // API: 사용자의 학습 통계 데이터를 가져와야 합니다.
@@ -114,44 +114,100 @@ export const useApp = () => {
 
 export const AppProvider = ({ children }) => {
   // localStorage에서 사용자 정보 읽어오기
-  const getStoredUser = () => {
-    try {
-      const storedUser = localStorage.getItem('user');
-      const storedToken = localStorage.getItem('token');
-      
-      if (storedUser && storedToken) {
+  const [user, setUserState] = useState({
+    id: null,
+    name: null,
+    profileImage: null,
+    level: null,
+    joinDate: null,
+    streak: null
+  });
+  
+  // setUser 함수를 useCallback으로 최적화
+  const setUser = useCallback((newUser) => {
+    console.log('setUser 호출됨:', newUser);
+    setUserState(newUser);
+  }, []);
+  
+  // 사용자 정보 변경 시 디버깅 로그
+  useEffect(() => {
+    console.log('AppContext user state updated:', user);
+  }, [user]);
+
+  // AppContext 마운트 시 API 호출로 사용자 정보 조회
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
+        
+        if (!token || !storedUser) {
+          console.log('AppContext - 토큰 또는 사용자 정보가 없습니다.');
+          return;
+        }
+
+        console.log('AppContext - 마운트 시 사용자 정보 조회 시작');
+        
+        // 기본 사용자 정보는 localStorage에서 가져오기
         const userData = JSON.parse(storedUser);
-        return {
-          id: userData.userId,
+        const basicUserInfo = {
+          id: userData.userId || null,
           name: userData.username,
           profileImage: userData.profileImage,
-          level: 'B', // 기본값
-          joinDate: '2024-01-15', // 기본값
-          streak: 7 // 기본값
+          level: null, // API에서 조회
+          joinDate: null, // API에서 조회
+          streak: null // API에서 조회
         };
+
+        // 사용자 설정 정보는 API에서 조회
+        const response = await fetch('/user/settings', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const responseData = await response.json();
+            console.log('AppContext - 사용자 설정 조회 응답:', responseData);
+            
+            // 백엔드 레벨(1, 2, 3)을 프론트엔드 레벨(A, B, C)로 변환
+            const levelMapping = { 1: 'A', 2: 'B', 3: 'C' };
+            const frontendLevel = levelMapping[responseData.difficultyLevel] || null;
+            
+            // 백엔드 카테고리 Map을 프론트엔드 키워드 배열로 변환
+            const keywordsArray = [];
+            if (responseData.categories) {
+              Object.values(responseData.categories).forEach(categoryKeywords => {
+                keywordsArray.push(...categoryKeywords);
+              });
+            }
+
+            const completeUserInfo = {
+              ...basicUserInfo,
+              level: frontendLevel,
+              keywords: keywordsArray,
+              joinDate: responseData.createdAt ? new Date(responseData.createdAt).toISOString().split('T')[0] : null,
+              streak: 7 // 기본값 또는 API에서 조회
+            };
+
+            console.log('AppContext - 완전한 사용자 정보:', completeUserInfo);
+            setUserState(completeUserInfo);
+          }
+        } else {
+          console.log('AppContext - 사용자 설정 조회 실패, 기본 정보만 사용');
+          setUserState(basicUserInfo);
+        }
+      } catch (error) {
+        console.error('AppContext - 사용자 정보 조회 오류:', error);
       }
-    } catch (error) {
-      console.error('Error parsing stored user data:', error);
-    }
-    
-    // 기본값 반환
-    return {
-      id: 1,
-      name: '김영희',
-      email: 'test@example.com',
-      level: 'B',
-      joinDate: '2024-01-15',
-      streak: 7
     };
-  };
 
-  const [user, setUser] = useState(getStoredUser());
+    fetchUserInfo();
+  }, []);
 
-  // localStorage에서 사용자 정보를 업데이트하는 함수
-  const updateUserFromStorage = () => {
-    const newUser = getStoredUser();
-    setUser(newUser);
-  };
   const [studyProgress, setStudyProgress] = useState({
     completed: 15,
     dailyGoal: 30,
@@ -262,7 +318,6 @@ export const AppProvider = ({ children }) => {
   const value = {
     user,
     setUser,
-    updateUserFromStorage,
     studyProgress,
     setStudyProgress,
 

@@ -2,9 +2,13 @@ import { Badge } from '../ui/badge';
 
 
 export default function WelcomeSection({ user }) {
+    // 디버깅을 위한 로그
+    console.log('WelcomeSection - 받은 사용자 정보:', user);
+    console.log('WelcomeSection - 사용자 이름:', user?.name);
+    
     return (
       <div className="home-welcome">
-        <h1 className="home-title">안녕하세요, {user?.name}님! 👋</h1>
+        <h1 className="home-title">안녕하세요, {user?.name || '사용자'}님! 👋</h1>
         <p className="home-subtitle">
           오늘도 영어 학습을 시작해보세요. 꾸준한 학습이 실력 향상의 지름길입니다.
         </p>
