@@ -4,24 +4,14 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ArrowLeft } from 'lucide-react';
 
-// API: 컴포넌트가 마운트될 때 서버로부터 시나리오 목록을 가져와야 합니다.
-// 예: useEffect(() => { fetch('/api/scenarios').then(res => res.json()).then(data => setScenarios(data)); }, []);
-
 export function ScenarioSelection({ 
   user, 
-  scenarios, 
-  onScenarioSelect, 
-  onCustomSelect, 
+  onGeneralConversation,
+  onRolePlayingScenario,
+  onCustomRolePlaying,
+  onFeedbackHistory,
   onBackToHome 
 }) {
-  const isScenarioSuitable = (scenario) => {
-    const userLevel = user?.level || 'B';
-    const levelMapping = { 'A': [1, 2], 'B': [3, 4], 'C': [5, 6] };
-    const userLevelNumbers = levelMapping[userLevel] || [3, 4];
-    
-    return scenario.level.some(level => userLevelNumbers.includes(level));
-  };
-
   const getLevelDisplay = (userLevel) => {
     const levelMapping = { 'A': '초급', 'B': '중급', 'C': '상급' };
     return levelMapping[userLevel] || '중급';
@@ -44,73 +34,70 @@ export function ScenarioSelection({
         <div>
           <h1 className="text-2xl font-bold text-gray-800">💬 회화 학습</h1>
           <p className="text-gray-600">
-            상황을 선택하거나 직접 입력해서 AI와 영어 회화를 연습해보세요
+            원하는 회화 유형을 선택해서 AI와 영어 회화를 연습해보세요
           </p>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 !mb-8">
-        <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={onCustomSelect}>
+      {/* Conversation Types */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 !mb-8">
+        {/* 일반 회화 */}
+        <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={onGeneralConversation}>
           <CardContent className="!p-6 text-center">
-            <div className="text-4xl !mb-4">✏️</div>
-            <h3 className="text-lg font-bold !mb-2">커스텀 상황</h3>
-            <p className="text-gray-600">원하는 상황을 직접 입력해서 연습해보세요</p>
+            <div className="text-4xl !mb-4">💭</div>
+            <h3 className="text-lg font-bold !mb-2">일반 회화</h3>
+            <p className="text-gray-600 !mb-4">자유로운 주제로 AI와 자연스럽게 대화해보세요</p>
+            <Badge variant="outline" className="text-xs">
+              난이도 선택 + 주제 입력
+            </Badge>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+
+        {/* 롤 플레잉 회화 */}
+        <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={onRolePlayingScenario}>
           <CardContent className="!p-6 text-center">
-            <div className="text-4xl !mb-4">🎯</div>
-            <h3 className="text-lg font-bold !mb-2">추천 상황</h3>
-            <p className="text-white/90">Level {user?.level} ({getLevelDisplay(user?.level)}) 수준에 맞는 상황을 선택하세요</p>
+            <div className="text-4xl !mb-4">🎭</div>
+            <h3 className="text-lg font-bold !mb-2">롤 플레잉 회화</h3>
+            <p className="text-gray-600 !mb-4">구체적인 상황에서 역할을 맡아 대화해보세요</p>
+            <Badge variant="outline" className="text-xs">
+              정해진 시나리오 선택
+            </Badge>
           </CardContent>
         </Card>
       </div>
 
-      {/* Scenario Selection */}
-      <div>
-        <h3 className="text-xl font-bold !mb-4">상황별 회화 연습</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {scenarios.map((scenario) => (
-            <Card 
-              key={scenario.id}
-              className={`cursor-pointer transition-all ${
-                isScenarioSuitable(scenario) 
-                  ? 'hover:shadow-lg hover:scale-105' 
-                  : 'opacity-60 cursor-not-allowed'
-              }`}
-              onClick={() => isScenarioSuitable(scenario) && onScenarioSelect(scenario)}
-            >
-              <CardContent className="!p-4">
-                <div className="flex items-start justify-between !mb-3">
-                  <div className="text-3xl">{scenario.icon}</div>
-                  <div className="flex !space-x-1">
-                    {scenario.level.map((level) => (
-                      <Badge 
-                        key={level} 
-                        variant="outline"
-                        className="text-xs"
-                      >
-                        L{level}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <h4 className="font-bold text-gray-800 !mb-2">{scenario.title}</h4>
-                <p className="text-sm text-gray-600 !mb-3">{scenario.description}</p>
-                {isScenarioSuitable(scenario) ? (
-                  <Badge variant="outline" className="text-xs">
-                    사용 가능
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary" className="text-xs">
-                    Level {user?.level} 부적합
-                  </Badge>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      {/* Custom Role Playing and Feedback History */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 !mt-8">
+        {/* Custom Role Playing */}
+        <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={onCustomRolePlaying}>
+          <CardContent className="!p-6 text-center">
+            <div className="text-4xl !mb-4">✏️</div>
+            <h3 className="text-lg font-bold !mb-2">커스텀 롤 플레잉</h3>
+            <p className="text-gray-600 !mb-4">원하는 역할과 상황을 직접 설정해서 연습해보세요</p>
+            <Badge variant="outline" className="text-xs">
+              AI/사용자 역할 + 상황 입력
+            </Badge>
+          </CardContent>
+        </Card>
+
+        {/* Feedback History */}
+        <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={onFeedbackHistory}>
+          <CardContent className="!p-6 text-center">
+            <div className="text-4xl !mb-4">📊</div>
+            <h3 className="text-lg font-bold !mb-2">피드백 히스토리</h3>
+            <p className="text-gray-600 !mb-4">이전 회화 연습에서 받은 피드백을 확인해보세요</p>
+            <Badge variant="outline" className="text-xs">
+              과거 피드백 조회
+            </Badge>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* User Level Info */}
+      <div className="bg-blue-50 rounded-lg !p-4">
+        <p className="text-sm text-blue-700">
+          현재 레벨: <strong>Level {user?.level} ({getLevelDisplay(user?.level)})</strong>
+        </p>
       </div>
     </div>
   );

@@ -3,85 +3,12 @@ import { useApp } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 
 import { ScenarioSelection } from '../../components/conversation/ScenarioSelection';
-import { CustomSituation } from '../../components/conversation/CustomSituation';
+import { GeneralConversation } from '../../components/conversation/GeneralConversation';
+import { RolePlayingScenario } from '../../components/conversation/RolePlayingScenario';
 import { SituationDetail } from '../../components/conversation/SituationDetail';
+import { CustomSituation } from '../../components/conversation/CustomSituation';
 import { ConversationPractice } from '../../components/conversation/ConversationPractice';
-
-// API: 회화 시나리오 목록을 서버에서 가져와야 합니다.
-const CONVERSATION_SCENARIOS = [
-  {
-    id: 'job-interview',
-    title: '면접 상황',
-    description: '취업 면접에서 자주 나오는 질문과 답변 연습',
-    icon: '💼',
-    level: [3, 4, 5], // 중급-상급
-    situations: [
-      "You are interviewing for a marketing position at a tech company.",
-      "You are applying for a teaching job at an international school.",
-      "You are interviewing for a customer service role at a hotel."
-    ]
-  },
-  {
-    id: 'restaurant',
-    title: '레스토랑',
-    description: '음식점에서 주문하고 대화하기',
-    icon: '🍽️',
-    level: [1, 2, 3], // 초급-중급
-    situations: [
-      "You are ordering food at a fine dining restaurant.",
-      "You are at a fast-food restaurant with friends.",
-      "You are complaining about cold food to the waiter."
-    ]
-  },
-  {
-    id: 'travel',
-    title: '여행 상황',
-    description: '공항, 호텔, 관광지에서의 대화',
-    icon: '✈️',
-    level: [2, 3, 4], // 초중급-중상급
-    situations: [
-      "You are checking into a hotel and asking about amenities.",
-      "You are asking for directions to a famous landmark.",
-      "You are at the airport dealing with a delayed flight."
-    ]
-  },
-  {
-    id: 'business',
-    title: '비즈니스 미팅',
-    description: '업무 미팅과 협상 상황',
-    icon: '🤝',
-    level: [4, 5, 6], // 중상급-최상급
-    situations: [
-      "You are presenting a new project proposal to your team.",
-      "You are negotiating a contract with a client.",
-      "You are discussing budget concerns with your manager."
-    ]
-  },
-  {
-    id: 'shopping',
-    title: '쇼핑',
-    description: '상점에서 물건 구매하기',
-    icon: '🛍️',
-    level: [1, 2, 3], // 초급-중급
-    situations: [
-      "You are buying clothes and asking about sizes and prices.",
-      "You are returning a defective product to the store.",
-      "You are asking a salesperson for recommendations."
-    ]
-  },
-  {
-    id: 'medical',
-    title: '병원/약국',
-    description: '의료 상황에서의 대화',
-    icon: '🏥',
-    level: [3, 4, 5], // 중급-상급
-    situations: [
-      "You are describing your symptoms to a doctor.",
-      "You are asking a pharmacist about medication.",
-      "You are scheduling a medical appointment."
-    ]
-  }
-];
+import { FeedbackHistory } from '../../components/conversation/FeedbackHistory';
 
 export default function ConversationPage() {
   const navigate = useNavigate();
@@ -92,19 +19,35 @@ export default function ConversationPage() {
   }, []);
 
   const [currentStep, setCurrentStep] = useState('select');
-  const [selectedScenario, setSelectedScenario] = useState(null);
+  const [conversationConfig, setConversationConfig] = useState(null);
+  const [situationDetailConfig, setSituationDetailConfig] = useState(null);
 
-  const handleScenarioSelect = (scenario) => {
-    setSelectedScenario(scenario);
-    setCurrentStep('detail');
+  const handleGeneralConversation = () => {
+    setCurrentStep('general');
   };
 
-  const handleSituationSelect = (situation) => {
-    startConversation(situation);
+  const handleRolePlayingScenario = () => {
+    setCurrentStep('role-playing-scenario');
   };
 
-  const startConversation = (situation) => {
-    setCurrentStep('practice');
+  const handleCustomRolePlaying = () => {
+    setCurrentStep('custom');
+  };
+
+  const handleFeedbackHistory = () => {
+    setCurrentStep('feedback-history');
+  };
+
+  const startConversation = (config) => {
+    if (config.type === 'situation-detail') {
+      // 상황 상세 화면으로 이동
+      setSituationDetailConfig(config);
+      setCurrentStep('situation-detail');
+    } else {
+      // 바로 대화 시작
+      setConversationConfig(config);
+      setCurrentStep('practice');
+    }
   };
 
 
@@ -114,7 +57,8 @@ export default function ConversationPage() {
 
   const handleBackToSelect = () => {
     setCurrentStep('select');
-    setSelectedScenario(null);
+    setConversationConfig(null);
+    setSituationDetailConfig(null);
   };
 
   const renderCurrentStep = () => {
@@ -123,10 +67,38 @@ export default function ConversationPage() {
         return (
           <ScenarioSelection
             user={user}
-            scenarios={CONVERSATION_SCENARIOS}
-            onScenarioSelect={handleScenarioSelect}
-            onCustomSelect={() => setCurrentStep('custom')}
+            onGeneralConversation={handleGeneralConversation}
+            onRolePlayingScenario={handleRolePlayingScenario}
+            onCustomRolePlaying={handleCustomRolePlaying}
+            onFeedbackHistory={handleFeedbackHistory}
             onBackToHome={handleBackToHome}
+          />
+        );
+      
+      case 'general':
+        return (
+          <GeneralConversation
+            onBack={handleBackToSelect}
+            onStartConversation={startConversation}
+          />
+        );
+      
+      case 'role-playing-scenario':
+        return (
+          <RolePlayingScenario
+            onBack={handleBackToSelect}
+            onStartConversation={startConversation}
+          />
+        );
+      
+      case 'situation-detail':
+        return (
+          <SituationDetail
+            selectedScenario={situationDetailConfig.selectedScenario}
+            difficultyLevel={situationDetailConfig.difficultyLevel}
+            user={user}
+            onBack={handleBackToSelect}
+            onStartConversation={startConversation}
           />
         );
       
@@ -138,18 +110,18 @@ export default function ConversationPage() {
           />
         );
       
-      case 'detail':
-        return (
-          <SituationDetail
-            scenario={selectedScenario}
-            onBack={handleBackToSelect}
-            onSituationSelect={handleSituationSelect}
-          />
-        );
-      
       case 'practice':
         return (
           <ConversationPractice
+            user={user}
+            conversationConfig={conversationConfig}
+            onBack={handleBackToSelect}
+          />
+        );
+      
+      case 'feedback-history':
+        return (
+          <FeedbackHistory
             user={user}
             onBack={handleBackToSelect}
           />
@@ -159,9 +131,10 @@ export default function ConversationPage() {
         return (
           <ScenarioSelection
             user={user}
-            scenarios={CONVERSATION_SCENARIOS}
-            onScenarioSelect={handleScenarioSelect}
-            onCustomSelect={() => setCurrentStep('custom')}
+            onGeneralConversation={handleGeneralConversation}
+            onRolePlayingScenario={handleRolePlayingScenario}
+            onCustomRolePlaying={handleCustomRolePlaying}
+            onFeedbackHistory={handleFeedbackHistory}
             onBackToHome={handleBackToHome}
           />
         );
