@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useApp } from '../../context/AppContext';
 
 export default function KakaoCallback() {
     const navigate = useNavigate();
+    const { updateUserFromStorage } = useApp();
 
     useEffect(() => {
         // 더 자세한 디버깅을 위한 로그
@@ -82,6 +84,9 @@ export default function KakaoCallback() {
                 username, 
                 profileImage
             }));
+            
+            // AppContext의 사용자 정보 업데이트
+            updateUserFromStorage();
             
             // 로그인 성공 후 대시보드 홈 페이지로 이동
             navigate('/add-info'); 

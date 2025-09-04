@@ -34,7 +34,15 @@ const TopBar = () => {
             </div>
 
             <div className="topbar__avatar">
-              {user?.name?.charAt(0) || 'U'}
+              {user?.profileImage ? (
+                <img 
+                  src={user.profileImage} 
+                  alt={user.name || 'User'} 
+                  className="topbar__avatar-image"
+                />
+              ) : (
+                user?.name?.charAt(0) || 'U'
+              )}
             </div>
 
             <button onClick={handleLogout} className="topbar__logout">

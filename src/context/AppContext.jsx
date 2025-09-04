@@ -113,14 +113,45 @@ export const useApp = () => {
 };
 
 export const AppProvider = ({ children }) => {
-  const [user, setUser] = useState({
-    id: 1,
-    name: '김영희',
-    email: 'test@example.com',
-    level: 'B',
-    joinDate: '2024-01-15',
-    streak: 7
-  });
+  // localStorage에서 사용자 정보 읽어오기
+  const getStoredUser = () => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      const storedToken = localStorage.getItem('token');
+      
+      if (storedUser && storedToken) {
+        const userData = JSON.parse(storedUser);
+        return {
+          id: userData.userId,
+          name: userData.username,
+          profileImage: userData.profileImage,
+          level: 'B', // 기본값
+          joinDate: '2024-01-15', // 기본값
+          streak: 7 // 기본값
+        };
+      }
+    } catch (error) {
+      console.error('Error parsing stored user data:', error);
+    }
+    
+    // 기본값 반환
+    return {
+      id: 1,
+      name: '김영희',
+      email: 'test@example.com',
+      level: 'B',
+      joinDate: '2024-01-15',
+      streak: 7
+    };
+  };
+
+  const [user, setUser] = useState(getStoredUser());
+
+  // localStorage에서 사용자 정보를 업데이트하는 함수
+  const updateUserFromStorage = () => {
+    const newUser = getStoredUser();
+    setUser(newUser);
+  };
   const [studyProgress, setStudyProgress] = useState({
     completed: 15,
     dailyGoal: 30,
@@ -231,6 +262,7 @@ export const AppProvider = ({ children }) => {
   const value = {
     user,
     setUser,
+    updateUserFromStorage,
     studyProgress,
     setStudyProgress,
 
