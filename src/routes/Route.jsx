@@ -23,9 +23,11 @@ const AllRoutes = () => {
             <Route path="/landing" element={<LandingPage />} /> 
             <Route path="/add-info" element={<AddInfoPage />} />
             <Route path="/kakao-callback" element={<KakaoCallback />} />
+            <Route path="/login/oauth2/code/kakao" element={<KakaoCallback />} />
+            <Route path="/login/success" element={<KakaoCallback />} />
             <Route element={<Layout />}>
-                {/* 기본 경로를 홈으로 리다이렉트 */}
-                <Route path="/" element={<Navigate to="/dashboard/home" replace />} />
+                {/* 기본 경로 - 쿼리 파라미터가 있으면 KaKaoCallback, 없으면 홈으로 리다이렉트 */}
+                <Route path="/" element={<KakaoCallback />} />
                 
                 {/* dashboard routes */}
                 <Route path="/dashboard/home" element={<HomePage />} />
