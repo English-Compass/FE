@@ -157,7 +157,7 @@ export function Word({
               }`}
             >
               <div className="flex items-center !space-x-3">
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-white text-sm font-medium ${
                   selectedAnswer === option
                     ? showResult
                       ? option === currentQuestion.correctAnswer
@@ -166,13 +166,9 @@ export function Word({
                       : 'border-blue-500 bg-blue-500'
                     : showResult && option === currentQuestion.correctAnswer
                       ? 'border-green-500 bg-green-500'
-                      : 'border-gray-300'
+                      : 'border-gray-300 text-gray-600'
                 }`}>
-                  {(selectedAnswer === option || (showResult && option === currentQuestion.correctAnswer)) && (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                      <path d="M20 6 9 17l-5-5"/>
-                    </svg>
-                  )}
+                  {String.fromCharCode(65 + index)}
                 </div>
                 <span className="font-medium">{option}</span>
               </div>

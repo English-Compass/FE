@@ -13,8 +13,29 @@ export function TodayWordsCard({ words: initialWords }) {
   // API: 서버에서 오늘의 추천 단어 목록을 가져옵니다.
   useEffect(() => { 
     const fetchTodayWords = async () => {
+      // 더미 데이터를 먼저 설정하여 즉시 표시
+      const dummyWords = [
+        {
+          word: "efficient",
+          meaning: "효율적인",
+          example: "She found an efficient way to solve the problem."
+        },
+        {
+          word: "challenging", 
+          meaning: "도전적인",
+          example: "This project is quite challenging but rewarding."
+        },
+        {
+          word: "innovative",
+          meaning: "혁신적인", 
+          example: "The company introduced an innovative solution."
+        }
+      ];
+      
+      setWords(dummyWords);
+      setIsLoading(false);
+      
       try {
-        setIsLoading(true);
         setError(null);
         
         // Word Study API를 사용하여 사용자 맞춤형 단어 목록 생성

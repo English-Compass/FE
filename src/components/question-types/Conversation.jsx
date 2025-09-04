@@ -89,7 +89,7 @@ export function Conversation({
     );
   }
 
-  if (!currentQuestion || !currentQuestion.conversation) return null;
+  if (!currentQuestion) return null;
 
   const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
   const studyType = STUDY_TYPES?.find(type => type.id === selectedType);
@@ -100,8 +100,8 @@ export function Conversation({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              💬 {isStudyMode ? '대화 완성' : currentQuestion.category}
+            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+              💬 {isStudyMode ? '대화 학습' : currentQuestion.category}
             </Badge>
             {studyType && (
               <Badge variant="secondary">
@@ -116,26 +116,30 @@ export function Conversation({
           )}
         </div>
         <CardTitle className="text-lg leading-relaxed !mt-4">
-          다음 대화의 빈칸에 들어갈 가장 자연스러운 말을 고르세요.
+          {currentQuestion.question}
         </CardTitle>
       </CardHeader>
       
       <CardContent className="!space-y-4">
-        {/* 대화 내용 표시 */}
-        <div className="!space-y-3 bg-gray-50 !p-4 rounded-lg border">
-          {currentQuestion.conversation?.map((line, index) => (
-            <div key={index} className={`flex ${line.speaker === 'A' ? 'justify-start' : 'justify-end'}`}>
-              <div className={`max-w-[80%] !p-3 rounded-lg ${
-                line.speaker === 'A' 
-                  ? 'bg-white border' 
-                  : 'bg-yellow-200'
-              }`}>
-                <span className="font-bold mr-2">{line.speaker}:</span>
-                <span>{line.dialogue.replace('___', '___________')}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* 복습 모드: 이전 틀린 답안 */}
+        {!isStudyMode && showResult && currentQuestion.userAnswer && (
+          <div className="bg-red-50 !p-3 rounded-lg border border-red-200">
+            <p className="text-sm text-red-700">
+              <span className="font-medium">이전 틀린 답안:</span> {currentQuestion.userAnswer}
+            </p>
+          </div>
+        )}
+
+
+        {/* 대화 문제 특화 정보 */}
+        {isStudyMode && (
+          <div className="bg-purple-50 !p-4 rounded-lg border border-purple-200">
+            <p className="text-sm text-purple-700 font-medium !mb-2">💬 대화 문제</p>
+            <p className="text-purple-800">
+              상황에 맞는 가장 자연스러운 응답을 선택하세요.
+            </p>
+          </div>
+        )}
 
         {/* 답변 옵션 */}
         <div className="!pt-4 !space-y-3">
@@ -157,7 +161,7 @@ export function Conversation({
               }`}
             >
               <div className="flex items-center !space-x-3">
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-white ${
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-white text-sm font-medium ${
                   selectedAnswer === option
                     ? showResult
                       ? option === currentQuestion.correctAnswer
@@ -166,9 +170,8 @@ export function Conversation({
                       : 'border-blue-500 bg-blue-500'
                     : showResult && option === currentQuestion.correctAnswer
                       ? 'border-green-500 bg-green-500'
-                      : 'border-gray-300'
+                      : 'border-gray-300 text-gray-600'
                 }`}>
-                  {/* 알파벳 옵션 (A, B, C, D) */}
                   {String.fromCharCode(65 + index)}
                 </div>
                 <span className="font-medium">{option}</span>

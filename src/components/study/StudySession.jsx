@@ -23,10 +23,14 @@ export default function StudySession({ onStudyComplete }) {
 
      // --- 데이터 로딩 ---
     useEffect(() => {
+        console.log('🚀 StudySession useEffect triggered');
+        console.log('Form data:', formData);
+        
         const fetchQuestions = async () => {
             try {
                 // 카테고리가 선택되지 않았다면 에러 처리
                 if (!formData.selectedCategories || formData.selectedCategories.length === 0) {
+                    console.log('❌ No categories selected');
                     setError('학습 카테고리를 선택해주세요.');
                     setIsLoading(false);
                     return;
@@ -36,10 +40,12 @@ export default function StudySession({ onStudyComplete }) {
                 const englishCategories = mapCategoriesToEnglish(formData.selectedCategories);
                 const englishKeywords = mapKeywordsToEnglish(formData.keywords);
                 
+                console.log('=== SESSION CREATION START ===');
                 console.log('Original categories:', formData.selectedCategories);
                 console.log('Mapped categories:', englishCategories);
                 console.log('Original keywords:', formData.keywords);
                 console.log('Mapped keywords:', englishKeywords);
+                console.log('Form data level:', formData.level);
                 
                 const sessionResponse = await fetch('http://localhost:8081/api/learning-sessions/practice', {
                     method: 'POST',
@@ -64,16 +70,26 @@ export default function StudySession({ onStudyComplete }) {
                 
                 const sessionData = await sessionResponse.json();
                 const sessionId = sessionData.sessionId;
+                console.log('✅ Session created successfully:', sessionData);
+                console.log('Session ID:', sessionId);
                 
                 // 2. 세션 시작
-                await fetch(`http://localhost:8081/api/learning-sessions/${sessionId}/start`, {
+                console.log('=== STARTING SESSION ===');
+                const startResponse = await fetch(`http://localhost:8081/api/learning-sessions/${sessionId}/start`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 });
                 
+                if (startResponse.ok) {
+                    console.log('✅ Session started successfully');
+                } else {
+                    console.error('❌ Session start failed:', startResponse.status, startResponse.statusText);
+                }
+                
                 // 3. 세션의 문제들 조회
+                console.log('=== LOADING QUESTIONS ===');
                 const questionsResponse = await fetch(`http://localhost:8081/api/learning-sessions/${sessionId}/questions`, {
                     method: 'GET',
                     headers: {
@@ -86,28 +102,56 @@ export default function StudySession({ onStudyComplete }) {
                 }
                 
                 const sessionQuestions = await questionsResponse.json();
+                console.log('✅ Questions loaded successfully:', sessionQuestions);
+                console.log('Total questions received:', sessionQuestions.length);
                 
                 // SessionQuestion 형태를 StudySession에서 사용하는 형태로 변환
-                const formattedQuestions = sessionQuestions.map((sq) => ({
-                    id: sq.question.questionId,
-                    question: sq.question.content,
-                    options: sq.question.choices,
-                    correctAnswer: sq.question.correctAnswer,
-                    type: sq.question.questionType.toLowerCase(),
-                    explanation: sq.question.explanation,
-                    sessionQuestionId: sq.sessionQuestionId
-                }));
+                console.log('=== MAPPING QUESTIONS ===');
+                const formattedQuestions = sessionQuestions.map((sq, index) => {
+                    const options = [sq.question.optionA, sq.question.optionB, sq.question.optionC];
+                    // correctAnswer를 실제 답안 텍스트로 변환 (A -> optionA의 값)
+                    const correctAnswerText = sq.question.correctAnswer === 'A' ? sq.question.optionA :
+                                            sq.question.correctAnswer === 'B' ? sq.question.optionB :
+                                            sq.question.optionC;
+                    
+                    console.log(`Question ${index + 1}:`, {
+                        id: sq.question.questionId,
+                        questionText: sq.question.questionText,
+                        originalAnswer: sq.question.correctAnswer,
+                        mappedAnswer: correctAnswerText,
+                        options: options,
+                        type: sq.question.questionType
+                    });
+                    
+                    return {
+                        id: sq.question.questionId,
+                        question: sq.question.questionText,
+                        options: options,
+                        correctAnswer: correctAnswerText,
+                        type: sq.question.questionType.toLowerCase(),
+                        explanation: sq.question.explanation,
+                        sessionQuestionId: sq.sessionQuestionId
+                    };
+                });
                 
                 setQuestions(formattedQuestions);
+                console.log('✅ Questions formatted and set:', formattedQuestions);
+                console.log('=== QUESTIONS SETUP COMPLETE ===');
                 
                 // 세션 ID를 상태에 저장 (완료 시 필요)
                 window.currentSessionId = sessionId;
+                console.log('Session ID stored globally:', sessionId);
+                
+                // 성공적으로 완료되면 로딩 상태 해제
+                setIsLoading(false);
+                console.log('✅ Loading completed successfully');
                 
             } catch (err) {
-                console.error('API 호출 실패:', err);
+                console.error('❌ API 호출 실패:', err);
                 setError('문제를 불러오는 데 실패했습니다. 네트워크를 확인해주세요.');
                 
                 // 실패 시 더미 데이터 사용
+                console.log('⚠️ Using dummy data as fallback');
             const dummyQuestions = [
                 {
                     id: 1,
@@ -142,6 +186,7 @@ export default function StudySession({ onStudyComplete }) {
             setTimeout(() => {
                 setQuestions(dummyQuestions);
                 setIsLoading(false);
+                console.log('⚠️ Dummy questions loaded:', dummyQuestions);
             }, 1000);
             }
         };
@@ -171,8 +216,34 @@ export default function StudySession({ onStudyComplete }) {
         setShowResult(true);
         
         try {
-            // 세션 진행률 업데이트 API 호출
             if (window.currentSessionId) {
+                // 1. 사용자 답안을 데이터베이스에 저장
+                const userAnswerLetter = currentQuestion.options.indexOf(selectedAnswer) === 0 ? 'A' :
+                                       currentQuestion.options.indexOf(selectedAnswer) === 1 ? 'B' : 'C';
+                
+                await fetch('http://localhost:8081/api/question-answers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sessionId: window.currentSessionId,
+                        questionId: currentQuestion.id,
+                        sessionType: 'PRACTICE',
+                        userAnswer: userAnswerLetter,
+                        isCorrect: isCorrect,
+                        timeSpent: null,
+                        solveCount: 1
+                    })
+                });
+                
+                console.log('✅ Answer saved:', {
+                    questionId: currentQuestion.id,
+                    userAnswer: userAnswerLetter,
+                    isCorrect: isCorrect
+                });
+
+                // 2. 세션 진행률 업데이트 API 호출
                 await fetch(`http://localhost:8081/api/learning-sessions/${window.currentSessionId}/progress`, {
                     method: 'POST',
                     headers: {
@@ -184,7 +255,7 @@ export default function StudySession({ onStudyComplete }) {
                 });
             }
         } catch (error) {
-            console.error('진행률 업데이트 API 호출 실패:', error);
+            console.error('API 호출 실패:', error);
         }
     };
 

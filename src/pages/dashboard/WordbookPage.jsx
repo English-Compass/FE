@@ -22,7 +22,24 @@ export default function WordbookPage() {
   // API: Word Study API를 통해 사용자 맞춤형 단어 목록 조회
   useEffect(() => {
     const fetchWordStudyList = async () => {
-      setLoading(true);
+      // 더미 데이터를 먼저 설정하여 즉시 표시
+      const recommendedWords = generateRecommendedWords(formData.keywords || []);
+      
+      if (formData.selectedCategories) {
+        formData.selectedCategories.forEach(categoryId => {
+          const categoryKeywords = KEYWORDS_BY_CATEGORY[categoryId] || [];
+          const categoryWords = generateRecommendedWords(categoryKeywords.slice(0, 2));
+          recommendedWords.push(...categoryWords);
+        });
+      }
+
+      const uniqueWords = recommendedWords.filter((word, index, arr) => 
+        arr.findIndex(w => w.word === word.word) === index
+      );
+
+      setWords(uniqueWords);
+      setLoading(false);
+      
       try {
         // Word Study API 호출 - 사용자 프로필 기반 단어 생성
         const response = await fetch('http://localhost:8081/api/word-study/generate', {
