@@ -114,7 +114,7 @@ export const useApp = () => {
 
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState({
-    id: 1,
+    id: 'user123', // Media Service에서 사용하는 사용자 ID (문자열)
     name: '김영희',
     email: 'test@example.com',
     level: 'B',
