@@ -223,7 +223,7 @@ export default function ReviewPage() {
 
   // 목록 모드일 때
   return (
-    <div className="h-screen overflow-y-auto !p-4 !sm:p-6 !space-y-6">
+    <div className="min-h-screen !p-4 !sm:p-6 !space-y-6">
       {/* Header */}
       <div className="!space-y-2">
         <h1 className="text-2xl font-bold text-gray-800">📝 복습하기</h1>

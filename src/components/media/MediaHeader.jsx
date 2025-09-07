@@ -27,13 +27,13 @@ export function MediaHeader({ user, searchTerm, onSearchChange, getLevelText, on
       {/* Search Bar */}
       <div className="relative !w-full !pl-12">
         <Input
-          placeholder=" 제목이나 내용으로 검색하세요..."
+          placeholder="  제목이나 내용으로 검색하세요..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           className="!border border-gray-300 h-12 transition-all duration-200 ease-in-out"
         />
-        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400">
+        <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400">
             <circle cx="11" cy="11" r="8"/>
             <path d="m21 21-4.35-4.35"/>
           </svg>

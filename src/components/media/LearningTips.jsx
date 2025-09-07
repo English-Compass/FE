@@ -45,10 +45,10 @@ export function LearningTips() {
         overflow-hidden transition-all duration-300 ease-in-out
         ${isExpanded 
           ? 'max-h-[500px] opacity-100' 
-          : 'max-h-0 !px-4 !py-0 opacity-0'
+          : 'max-h-0 !px-0 !py-3 opacity-0'
         }
       `}>
-        <div className="grid md:grid-cols-2 gap-4 text-m">
+        <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div className="!space-y-2">
             <div>
               <h4 className="text-foreground font-medium">1단계: 자막 켜고 보기</h4>
