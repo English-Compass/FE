@@ -7,8 +7,13 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      '/api': {
+      '/api/v1': {
         target: 'http://localhost:8082',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/recommendations': {
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
       }
