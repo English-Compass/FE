@@ -13,11 +13,62 @@ import HistoryChart from '../../components/home/HistoryChart.jsx';
 
 export default function HomePage() {
     const navigate = useNavigate();
-    const { user, studyProgress, scrollToTop } = useApp();
+    const { user, setUser, studyProgress, scrollToTop } = useApp();
 
     useEffect(() => {
         scrollToTop();
-    }, []);
+        
+        // HomePage 마운트 시 사용자 정보 확인
+        console.log('HomePage - 마운트 시 사용자 정보:', user);
+        console.log('HomePage - 사용자 이름:', user?.name);
+        console.log('HomePage - 프로필 이미지:', user?.profileImage);
+        console.log('HomePage - 사용자 ID:', user?.id);
+        
+        // URL에 토큰과 사용자 정보가 있으면 저장 (백엔드에서 직접 리다이렉트된 경우)
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const userId = urlParams.get('userId');
+        const username = urlParams.get('username');
+        const profileImage = urlParams.get('profileImage');
+        
+        if (token && userId && username) {
+            console.log('HomePage - URL에서 사용자 정보 발견, 저장 중...');
+            console.log('- token:', token);
+            console.log('- userId:', userId);
+            console.log('- username:', username);
+            console.log('- profileImage:', profileImage);
+            
+            // 토큰 저장
+            localStorage.setItem('token', token);
+            sessionStorage.setItem('token', token);
+            
+            // 사용자 정보 저장
+            const decodedUsername = decodeURIComponent(username || '');
+            const decodedProfileImage = decodeURIComponent(profileImage || '');
+            
+            localStorage.setItem('user', JSON.stringify({
+                userId: userId === 'null' ? null : userId,
+                username: decodedUsername,
+                profileImage: decodedProfileImage
+            }));
+            
+            // AppContext 업데이트
+            const userData = {
+                id: userId === 'null' ? null : userId,
+                name: decodedUsername,
+                profileImage: decodedProfileImage,
+                level: 'B',
+                joinDate: '2024-01-15',
+                streak: 7
+            };
+            
+            console.log('HomePage - AppContext에 저장할 사용자 데이터:', userData);
+            setUser(userData);
+            
+            // URL에서 쿼리 파라미터 제거
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, [user, setUser]);
 
     // API: 대시보드에 필요한 데이터(오늘의 단어, 복습 퀴즈 등)를 가져와야 합니다.
     // const fetchDashboardData = async () => {
