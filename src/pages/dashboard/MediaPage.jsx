@@ -4,70 +4,9 @@ import { useApp } from '../../context/AppContext';
 import { MediaHeader } from '../../components/media/MediaHeader';
 import { LearningTips } from '../../components/media/LearningTips';
 import { MediaGrid } from '../../components/media/MediaGrid';
+import { GenreSelection } from '../../components/media/GenreSelection';
 
-// API: 사용자의 레벨과 선호도에 맞는 미디어 콘텐츠 목록을 가져와야 합니다.
-// const fetchMediaContent = async (userLevel, preferences) => {
-//   const response = await fetch('http://localhost:8080/api/media/recommendations', {
-//     method: 'GET',
-//     headers: {
-//       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-//       'Content-Type': 'application/json'
-//     },
-//     params: { level: userLevel, categories: preferences.join(',') }
-//   });
-//   return response.json();
-// };
-
-const MEDIA_CONTENT = [
-  {
-    id: 1,
-    title: 'Friends',
-    type: 'TV Series',
-    platform: 'Netflix',
-    thumbnail: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=300&h=200&fit=crop',
-    level: 2,
-    category: 'Comedy',
-    description: '일상 영어와 친구들 간의 대화를 자연스럽게 배울 수 있어요',
-    reason: '초중급 수준에 맞는 친근한 일상 대화',
-    duration: '22분/에피소드'
-  },
-  {
-    id: 2,
-    title: 'Ted Talks',
-    type: 'Educational',
-    platform: 'YouTube',
-    thumbnail: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=300&h=200&fit=crop',
-    level: 5,
-    category: 'Education',
-    description: '다양한 주제의 프레젠테이션으로 고급 영어를 학습하세요',
-    reason: '논리적 구조와 고급 어휘 사용',
-    duration: '10-20분'
-  },
-  {
-    id: 3,
-    title: 'Stranger Things',
-    type: 'TV Series',
-    platform: 'Netflix',
-    thumbnail: 'https://images.unsplash.com/photo-1489599063534-ba63ce831ac7?w=300&h=200&fit=crop',
-    level: 3,
-    category: 'Sci-Fi',
-    description: '흥미진진한 스토리와 함께 미국 문화를 이해할 수 있어요',
-    reason: '감정 표현과 일상적인 대화',
-    duration: '45분/에피소드'
-  },
-  {
-    id: 4,
-    title: 'The Crown',
-    type: 'TV Series',
-    platform: 'Netflix',
-    thumbnail: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop',
-    level: 4,
-    category: 'Drama',
-    description: '품격 있는 영국 영어와 격식있는 표현을 배워보세요',
-    reason: '정확한 발음과 우아한 표현들',
-    duration: '55분/에피소드'
-  }
-];
+const API_BASE_URL = '/api/recommendations'; // Vite proxy 사용
 
 export default function MediaPage() {
   const { user, formData, scrollToTop } = useApp();
@@ -75,34 +14,132 @@ export default function MediaPage() {
   useEffect(() => {
     scrollToTop();
   }, []);
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [mediaContent, setMediaContent] = useState(MEDIA_CONTENT);
+  const [mediaContent, setMediaContent] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [availableGenres, setAvailableGenres] = useState([]);
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [showGenreSelection, setShowGenreSelection] = useState(false);
+  const [recommendationHistory, setRecommendationHistory] = useState([]);
 
-  // TODO: API 데이터 로드
-  // useEffect(() => {
-  //   const loadMediaContent = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const data = await fetchMediaContent(formData.level, formData.selectedCategories);
-  //       setMediaContent(data.recommendations || MEDIA_CONTENT);
-  //     } catch (error) {
-  //       console.error('미디어 컨텐츠 로드 실패:', error);
-  //       setMediaContent(MEDIA_CONTENT); // 폴백 데이터
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   loadMediaContent();
-  // }, [formData.level, formData.selectedCategories]);
+  // 사용 가능한 장르 목록 조회
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/genres`);
+        if (response.ok) {
+          const data = await response.json();
+          setAvailableGenres(data.genres || []);
+        }
+      } catch (error) {
+        console.error('장르 목록 조회 실패:', error);
+      }
+    };
+    fetchGenres();
+  }, []);
 
-  const filteredContent = mediaContent.filter(content => {
-    const matchesSearch = content.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         content.description.toLowerCase().includes(searchTerm.toLowerCase());
+  // 사용자 추천 히스토리 조회
+  useEffect(() => {
+    if (user?.id) {
+      const fetchHistory = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/user-requested/${user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setRecommendationHistory(data.recommendations || []);
+          }
+        } catch (error) {
+          console.error('추천 히스토리 조회 실패:', error);
+        }
+      };
+      fetchHistory();
+    }
+  }, [user?.id]);
+
+  // 장르를 직접 받아서 추천 생성하는 함수
+  const handleGenerateRecommendationsWithGenres = async (genres) => {
+    console.log('사용자 정보:', user);
+    console.log('전달받은 장르:', genres);
+    
+    if (!user?.id) {
+      alert('사용자 정보가 없습니다. 로그인 상태를 확인해주세요.');
+      return;
+    }
+    
+    if (!genres || genres.length === 0) {
+      alert('장르를 선택해주세요.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 실제 사용자 ID 사용
+                   const requestBody = {
+               userId: user.id, // 문자열 사용자 ID 사용
+               selectedGenres: genres,
+             };
+      
+      console.log('요청 데이터:', requestBody);
+      
+      const response = await fetch(`${API_BASE_URL}/user-requested`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('응답 상태:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('추천 생성 응답:', data);
+        
+        if (data.status === 'SUCCESS') {
+          alert('추천이 성공적으로 생성되었습니다!');
+          setShowGenreSelection(false);
+          setSelectedGenres([]);
+          // 추천 히스토리 새로고침 (실제 사용자 ID로)
+          const historyResponse = await fetch(`${API_BASE_URL}/user-requested/${user.id}`);
+          if (historyResponse.ok) {
+            const historyData = await historyResponse.json();
+            console.log('추천 히스토리 응답:', historyData);
+            setRecommendationHistory(historyData.recommendations || []);
+          }
+        } else {
+          alert(data.message || '추천 생성에 실패했습니다.');
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API 오류:', errorData);
+        alert(`추천 생성에 실패했습니다. (${response.status})`);
+      }
+    } catch (error) {
+      console.error('추천 생성 오류:', error);
+      alert('추천 생성 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredContent = recommendationHistory.filter(content => {
+    const matchesSearch = content.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         content.description?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
   const getLevelColor = (level) => {
+    // 문자열 난이도도 처리
+    if (typeof level === 'string') {
+      const levelMap = {
+        '초급': 'level-color-1',
+        '중급': 'level-color-3',
+        '고급': 'level-color-5'
+      };
+      return levelMap[level] || 'bg-gray-500';
+    }
+    
     const colors = {
       1: 'level-color-1',
       2: 'level-color-2', 
@@ -115,6 +152,11 @@ export default function MediaPage() {
   };
 
   const getLevelText = (level) => {
+    // 문자열 난이도도 처리
+    if (typeof level === 'string') {
+      return level;
+    }
+    
     const levels = {
       1: '초급',
       2: '초중급',
@@ -127,25 +169,22 @@ export default function MediaPage() {
   };
 
   const handleWatchContent = (content) => {
-    // TODO: 시청 기록 API 호출
-    // const trackWatching = async () => {
-    //   await fetch('http://localhost:8080/api/media/track-watching', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    //       'Content-Type': 'application/json'
-    //     },
-    //     body: JSON.stringify({ mediaId: content.id, platform: content.platform })
-    //   });
-    // };
-    // trackWatching();
-    
     // 실제로는 외부 OTT 링크로 연결
-    alert(`${content.platform}에서 "${content.title}" 시청하기`);
+    if (content.playUrl) {
+      window.open(content.playUrl, '_blank');
+    } else if (content.url) {
+      window.open(content.url, '_blank');
+    } else {
+      alert(`${content.platform}에서 "${content.title}" 시청하기`);
+    }
   };
 
   const handleSearchChange = (value) => {
     setSearchTerm(value);
+  };
+
+  const handleGenreSelection = (genres) => {
+    setSelectedGenres(genres);
   };
 
   return (
@@ -155,16 +194,43 @@ export default function MediaPage() {
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
         getLevelText={getLevelText}
+        onGenerateRecommendations={() => setShowGenreSelection(true)}
       />
+      
+      {showGenreSelection && (
+        <GenreSelection
+          availableGenres={availableGenres}
+          selectedGenres={selectedGenres}
+          onGenreSelection={handleGenreSelection}
+          onGenerate={handleGenerateRecommendationsWithGenres}
+          onCancel={() => setShowGenreSelection(false)}
+          loading={loading}
+        />
+      )}
       
       <LearningTips />
       
-      <MediaGrid 
-        filteredContent={filteredContent}
-        getLevelColor={getLevelColor}
-        getLevelText={getLevelText}
-        onWatchContent={handleWatchContent}
-      />
+      {recommendationHistory.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-gray-500 mb-4">
+            <p className="text-lg font-medium mb-2">🎬 맞춤 미디어 추천</p>
+            <p>장르를 선택하여 맞춤형 미디어 콘텐츠를 받아보세요!</p>
+          </div>
+          <button
+            onClick={() => setShowGenreSelection(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
+          >
+            추천 받기
+          </button>
+        </div>
+      ) : (
+        <MediaGrid 
+          filteredContent={filteredContent}
+          getLevelColor={getLevelColor}
+          getLevelText={getLevelText}
+          onWatchContent={handleWatchContent}
+        />
+      )}
     </div>
   );
 }

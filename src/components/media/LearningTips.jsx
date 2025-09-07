@@ -44,7 +44,7 @@ export function LearningTips() {
       <CardContent className={`
         overflow-hidden transition-all duration-300 ease-in-out
         ${isExpanded 
-          ? 'max-h-[500px] opacity-100 animate-[slideDown_0.3s_ease]' 
+          ? 'max-h-[500px] opacity-100' 
           : 'max-h-0 !px-4 !py-0 opacity-0'
         }
       `}>
@@ -73,19 +73,6 @@ export function LearningTips() {
           </div>
         </div>
       </CardContent>
-
-      <style jsx>{`
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </Card>
   );
 }

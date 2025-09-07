@@ -23,6 +23,11 @@ export default defineConfig({
         secure: false
       },
       '/user/settings': {
+        target: 'http://localhost:8080',      
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/recommendations': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
