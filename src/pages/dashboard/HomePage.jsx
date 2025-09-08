@@ -15,7 +15,13 @@ export default function HomePage() {
     const navigate = useNavigate();
     const { user, setUser, studyProgress, scrollToTop } = useApp();
     const [dailyActivity, setDailyActivity] = useState({ studyTimeMinutes: 0 });
+    const [weeklyStats, setWeeklyStats] = useState([]);
+    const [questionTypeAccuracy, setQuestionTypeAccuracy] = useState([]);
+    const [weaknessDistribution, setWeaknessDistribution] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [weeklyLoading, setWeeklyLoading] = useState(true);
+    const [accuracyLoading, setAccuracyLoading] = useState(true);
+    const [weaknessLoading, setWeaknessLoading] = useState(true);
 
     // 오늘 날짜를 YYYY-MM-DD 형식으로 가져오는 함수
     const getTodayDate = () => {
@@ -89,6 +95,256 @@ export default function HomePage() {
         }
     };
 
+    // 주간 학습량 데이터 가져오기
+    const fetchWeeklyStats = async () => {
+        // 로컬 스토리지에서 사용자 ID 가져오기
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+            console.log('User data not found in localStorage, skipping weekly stats fetch');
+            setWeeklyLoading(false);
+            return;
+        }
+
+        const userData = JSON.parse(storedUser);
+        const userId = userData.userId;
+        
+        if (!userId) {
+            console.log('User ID not available, skipping weekly stats fetch');
+            setWeeklyLoading(false);
+            return;
+        }
+
+        try {
+            setWeeklyLoading(true);
+            const today = getTodayDate();
+            const apiUrl = `/learning-analytics/users/${userId}/weekly-graph?weekStartDate=${today}`;
+            
+            console.log('📈 [WeeklyGraph API] 요청 시작:', {
+                userId,
+                weekStartDate: today,
+                apiUrl,
+                timestamp: new Date().toISOString()
+            });
+            
+            const response = await fetch(apiUrl);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ [WeeklyGraph API] 응답 성공:', {
+                    userId,
+                    weeklyGraphData: data,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // API 응답을 차트 형식으로 변환 (value -> sessionCount)
+                const chartData = data.map(item => ({
+                    date: item.date,
+                    sessionCount: item.value,
+                    dayOfWeek: item.dayOfWeek,
+                    hasActivity: item.hasActivity
+                }));
+                
+                console.log('📊 [WeeklyGraph] 차트 데이터 변환:', chartData);
+                setWeeklyStats(chartData);
+            } else {
+                console.error('❌ [WeeklyGraph API] 응답 실패:', {
+                    userId,
+                    status: response.status,
+                    statusText: response.statusText,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        } catch (error) {
+            console.error('🚨 [WeeklyGraph API] 요청 에러:', {
+                userId,
+                error: error.message,
+                stack: error.stack,
+                timestamp: new Date().toISOString()
+            });
+        } finally {
+            setWeeklyLoading(false);
+            console.log('🏁 [WeeklyGraph API] 요청 완료:', {
+                userId,
+                timestamp: new Date().toISOString()
+            });
+        }
+    };
+
+    // 유형별 정답률 데이터 가져오기
+    const fetchQuestionTypeAccuracy = async () => {
+        // 로컬 스토리지에서 사용자 ID 가져오기
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+            console.log('User data not found in localStorage, skipping question type accuracy fetch');
+            setAccuracyLoading(false);
+            return;
+        }
+
+        const userData = JSON.parse(storedUser);
+        const userId = userData.userId;
+        
+        if (!userId) {
+            console.log('User ID not available, skipping question type accuracy fetch');
+            setAccuracyLoading(false);
+            return;
+        }
+
+        try {
+            setAccuracyLoading(true);
+            const apiUrl = `/learning-analytics/users/${userId}/question-type-accuracy`;
+            
+            console.log('🎯 [QuestionTypeAccuracy API] 요청 시작:', {
+                userId,
+                apiUrl,
+                timestamp: new Date().toISOString()
+            });
+            
+            const response = await fetch(apiUrl);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ [QuestionTypeAccuracy API] 응답 성공:', {
+                    userId,
+                    accuracyData: data,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // API 응답을 차트 형식으로 변환 (PRONUNCIATION_RECOGNITION 제외)
+                const chartData = data
+                    .filter(item => item.questionType !== 'PRONUNCIATION_RECOGNITION')
+                    .map(item => ({
+                        type: item.questionTypeName,
+                        accuracy: item.accuracyRate,
+                        totalQuestions: item.totalQuestions,
+                        correctAnswers: item.correctAnswers,
+                        wrongAnswers: item.totalQuestions - item.correctAnswers,
+                        averageTimeSpent: item.averageTimeSpent,
+                        totalTimeSpent: item.totalTimeSpent
+                    }));
+                
+                console.log('📊 [QuestionTypeAccuracy] 차트 데이터 변환:', chartData);
+                setQuestionTypeAccuracy(chartData);
+            } else {
+                console.error('❌ [QuestionTypeAccuracy API] 응답 실패:', {
+                    userId,
+                    status: response.status,
+                    statusText: response.statusText,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        } catch (error) {
+            console.error('🚨 [QuestionTypeAccuracy API] 요청 에러:', {
+                userId,
+                error: error.message,
+                stack: error.stack,
+                timestamp: new Date().toISOString()
+            });
+        } finally {
+            setAccuracyLoading(false);
+            console.log('🏁 [QuestionTypeAccuracy API] 요청 완료:', {
+                userId,
+                timestamp: new Date().toISOString()
+            });
+        }
+    };
+
+    // 약점 유형 분포 데이터 가져오기
+    const fetchWeaknessDistribution = async () => {
+        // 로컬 스토리지에서 사용자 ID 가져오기
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+            console.log('User data not found in localStorage, skipping weakness distribution fetch');
+            setWeaknessLoading(false);
+            return;
+        }
+
+        const userData = JSON.parse(storedUser);
+        const userId = userData.userId;
+        
+        if (!userId) {
+            console.log('User ID not available, skipping weakness distribution fetch');
+            setWeaknessLoading(false);
+            return;
+        }
+
+        try {
+            setWeaknessLoading(true);
+            const apiUrl = `/learning-analytics/users/${userId}/weakness-distribution`;
+            
+            console.log('🎯 [WeaknessDistribution API] 요청 시작:', {
+                userId,
+                apiUrl,
+                timestamp: new Date().toISOString()
+            });
+            
+            const response = await fetch(apiUrl);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ [WeaknessDistribution API] 응답 성공:', {
+                    userId,
+                    weaknessData: data,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // API 응답을 차트 형식으로 변환 (PRONUNCIATION_RECOGNITION 제외)
+                const filteredData = data.filter(item => item.questionType !== 'PRONUNCIATION_RECOGNITION');
+                
+                // 정답률 기준으로 정렬 (낮은 순서대로)
+                const sortedData = filteredData.sort((a, b) => a.accuracyRate - b.accuracyRate);
+                
+                // 정답률 기준으로 우선순위 재할당
+                const chartData = sortedData.map((item, index) => {
+                    // 정답률이 동일한 경우 공동 순위 처리
+                    let priority = index + 1;
+                    if (index > 0 && item.accuracyRate === sortedData[index - 1].accuracyRate) {
+                        // 이전 항목과 정답률이 같으면 같은 우선순위
+                        priority = sortedData.findIndex((prevItem, prevIndex) => 
+                            prevIndex < index && prevItem.accuracyRate === item.accuracyRate
+                        ) + 1;
+                    }
+                    
+                    return {
+                        type: item.questionTypeName,
+                        displayName: item.questionTypeName,
+                        count: item.incorrectAnswers,
+                        totalQuestions: item.totalQuestions,
+                        correctAnswers: item.correctAnswers,
+                        incorrectAnswers: item.incorrectAnswers,
+                        accuracyRate: item.accuracyRate,
+                        weaknessLevel: item.weaknessLevel,
+                        weaknessGrade: item.weaknessGrade,
+                        priority: priority, // 정답률 기준 재할당된 우선순위
+                        recommendedStudyMethod: item.recommendedStudyMethod
+                    };
+                });
+                
+                console.log('📊 [WeaknessDistribution] 차트 데이터 변환:', chartData);
+                setWeaknessDistribution(chartData);
+            } else {
+                console.error('❌ [WeaknessDistribution API] 응답 실패:', {
+                    userId,
+                    status: response.status,
+                    statusText: response.statusText,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        } catch (error) {
+            console.error('🚨 [WeaknessDistribution API] 요청 에러:', {
+                userId,
+                error: error.message,
+                stack: error.stack,
+                timestamp: new Date().toISOString()
+            });
+        } finally {
+            setWeaknessLoading(false);
+            console.log('🏁 [WeaknessDistribution API] 요청 완료:', {
+                userId,
+                timestamp: new Date().toISOString()
+            });
+        }
+    };
+
     useEffect(() => {
         scrollToTop();
         
@@ -145,6 +401,15 @@ export default function HomePage() {
 
         // 오늘의 학습 데이터 가져오기
         fetchDailyActivity();
+        
+        // 주간 학습량 데이터 가져오기
+        fetchWeeklyStats();
+        
+        // 유형별 정답률 데이터 가져오기
+        fetchQuestionTypeAccuracy();
+        
+        // 약점 유형 분포 데이터 가져오기
+        fetchWeaknessDistribution();
     }, [user, setUser]);
 
     // API: 대시보드에 필요한 데이터(오늘의 단어, 복습 퀴즈 등)를 가져와야 합니다.
@@ -184,7 +449,14 @@ export default function HomePage() {
                 dailyActivity={dailyActivity}
                 loading={loading}
             />
-            <HistoryChart />
+            <HistoryChart 
+                weeklyStats={weeklyStats}
+                loading={weeklyLoading}
+                questionTypeAccuracy={questionTypeAccuracy}
+                accuracyLoading={accuracyLoading}
+                weaknessDistribution={weaknessDistribution}
+                weaknessLoading={weaknessLoading}
+            />
             <div className="home-page-cards">
             <ConversationCard user={user} navigate={navigate} />
             <TodayWordsCard words={todayWords} />
