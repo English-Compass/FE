@@ -7,11 +7,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        secure: false
-      },
       '/login': {
         target: 'http://localhost:8080',
         changeOrigin: true,
@@ -29,6 +24,11 @@ export default defineConfig({
       },
       '/api/recommendations': {
         target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/learning-analytics': {
+        target: 'http://localhost:8082',
         changeOrigin: true,
         secure: false
       }
