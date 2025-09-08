@@ -31,6 +31,11 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
+      },
+      '/learning-analytics': {
+        target: 'http://localhost:8082',
+        changeOrigin: true,
+        secure: false
       }
     }
   }

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useApp } from '../../context/AppContext.jsx';
@@ -14,6 +14,80 @@ import HistoryChart from '../../components/home/HistoryChart.jsx';
 export default function HomePage() {
     const navigate = useNavigate();
     const { user, setUser, studyProgress, scrollToTop } = useApp();
+    const [dailyActivity, setDailyActivity] = useState({ studyTimeMinutes: 0 });
+    const [loading, setLoading] = useState(true);
+
+    // 오늘 날짜를 YYYY-MM-DD 형식으로 가져오는 함수
+    const getTodayDate = () => {
+        const today = new Date();
+        return today.toISOString().split('T')[0];
+    };
+
+    // 오늘의 학습 데이터 가져오기
+    const fetchDailyActivity = async () => {
+        // 로컬 스토리지에서 사용자 ID 가져오기
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+            console.log('User data not found in localStorage, skipping daily activity fetch');
+            setLoading(false);
+            return;
+        }
+
+        const userData = JSON.parse(storedUser);
+        const userId = userData.userId;
+        
+        if (!userId) {
+            console.log('User ID not available, skipping daily activity fetch');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const today = getTodayDate();
+            const apiUrl = `/learning-analytics/users/${userId}/daily-activity?fromDate=${today}&toDate=${today}`;
+            
+            console.log('📊 [DailyActivity API] 요청 시작:', {
+                userId,
+                today,
+                apiUrl,
+                timestamp: new Date().toISOString()
+            });
+            
+            const response = await fetch(apiUrl);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ [DailyActivity API] 응답 성공:', {
+                    userId,
+                    studyTimeMinutes: data.studyTimeMinutes,
+                    fullResponse: data,
+                    timestamp: new Date().toISOString()
+                });
+                setDailyActivity({ studyTimeMinutes: data.studyTimeMinutes });
+            } else {
+                console.error('❌ [DailyActivity API] 응답 실패:', {
+                    userId,
+                    status: response.status,
+                    statusText: response.statusText,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        } catch (error) {
+            console.error('🚨 [DailyActivity API] 요청 에러:', {
+                userId,
+                error: error.message,
+                stack: error.stack,
+                timestamp: new Date().toISOString()
+            });
+        } finally {
+            setLoading(false);
+            console.log('🏁 [DailyActivity API] 요청 완료:', {
+                userId,
+                timestamp: new Date().toISOString()
+            });
+        }
+    };
 
     useEffect(() => {
         scrollToTop();
@@ -68,6 +142,9 @@ export default function HomePage() {
             // URL에서 쿼리 파라미터 제거
             window.history.replaceState({}, document.title, window.location.pathname);
         }
+
+        // 오늘의 학습 데이터 가져오기
+        fetchDailyActivity();
     }, [user, setUser]);
 
     // API: 대시보드에 필요한 데이터(오늘의 단어, 복습 퀴즈 등)를 가져와야 합니다.
@@ -102,7 +179,11 @@ export default function HomePage() {
     return (
         <div className="home-page">
             <WelcomeSection user={user} />
-            <DailyProgressCard studyProgress={studyProgress} />
+            <DailyProgressCard 
+                studyProgress={studyProgress} 
+                dailyActivity={dailyActivity}
+                loading={loading}
+            />
             <HistoryChart />
             <div className="home-page-cards">
             <ConversationCard user={user} navigate={navigate} />
