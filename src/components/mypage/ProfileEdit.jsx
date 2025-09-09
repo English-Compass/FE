@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -8,10 +8,11 @@ import { X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useApp } from '../../context/AppContext';
 
-// API: '저장' 버튼 클릭 시, 수정된 사용자 프로필 정보를 서버에 전송하여 업데이트해야 합니다.
-// 예: const handleSave = () => { fetch('/api/user/profile', { method: 'PUT', body: JSON.stringify(editForm) }); };
-
 export default function ProfileEdit({ user, editForm, setEditForm, onSave }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const { STUDY_TYPES, KEYWORDS_BY_CATEGORY, setUser } = useApp();
+
   const handleKeywordToggle = (keyword) => {
     setEditForm(prev => ({
       ...prev,
@@ -21,7 +22,243 @@ export default function ProfileEdit({ user, editForm, setEditForm, onSave }) {
     }));
   };
 
-  const { STUDY_TYPES, KEYWORDS_BY_CATEGORY } = useApp();
+  // 백엔드에서 사용자 설정 정보 조회
+  const fetchInitialUserSettings = async () => {
+    setIsInitialLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.log('ProfileEdit - 토큰이 없습니다. 기본값을 사용합니다.');
+        setIsInitialLoading(false);
+        return;
+      }
+
+      console.log('ProfileEdit - 백엔드에서 사용자 설정 조회 시작');
+      const response = await fetch('/user/settings', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('ProfileEdit - API 응답 상태:', response.status, response.statusText);
+
+      if (response.ok) {
+        // 응답이 성공적이지만 JSON이 아닐 수 있으므로 안전하게 처리
+        let responseData = null;
+        const contentType = response.headers.get('content-type');
+        
+        console.log('ProfileEdit - 응답 Content-Type:', contentType);
+        
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            responseData = await response.json();
+            console.log('ProfileEdit - 사용자 설정 조회 응답:', responseData);
+            
+            const userData = responseData;
+            
+            // 백엔드 레벨(1, 2, 3)을 프론트엔드 레벨(A, B, C)로 변환
+            const levelMapping = { 1: 'A', 2: 'B', 3: 'C' };
+            const frontendLevel = levelMapping[userData.difficultyLevel] || 'B';
+            
+            // 백엔드 카테고리 Map을 프론트엔드 키워드 배열로 변환
+            const keywordsArray = [];
+            if (userData.categories) {
+              Object.values(userData.categories).forEach(categoryKeywords => {
+                keywordsArray.push(...categoryKeywords);
+              });
+            }
+            
+            console.log('ProfileEdit - 변환된 데이터:', {
+              level: frontendLevel,
+              keywords: keywordsArray
+            });
+            
+            // AppContext의 user 상태도 업데이트
+            setUser(prevUser => ({
+              ...prevUser,
+              level: frontendLevel,
+              keywords: keywordsArray
+            }));
+
+            // editForm 업데이트 (현재 편집 중인 폼 데이터)
+            setEditForm(prev => {
+              const newForm = {
+                ...prev,
+                level: frontendLevel,
+                keywords: keywordsArray
+              };
+              console.log('ProfileEdit - editForm 업데이트:', newForm);
+              return newForm;
+            });
+          } catch (jsonError) {
+            console.warn('ProfileEdit - JSON 파싱 실패:', jsonError);
+            console.log('ProfileEdit - 응답 텍스트:', await response.text());
+          }
+        } else {
+          console.log('ProfileEdit - JSON이 아닌 응답입니다. 상태 코드:', response.status);
+          const responseText = await response.text();
+          console.log('ProfileEdit - 응답 텍스트:', responseText);
+        }
+      } else {
+        console.error('ProfileEdit - 사용자 설정 조회 실패:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('ProfileEdit - 에러 응답:', errorText);
+      }
+    } catch (error) {
+      console.error('ProfileEdit - 사용자 설정 조회 오류:', error);
+    } finally {
+      setIsInitialLoading(false);
+    }
+  };
+
+  // 컴포넌트 마운트 시 초기 데이터 로딩
+  useEffect(() => {
+    fetchInitialUserSettings();
+  }, []);
+
+  // API: 사용자 프로필 정보 업데이트
+  const handleSaveProfile = async () => {
+    setIsLoading(true);
+    
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+
+      // 프론트엔드 레벨(A, B, C)을 백엔드 레벨(1, 2, 3)로 변환
+      const levelMapping = { 'A': 1, 'B': 2, 'C': 3 };
+      const difficultyLevel = levelMapping[editForm.level] || 2; // 기본값: 중급
+
+      // 프론트엔드 키워드를 CategoryRequestDto 형식으로 변환
+      const categoriesMap = {};
+      editForm.keywords.forEach(keyword => {
+        // 각 키워드가 어느 카테고리에 속하는지 찾기
+        for (const [categoryKey, categoryKeywords] of Object.entries(KEYWORDS_BY_CATEGORY)) {
+          if (categoryKeywords.includes(keyword)) {
+            if (!categoriesMap[categoryKey]) {
+              categoriesMap[categoryKey] = [];
+            }
+            categoriesMap[categoryKey].push(keyword);
+            break;
+          }
+        }
+      });
+
+      // 백엔드로 전송할 데이터 (CategoryRequestDto 형식)
+      const categoryRequestData = {
+        categories: categoriesMap
+      };
+
+      // 난이도와 카테고리를 별도로 전송
+      const difficultyRequestData = {
+        difficultyLevel: difficultyLevel
+      };
+
+      console.log('카테고리 업데이트 요청:', categoryRequestData);
+      console.log('난이도 업데이트 요청:', difficultyRequestData);
+
+      // 1. 난이도 설정 업데이트
+      const difficultyResponse = await fetch('/user/settings/difficulty', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(difficultyRequestData)
+      });
+
+      if (!difficultyResponse.ok) {
+        throw new Error(`난이도 업데이트 실패: ${difficultyResponse.status}`);
+      }
+
+      // 2. 카테고리 설정 업데이트
+      const categoryResponse = await fetch('/user/settings/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(categoryRequestData)
+      });
+
+      if (!categoryResponse.ok) {
+        throw new Error(`카테고리 업데이트 실패: ${categoryResponse.status}`);
+      }
+
+      const response = categoryResponse; // 마지막 응답을 사용
+
+      if (response.ok) {
+        // 응답이 성공적이지만 JSON이 아닐 수 있으므로 안전하게 처리
+        let responseData = null;
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            responseData = await response.json();
+            console.log('프로필 업데이트 응답:', responseData);
+          } catch (jsonError) {
+            console.warn('JSON 파싱 실패, 빈 응답으로 처리:', jsonError);
+          }
+        } else {
+          console.log('JSON이 아닌 응답입니다. 상태 코드:', response.status);
+        }
+        
+        // AppContext의 user 상태 업데이트
+        setUser(prevUser => ({
+          ...prevUser,
+          level: editForm.level,
+          keywords: editForm.keywords
+        }));
+
+        // localStorage의 user 정보도 업데이트
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        localStorage.setItem('user', JSON.stringify({
+          ...storedUser,
+          level: editForm.level,
+          keywords: editForm.keywords
+        }));
+
+        // alert('프로필이 성공적으로 업데이트되었습니다.');
+        onSave(); // 부모 컴포넌트의 onSave 호출 (편집 모드 종료)
+      } else {
+        // 에러 응답 처리
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        
+        try {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          }
+        } catch (jsonError) {
+          console.warn('에러 응답 JSON 파싱 실패:', jsonError);
+        }
+        
+        console.error('프로필 업데이트 실패:', errorMessage);
+        alert(`프로필 업데이트 실패: ${errorMessage}`);
+      }
+    } catch (error) {
+      console.error('프로필 업데이트 오류:', error);
+      alert('프로필 업데이트 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 초기 로딩 중일 때 로딩 화면 표시
+  if (isInitialLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span className="ml-2 text-gray-600">프로필 정보를 불러오는 중...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="!space-y-6">
@@ -104,7 +341,13 @@ export default function ProfileEdit({ user, editForm, setEditForm, onSave }) {
           </div>
         </div>
 
-        <Button onClick={onSave} className="bg-blue-600 hover:bg-blue-700">저장</Button>
+        <Button 
+          onClick={handleSaveProfile} 
+          disabled={isLoading}
+          className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isLoading ? '저장 중...' : '저장'}
+        </Button>
       </div>
     </div>
   );

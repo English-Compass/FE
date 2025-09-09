@@ -17,6 +17,7 @@ export function ConversationPractice({
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [sessionFeedback, setSessionFeedback] = useState(null);
   const mediaRecorderRef = useRef(null);
+  const sessionIdRef = useRef(null);
 
   useEffect(() => {
     // API: 컴포넌트가 마운트될 때, 새로운 대화 세션을 시작합니다.
@@ -42,6 +43,7 @@ export function ConversationPractice({
 
           const data = await response.json();
           setSessionId(data.sessionId);
+          sessionIdRef.current = data.sessionId; 
           setConversation([{
             id: 'ai-greeting',
             type: 'ai',
@@ -52,6 +54,7 @@ export function ConversationPractice({
         else if (conversationConfig?.type === 'role-playing-scenario') {
           // 상황 상세 화면에서 이미 세션을 생성했으므로 그 정보를 사용
           setSessionId(conversationConfig.sessionId);
+          sessionIdRef.current = conversationConfig.sessionId; 
           setConversation([{
             id: 'ai-greeting',
             type: 'ai',
@@ -75,6 +78,7 @@ export function ConversationPractice({
 
           const data = await response.json();
           setSessionId(data.sessionId);
+          sessionIdRef.current = data.sessionId; 
           // 커스텀 롤 플레잉에서는 AI가 먼저 인사하지 않음 (aiFirstGreeting이 null)
           setConversation([]);
         }
@@ -86,9 +90,10 @@ export function ConversationPractice({
     startSession();
 
     return () => {
-      if (sessionId) {
+      // cleanup 함수에서는 ref를 사용하여 최신 sessionId에 접근
+      if (sessionIdRef.current) {
         // 모든 회화 유형은 같은 end 엔드포인트 사용
-        const endpoint = `${API_BASE_URL}/speech-sessions/role-playing/${sessionId}/end`;
+        const endpoint = `${API_BASE_URL}/speech-sessions/role-playing/${sessionIdRef.current}/end`;
         
         fetch(endpoint, {
           method: 'POST',

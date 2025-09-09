@@ -4,8 +4,8 @@ import { Button } from '../ui/button';
 export default function HeroSection() {
 
     const handleLogin = () => {
-        const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?client_id=${import.meta.env.VITE_KAKAO_REST_API_KEY}&redirect_uri=${import.meta.env.VITE_KAKAO_REDIRECT_URI}&response_type=code`;
-        window.location.href = KAKAO_AUTH_URL;
+        // 백엔드의 카카오 로그인 엔드포인트로 직접 이동
+        window.location.href = 'http://localhost:8080/oauth2/authorization/kakao';
     }
     
     return (

@@ -96,9 +96,9 @@ export function MediaCard({ content, getLevelColor, getLevelText, onWatchContent
         </div>
       ) : (
         // 다른 콘텐츠: 이미지 없이 헤더만 표시
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 border-b">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 !p-4 border-b">
           <div className="flex justify-between items-center">
-            <div className="flex space-x-2">
+            <div className="flex !space-x-2">
               <Badge className={`${getLevelColor(content.difficultyLevel)} text-white border-0`}>
                 {getLevelText(content.difficultyLevel)}
               </Badge>
@@ -112,7 +112,6 @@ export function MediaCard({ content, getLevelColor, getLevelText, onWatchContent
           </div>
         </div>
       )}
-      
       <CardContent className="!p-4 !space-y-3">
         <div className="!space-y-2">
           <div className="flex items-center justify-between">
@@ -122,13 +121,11 @@ export function MediaCard({ content, getLevelColor, getLevelText, onWatchContent
                 {content.platform || 'Unknown'}
               </Badge>
             )}
-          </div>
-          
+          </div>         
           <p className="text-sm text-gray-600 line-clamp-2">
             {content.description || '설명이 없습니다.'}
           </p>
         </div>
-
         <div className="flex flex-col gap-2">
           {content.recommendationReason && (
             <div className="bg-blue-50 !p-2 rounded-lg">

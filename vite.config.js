@@ -8,12 +8,32 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/v1': {
-        target: 'http://localhost:8083',
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/login': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/auth': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/user/settings': {
+        target: 'http://localhost:8080',      
         changeOrigin: true,
         secure: false
       },
       '/api/recommendations': {
-        target: 'http://localhost:8084',
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/learning-analytics': {
+        target: 'http://localhost:8082',
         changeOrigin: true,
         secure: false
       }
