@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
 import { useApp } from '../../context/AppContext';
+import { RealtimeRecommendationModal } from './RealtimeRecommendationModal';
 
 // 새로 추가된 추천 미디어 카드 컴포넌트
 function RecommendedMediaCard({ media }) {
@@ -28,8 +29,11 @@ function RecommendedMediaCard({ media }) {
 }
 
 export function StudyCompleteSummary({ studyResults, onRestart, onGoHome }) {
-  const { selectedType, STUDY_TYPES, getDifficultyText, formData } = useApp();
+  const { selectedType, STUDY_TYPES, getDifficultyText, formData, user } = useApp();
   const [recommendations, setRecommendations] = useState([]);
+  const [realtimeRecommendations, setRealtimeRecommendations] = useState([]);
+  const [showRealtimeModal, setShowRealtimeModal] = useState(false);
+  const [loadingRealtime, setLoadingRealtime] = useState(false);
   
   // 결과 통계 계산
   const totalQuestions = studyResults?.totalQuestions || 0;
@@ -39,6 +43,39 @@ export function StudyCompleteSummary({ studyResults, onRestart, onGoHome }) {
   
   // 선택된 학습 유형 정보
   const studyType = STUDY_TYPES.find(type => type.id === selectedType);
+
+  // 실시간 추천 가져오기 (학습 세션 완료 후)
+  const fetchRealtimeRecommendations = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setLoadingRealtime(true);
+      const response = await fetch(`/api/recommendations/history/${user.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('실시간 추천 응답:', data);
+        console.log('추천 개수:', data.recommendations?.length || 0);
+        setRealtimeRecommendations(data.recommendations || []);
+        setShowRealtimeModal(true);
+      } else {
+        console.error('실시간 추천 조회 실패:', response.status, response.statusText);
+        // 실패해도 모달은 표시 (빈 상태로)
+        setShowRealtimeModal(true);
+      }
+    } catch (error) {
+      console.error('실시간 추천 조회 오류:', error);
+      // 오류가 발생해도 모달은 표시
+      setShowRealtimeModal(true);
+    } finally {
+      setLoadingRealtime(false);
+    }
+  };
 
   useEffect(() => {
     // API: 사용자의 키워드와 난이도에 맞는 미디어 추천을 요청합니다.
@@ -71,7 +108,10 @@ export function StudyCompleteSummary({ studyResults, onRestart, onGoHome }) {
     };
 
     fetchRecommendations();
-  }, [formData.keywords, formData.level]);
+    
+    // 학습 완료 후 자동으로 실시간 추천 요청
+    fetchRealtimeRecommendations();
+  }, [formData.keywords, formData.level, user?.id, studyResults, selectedType]);
   
   return (
     <div className="!p-4 !sm:p-6 !space-y-6 max-w-3xl !mx-auto">
@@ -197,6 +237,14 @@ export function StudyCompleteSummary({ studyResults, onRestart, onGoHome }) {
           </CardContent>
         </Card>
       )}
+
+      {/* 실시간 추천 모달 */}
+      <RealtimeRecommendationModal
+        isOpen={showRealtimeModal}
+        onClose={() => setShowRealtimeModal(false)}
+        recommendations={realtimeRecommendations}
+        loading={loadingRealtime}
+      />
     </div>
   );
 }

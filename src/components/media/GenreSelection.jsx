@@ -1,178 +1,132 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { X, Film, Music, BookOpen, Gamepad2, Heart, Zap, Shield, Eye, Star, Users, Globe, Camera, Tv } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 
-const genreIcons = {
-  '액션': Zap,
-  '드라마': Heart,
-  '코미디': Users,
-  '로맨스': Heart,
-  '스릴러': Shield,
-  '공포': Eye,
-  '미스터리': BookOpen,
-  'SF': Globe,
-  '판타지': Star,
-  '범죄': Shield,
-  '전쟁': Shield,
-  '음악': Music,
-  '애니메이션': Camera,
-  '다큐멘터리': Tv,
-  'EDUCATION': BookOpen,
-  'ENTERTAINMENT': Film,
-  'GAMING': Gamepad2,
-  'TECHNOLOGY': Globe,
-  'LIFESTYLE': Heart,
-  'SPORTS': Zap,
-  'NEWS': BookOpen,
-  'TRAVEL': Globe,
-  'FOOD': Heart,
-  'FASHION': Heart,
-  'BUSINESS': BookOpen,
-  'SCIENCE': Globe,
-  'HISTORY': BookOpen,
-  'NATURE': Globe,
-  'ARTS': Star,
-  'PHILOSOPHY': BookOpen,
-  'POLITICS': Shield,
-  'ECONOMY': BookOpen,
-  'SOCIAL': Users,
-  'PSYCHOLOGY': BookOpen,
-  'RELIGION': Star,
-  'MYTHOLOGY': Star,
-  'FANTASY': Star,
-  'ADVENTURE': Zap,
-  'MYSTERY': BookOpen,
-  'HORROR': Eye,
-  'ROMANCE': Heart,
-  'COMEDY': Users,
-  'DRAMA': Heart,
-  'ACTION': Zap,
-  'CRIME': Shield,
-  'WAR': Shield,
-  'MUSIC': Music,
-  'ANIMATION': Camera,
-  'DOCUMENTARY': Tv
-};
+const GenreSelection = ({ isOpen, onClose, onConfirm }) => {
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [availableGenres, setAvailableGenres] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-export function GenreSelection({
-  availableGenres,
-  selectedGenres,
-  onGenreSelection,
-  onGenerate,
-  onCancel,
-  loading
-}) {
-  const [localSelectedGenres, setLocalSelectedGenres] = useState(selectedGenres);
+  // 사용 가능한 장르 목록 조회
+  const fetchGenres = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/recommendations/genres');
+      if (!response.ok) {
+        throw new Error('장르 목록을 불러올 수 없습니다.');
+      }
+      const data = await response.json();
+      setAvailableGenres(data.genres || []);
+    } catch (error) {
+      console.error('장르 목록 조회 오류:', error);
+      // 백엔드에서 제공하는 기본 장르 목록 사용
+      setAvailableGenres([
+        '액션', '드라마', '코미디', '로맨스', '스릴러',
+        '공포', '미스터리', 'SF', '판타지', '범죄',
+        '전쟁', '음악', '애니메이션', '다큐멘터리'
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchGenres();
+    }
+  }, [isOpen]);
 
   const handleGenreToggle = (genre) => {
-    setLocalSelectedGenres(prev => {
+    setSelectedGenres(prev => {
       if (prev.includes(genre)) {
         return prev.filter(g => g !== genre);
-      } else {
-        if (prev.length >= 5) {
-          alert('최대 5개까지 선택할 수 있습니다.');
-          return prev;
-        }
+      } else if (prev.length < 5) {
         return [...prev, genre];
       }
+      return prev;
     });
   };
 
-  const handleGenerate = () => {
-    if (localSelectedGenres.length === 0) {
+  const handleConfirm = () => {
+    if (selectedGenres.length === 0) {
       alert('최소 1개 이상의 장르를 선택해주세요.');
       return;
     }
-    console.log('GenreSelection에서 선택된 장르:', localSelectedGenres);
-    onGenreSelection(localSelectedGenres);
-    // 장르 선택 후 모달을 닫고 추천 생성은 별도로 처리
-    onCancel();
+    onConfirm(selectedGenres);
+    setSelectedGenres([]);
+    onClose();
   };
 
-  const handleCancel = () => {
-    setLocalSelectedGenres(selectedGenres);
-    onCancel();
+  const handleClose = () => {
+    setSelectedGenres([]);
+    onClose();
   };
+
+  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">🎬 장르 선택</h2>
-          <Button variant="ghost" size="sm" onClick={handleCancel} className="text-gray-500 hover:text-gray-700">
-            <X className="w-5 h-5" />
-          </Button>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center !z-50">
+      <div className="bg-white rounded-lg !p-6 w-full max-w-md !mx-4">
+        <div className="flex justify-between items-center !mb-4">
+          <h2 className="text-xl font-bold text-gray-900">장르 선택</h2>
+          <button
+            onClick={handleClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            <X size={24} />
+          </button>
         </div>
 
-        <div className="mb-6">
-          <p className="text-gray-600 mb-4">
-            관심 있는 장르를 선택하세요. (최대 5개)
-          </p>
-          {localSelectedGenres.length > 0 && (
-            <div className="mb-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">선택된 장르:</p>
-              <div className="flex flex-wrap gap-2">
-                {localSelectedGenres.map(genre => {
-                  const IconComponent = genreIcons[genre] || Film;
-                  return (
-                    <Badge
-                      key={genre}
-                      variant="secondary"
-                      className="bg-blue-100 text-blue-800 border-blue-200 flex items-center gap-1"
-                    >
-                      <IconComponent className="w-3 h-3" />
-                      {genre}
-                      <button
-                        onClick={() => handleGenreToggle(genre)}
-                        className="ml-1 hover:text-blue-600"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+        <p className="text-sm text-gray-600 !mb-4">
+          관심 있는 장르를 선택해주세요. (최대 5개)
+        </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
-          {availableGenres.map(genre => {
-            const IconComponent = genreIcons[genre] || Film;
-            const isSelected = localSelectedGenres.includes(genre);
-            
-            return (
+        {loading ? (
+          <div className="flex justify-center !py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2 !mb-6 max-h-60 overflow-y-auto">
+            {availableGenres.map((genre) => (
               <button
                 key={genre}
                 onClick={() => handleGenreToggle(genre)}
-                className={`p-4 rounded-lg border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
-                  isSelected
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                className={`!p-3 text-sm rounded-lg border transition-colors ${
+                  selectedGenres.includes(genre)
+                    ? 'bg-blue-100 border-blue-500 text-blue-700'
+                    : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <IconComponent className="w-6 h-6" />
-                <span className="text-sm font-medium">{genre}</span>
+                {genre}
               </button>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
 
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={handleCancel} disabled={loading}>
-            취소
-          </Button>
-          <Button 
-            onClick={handleGenerate} 
-            disabled={loading || localSelectedGenres.length === 0}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {loading ? '추천 생성 중...' : '추천 받기'}
-          </Button>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-500">
+            선택된 장르: {selectedGenres.length}/5
+          </span>
+          <div className="flex space-x-2" style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={handleClose}
+              className="!px-4 !py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+              style={{ display: 'block' }}
+            >
+              취소
+            </button>
+            <button
+              onClick={handleConfirm}
+              className="!px-4 !py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              style={{ display: 'block', backgroundColor: '#2563eb', color: 'white' }}
+            >
+              추천받기
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default GenreSelection;
+

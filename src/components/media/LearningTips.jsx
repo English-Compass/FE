@@ -21,7 +21,7 @@ export function LearningTips() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  return (
+  return ( 
     <Card className="!mt-8">
       <CardHeader 
         className="cursor-pointer transition-colors duration-200 ease-in-out hover:bg-gray-50 md:cursor-default md:hover:bg-transparent"
@@ -46,6 +46,7 @@ export function LearningTips() {
         ${isExpanded 
           ? 'max-h-[500px] opacity-100' 
           : 'max-h-0 !px-0 !py-3 opacity-0'
+
         }
       `}>
         <div className="grid md:grid-cols-2 gap-4 text-sm">

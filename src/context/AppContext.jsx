@@ -113,14 +113,13 @@ export const useApp = () => {
 };
 
 export const AppProvider = ({ children }) => {
-  // localStorage에서 사용자 정보 읽어오기
-  const [user, setUserState] = useState({
-    id: null,
-    name: null,
-    profileImage: null,
-    level: null,
-    joinDate: null,
-    streak: null
+  const [user, setUser] = useState({
+    id: 'test-user-016',
+    name: '김영희',
+    email: 'test@example.com',
+    level: 'B',
+    joinDate: '2024-01-15',
+    streak: 7
   });
   
   // setUser 함수를 useCallback으로 최적화
