@@ -114,7 +114,7 @@ export const useApp = () => {
 
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState({
-    id: 1,
+    id: 'test-user-016',
     name: '김영희',
     email: 'test@example.com',
     level: 'B',

@@ -21,7 +21,7 @@ export function LearningTips() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  return (
+  return ( 
     <Card className="!mt-8">
       <CardHeader 
         className="cursor-pointer transition-colors duration-200 ease-in-out hover:bg-gray-50 md:cursor-default md:hover:bg-transparent"
@@ -44,7 +44,7 @@ export function LearningTips() {
       <CardContent className={`
         overflow-hidden transition-all duration-300 ease-in-out
         ${isExpanded 
-          ? 'max-h-[500px] opacity-100 animate-[slideDown_0.3s_ease]' 
+          ? 'max-h-[500px] opacity-100' 
           : 'max-h-0 !px-4 !py-0 opacity-0'
         }
       `}>
@@ -74,18 +74,6 @@ export function LearningTips() {
         </div>
       </CardContent>
 
-      <style jsx>{`
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </Card>
   );
 }
