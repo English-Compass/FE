@@ -4,6 +4,7 @@ import { QuickReview } from '../../components/review/QuickReview';
 import { ReviewList } from '../../components/review/ReviewList';
 import { ReviewQuiz } from '../../components/review/ReviewQuiz';
 import { useApp } from '../../context/AppContext';
+import { fetchWrongQuestions, fetchReviewQuiz, createQuestionAnswer, createReviewSession, updateLearningSessionProgress } from '../../services/api.js';
 
 export default function ReviewPage() {
   const {
@@ -21,76 +22,49 @@ export default function ReviewPage() {
     scrollToTop
   } = useApp();
 
+  // 실제 세션 동기화용 상태
+  const [sessionId, setSessionId] = React.useState(null);
+
   // 컴포넌트 마운트 시 복습 문제 데이터 로드 및 스크롤 리셋
   useEffect(() => {
     scrollToTop();
-    // API: 서버에서 사용자가 틀린 문제 목록을 가져와야 합니다.
-    // const fetchReviewQuestions = async () => {
-    //   try {
-    //     const response = await fetch('/api/review/wrong-questions', {
-    //       method: 'GET',
-    //       headers: {
-    //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    //         'Content-Type': 'application/json'
-    //       }
-    //     });
-    //     const data = await response.json();
-    //     setReviewQuestions(data.questions);
-    //   } catch (error) {
-    //     console.error('복습 문제 로드 실패:', error);
-    //   }
-    // };
-    // fetchReviewQuestions();
+    // 백엔드에서 틀린 문제 목록 가져오기
+    const storedUser = localStorage.getItem('user');
+    const userId = storedUser ? JSON.parse(storedUser).userId : null;
+    if (!userId) return;
 
-    // 임시 테스트 데이터 (개발용)
-    const testReviewQuestions = [
-      {
-        id: 1,
-        question: "What does 'comprehensive' mean?",
-        userAnswer: "simple",
-        correctAnswer: "complete and thorough",
-        options: ["simple", "complete and thorough", "expensive", "quick"],
-        date: "2025-08-05",
-        questionType: "word"
-      },
-      {
-        id: 2,
-        question: "She went to the library to study for her exams.",
-        userAnswer: "그녀는 도서관에서 책을 읽었다.",
-        correctAnswer: "그녀는 시험 공부를 하기 위해 도서관에 갔다.",
-        options: ["그녀는 도서관에서 책을 읽었다.", "그녀는 시험 공부를 하기 위해 도서관에 갔다.", "그녀는 친구와 만나기 위해 도서관에 갔다."],
-        date: "2025-08-04",
-        questionType: "sentence"
-      },
-      {
-        id: 3,
-        question: "The weather was _____ cold yesterday.",
-        userAnswer: "much",
-        correctAnswer: "extremely",
-        options: ["much", "extremely", "very much"],
-        date: "2025-08-03",
-        questionType: "word"
-      },
-      {
-        id: 4,
-        question: "The task was ___difficult___ for everyone to complete.",
-        userAnswer: "The work was simple for all to finish.",
-        correctAnswer: "The assignment was challenging for everyone to finish.",
-        options: ["The work was simple for all to finish.", "The assignment was challenging for everyone to finish.", "The job was easy for all to complete."],
-        date: "2025-08-02",
-        questionType: "sentence"
-      },
-      {
-        id: 5,
-        question: "Choose the word that means the same as 'happy':",
-        userAnswer: "sad",
-        correctAnswer: "joyful",
-        options: ["sad", "joyful", "angry"],
-        date: "2025-08-01",
-        questionType: "synonym"
-      }
-    ];
-    setReviewQuestions(testReviewQuestions);
+    // 리뷰 세션 생성 (실세션 동기화)
+    createReviewSession({ userId, categories: [] })
+      .then((session) => {
+        if (session?.sessionId) setSessionId(session.sessionId);
+      })
+      .catch(() => {});
+    fetchWrongQuestions(userId)
+      .then((data) => {
+        const list = Array.isArray(data) ? data : (data?.questions || []);
+        const mapped = list.map((q, idx) => ({
+          id: q.id || q.questionId || idx + 1,
+          question: q.question || q.questionText || '',
+          options: q.options || [q.optionA, q.optionB, q.optionC].filter(Boolean),
+          date: q.date || q.answeredAt || '',
+          questionType: q.questionType || q.type || 'word'
+        }));
+        if (mapped.length > 0) {
+          setReviewQuestions(mapped);
+          return;
+        }
+        // 폴백: 리뷰 퀴즈 API
+        return fetchReviewQuiz(userId).then((quiz) => {
+          const quizMapped = (Array.isArray(quiz) ? quiz : []).map((q, idx) => ({
+            id: q.id || idx + 1,
+            question: q.question,
+            options: q.options || [q.optionA, q.optionB, q.optionC].filter(Boolean),
+            questionType: q.type || 'word'
+          }));
+          setReviewQuestions(quizMapped);
+        });
+      })
+      .catch(() => {})
   }, [setReviewQuestions, scrollToTop]);
 
   // 퀴즈 시작
@@ -102,8 +76,50 @@ export default function ReviewPage() {
   };
 
   // 답안 제출
-  const submitReviewAnswer = () => {
+  const submitReviewAnswer = async () => {
     setReviewShowResult(true);
+    const currentQuestion = reviewQuestions[currentReviewIndex];
+    if (!currentQuestion) return;
+    try {
+      // 선택지 값을 A/B/C로 변환
+      const options = currentQuestion.options || [];
+      const idx = options.findIndex(o => o === reviewSelectedAnswer);
+      const indexToLetter = ['A','B','C'];
+      const userAnswerLetter = indexToLetter[idx] || 'A';
+      const isCorrect = reviewSelectedAnswer === currentQuestion.correctAnswer;
+
+      const effectiveSessionId = sessionId || (() => {
+        const storedUser = localStorage.getItem('user');
+        const uid = storedUser ? JSON.parse(storedUser).userId : 'unknown';
+        return `review-${uid || 'unknown'}`;
+      })();
+      const questionId = currentQuestion.id?.toString() || '';
+
+      await createQuestionAnswer({
+        sessionId: effectiveSessionId,
+        questionId,
+        sessionType: 'REVIEW',
+        userAnswer: userAnswerLetter,
+        isCorrect,
+        timeSpent: 0,
+        solveCount: 1
+      });
+
+      // 세션 진행률 업데이트
+      try {
+        await updateLearningSessionProgress({ sessionId: effectiveSessionId, isCorrect });
+      } catch (err) {
+        console.warn('세션 진행 업데이트 실패:', err?.message || err);
+      }
+
+      // 정답이면 목록에서 제거
+      if (isCorrect) {
+        setReviewQuestions(prev => prev.filter(q => (q.id?.toString() || '') !== questionId));
+      }
+    } catch (e) {
+      // 최소 처리: 콘솔만
+      console.error('정답 기록 실패:', e);
+    }
   };
 
   // 다음 문제 또는 완료
@@ -141,44 +157,9 @@ export default function ReviewPage() {
     setReviewShowResult(false);
   };
 
-  // API: 문제 정답 처리 시 복습 목록에서 제거
-  // const handleCorrectAnswer = async (questionId) => {
-  //   try {
-  //     const response = await fetch(`http://localhost:8080/api/review/questions/${questionId}/correct`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  //         'Content-Type': 'application/json'
-  //       }
-  //     });
-  //     
-  //     if (response.ok) {
-  //       setReviewQuestions(prev => prev.filter(q => q.id !== questionId));
-  //     }
-  //   } catch (error) {
-  //     console.error('정답 처리 실패:', error);
-  //   }
-  // };
+  // 정답 처리 API는 백엔드 확정 후 연동 예정
 
-  // API: 복습 문제 새로고침
-  // const refreshReviewQuestions = async () => {
-  //   try {
-  //     const response = await fetch('http://localhost:8080/api/review/wrong-questions', {
-  //       method: 'GET',
-  //       headers: {
-  //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  //         'Content-Type': 'application/json'
-  //       }
-  //     });
-  //     
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       setReviewQuestions(data.questions || []);
-  //     }
-  //   } catch (error) {
-  //     console.error('복습 문제 새로고침 실패:', error);
-  //   }
-  // };
+  // 새로고침 API는 필요 시 별도 구현
 
   // 약점 유형 집중 복습 시작
   const startWeakTypeReview = (questionType) => {
@@ -192,14 +173,11 @@ export default function ReviewPage() {
       return;
     }
 
-    // 임시로 해당 유형 문제들만 설정
     setReviewQuestions(filteredQuestions);
     setReviewMode(REVIEW_MODES.QUIZ);
     setCurrentReviewIndex(0);
     setReviewSelectedAnswer('');
     setReviewShowResult(false);
-
-    // 복습 완료 후 원래 문제들로 복구하는 로직은 별도 구현 필요
   };
 
   // 퀴즈 모드일 때

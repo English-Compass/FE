@@ -18,7 +18,7 @@ const KEYWORDS_BY_CATEGORY = {
   DAILY_LIFE: ['쇼핑 식당', '병원 방문', '대중교통']
 };
 
-// API: 사용자의 학습 통계 데이터를 가져와야 합니다.
+// 사용자의 학습 통계 데이터를 가져오는 예시 (현재 비활성)
 // const fetchUserStats = async () => {
 //   const response = await fetch('http://localhost:8080/api/user/statistics', {
 //     method: 'GET',

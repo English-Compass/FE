@@ -6,10 +6,6 @@ import { Word } from '../question-types/Word';
 import { Sentence } from '../question-types/Sentence';
 import { Conversation } from '../question-types/Conversation';
 
-// API: 복습 퀴즈 문제 데이터는 부모 컴포넌트(ReviewPage)에서 fetch하여 props로 전달받습니다.
-// 퀴즈 완료 시, 학습 결과를 서버에 전송하여 저장해야 합니다.
-// 예: onNext (마지막 문제일 경우) -> fetch('/api/review/results', { method: 'POST', body: JSON.stringify(results) });
-
 export function ReviewQuiz({ 
   question, 
   currentIndex, 

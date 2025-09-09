@@ -1,0 +1,12 @@
+node_modules
+.npm
+.pnpm-store
+.git
+.gitignore
+dist
+.DS_Store
+**/*.log
+**/.env*
+FE/node_modules
+FE/dist
+

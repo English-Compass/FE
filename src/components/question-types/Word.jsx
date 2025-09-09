@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { useApp } from '../../context/AppContext';
+import { generateQuestions } from '../../services/api.js';
 
 export function Word({ 
   question, 
@@ -15,29 +16,39 @@ export function Word({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // API 호출 함수
   const fetchWordQuestion = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // 1. README에 명시된 API 엔드포인트로 요청합니다.
-      // 특정 유형의 문제 하나만 가져오는 API가 필요합니다. (예: /api/quizzes/random?type=word)
-      const response = await fetch(`http://localhost:8080/api/quizzes/random?type=word&level=${formData.level}`);
+      const level = (formData.level || 'B').toUpperCase();
+      const categoryMap = { business: '비즈니스', travel: '여행', daily: '일상생활', academic: '학업' };
+      const majorCategory = categoryMap[selectedType] || '일상생활';
 
-      if (!response.ok) {
-        throw new Error(`서버 응답 오류: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // 2. 서버에서 받은 데이터로 상태를 업데이트합니다.
-      setCurrentQuestion(data);
-      
-      // 3. 부모 컴포넌트(StudySession)에 문제 정보를 전달합니다.
-      if (onQuestionLoad) {
-        onQuestionLoad(data);
-      }
+      const res = await generateQuestions({
+        questionType: 'WORD',
+        difficulty: level,
+        majorCategory,
+        topics: formData.keywords || [],
+        questionCount: 1
+      });
+      const q = Array.isArray(res?.questions) ? res.questions[0] : null;
+      if (!q) throw new Error('문제 생성 실패');
+      const options = [q.optionA, q.optionB, q.optionC].filter(Boolean);
+      const letterToIndex = { A: 0, B: 1, C: 2 };
+      const answerIndex = letterToIndex[(q.correctAnswer || '').toUpperCase()] ?? -1;
+      const correctValue = answerIndex >= 0 ? options[answerIndex] : (q.correctAnswer || '');
+      const mapped = {
+        id: 'gen-word-1',
+        question: q.questionText || '',
+        options,
+        correctAnswer: correctValue,
+        type: 'word',
+        difficulty: q.difficulty || level,
+        explanation: q.explanation || ''
+      };
+      setCurrentQuestion(mapped);
+      if (onQuestionLoad) onQuestionLoad(mapped);
 
     } catch (err) {
       console.error('단어 문제 로드 실패:', err);

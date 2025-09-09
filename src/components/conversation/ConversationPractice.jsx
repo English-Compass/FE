@@ -20,7 +20,6 @@ export function ConversationPractice({
   const sessionIdRef = useRef(null);
 
   useEffect(() => {
-    // API: 컴포넌트가 마운트될 때, 새로운 대화 세션을 시작합니다.
     const startSession = async () => {
       try {
         let requestBody = {
@@ -103,7 +102,7 @@ export function ConversationPractice({
     };
   }, [user.id, conversationConfig]);
 
-// API: 녹음된 음성 데이터를 서버로 전송하고, AI의 응답을 받아 대화에 추가합니다.
+// 녹음된 음성 데이터를 서버로 전송하고, AI의 응답을 받아 대화에 추가합니다.
 const handleSendAudio = async (audioBlob) => {
     if (!sessionId) return;
 

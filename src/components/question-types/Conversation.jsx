@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { useApp } from '../../context/AppContext';
+import { generateQuestions } from '../../services/api.js';
 
 export function Conversation({ 
   question, 
@@ -15,28 +16,45 @@ export function Conversation({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // API 호출 함수
   const fetchConversationQuestion = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // 1. 대화 유형의 문제를 가져오는 API를 호출합니다.
-      const response = await fetch(`http://localhost:8080/api/quizzes/random?type=conversation&level=${formData.level}`);
+      const level = (formData.level || 'B').toUpperCase();
+      const categoryMap = { business: '비즈니스', travel: '여행', daily: '일상생활', academic: '학업' };
+      const majorCategory = categoryMap[selectedType] || '일상생활';
 
-      if (!response.ok) {
-        throw new Error(`서버 응답 오류: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // 2. 서버에서 받은 데이터로 상태를 업데이트합니다.
-      setCurrentQuestion(data);
-      
-      // 3. 부모 컴포넌트(StudySession)에 문제 정보를 전달합니다.
-      if (onQuestionLoad) {
-        onQuestionLoad(data);
-      }
+      const res = await generateQuestions({
+        questionType: 'CONVERSATION',
+        difficulty: level,
+        majorCategory,
+        topics: formData.keywords || [],
+        questionCount: 1
+      });
+      const q = Array.isArray(res?.questions) ? res.questions[0] : null;
+      if (!q) throw new Error('문제 생성 실패');
+      const options = [q.optionA, q.optionB, q.optionC].filter(Boolean);
+      const letterToIndex = { A: 0, B: 1, C: 2 };
+      const answerIndex = letterToIndex[(q.correctAnswer || '').toUpperCase()] ?? -1;
+      const correctValue = answerIndex >= 0 ? options[answerIndex] : (q.correctAnswer || '');
+      const mapped = {
+        id: 'gen-conv-1',
+        // 대화 데이터가 없으면 간단히 A가 질문, B가 빈칸 형태로 구성
+        conversation: q.conversation && Array.isArray(q.conversation) && q.conversation.length > 0
+          ? q.conversation
+          : [
+              { speaker: 'A', dialogue: (q.questionText || '').replace('___', '___________') || '...' },
+              { speaker: 'B', dialogue: '___' }
+            ],
+        options,
+        correctAnswer: correctValue,
+        type: 'conversation',
+        difficulty: q.difficulty || level,
+        explanation: q.explanation || ''
+      };
+      setCurrentQuestion(mapped);
+      if (onQuestionLoad) onQuestionLoad(mapped);
 
     } catch (err) {
       console.error('대화 문제 로드 실패:', err);
@@ -89,7 +107,7 @@ export function Conversation({
     );
   }
 
-  if (!currentQuestion || !currentQuestion.conversation) return null;
+  if (!currentQuestion) return null;
 
   const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
   const studyType = STUDY_TYPES?.find(type => type.id === selectedType);
