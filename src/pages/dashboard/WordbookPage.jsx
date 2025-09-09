@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { ArrowLeft, BookOpen, Search, Filter } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { fetchRecommendedWords } from '../../services/api.js';
 
 export default function WordbookPage() {
   const navigate = useNavigate();
@@ -19,35 +20,9 @@ export default function WordbookPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
 
-  // API: 사용자의 키워드와 레벨에 맞는 추천 단어 목록을 서버에서 가져와야 합니다.
-  // useEffect(() => {
-  //   const fetchRecommendedWords = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const response = await fetch('http://localhost:8080/api/words/recommendations', {
-  //         method: 'POST',
-  //         headers: {
-  //           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  //           'Content-Type': 'application/json'
-  //         },
-  //         body: JSON.stringify({
-  //           keywords: formData.keywords || [],
-  //           level: formData.level,
-  //           limit: 50
-  //         })
-  //       });
-  //       const data = await response.json();
-  //       setWords(data);
-  //     } catch (err) {
-  //       console.error("Failed to fetch words:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchRecommendedWords();
-  // }, [formData.keywords, formData.level]);
+  // 추천 단어 API 연동으로 대체됨
 
-  // 키워드 기반 단어 추천 (임시 데이터)
+  // 키워드 기반 단어 추천 (로컬 더미 + API 결과 병합)
   const generateRecommendedWords = (keywords) => {
     const wordDatabase = {
       // 여행 관련 단어
@@ -121,30 +96,40 @@ export default function WordbookPage() {
   };
 
   useEffect(() => {
-    setLoading(true);
-    
-    // 사용자가 선택한 키워드 기반으로 단어 추천
-    const recommendedWords = generateRecommendedWords(formData.keywords || []);
-    
-    // 추가로 선택된 카테고리의 기본 단어들도 포함
-    if (formData.selectedCategories) {
-      formData.selectedCategories.forEach(categoryId => {
-        const categoryKeywords = KEYWORDS_BY_CATEGORY[categoryId] || [];
-        const categoryWords = generateRecommendedWords(categoryKeywords.slice(0, 2)); // 카테고리당 2개 키워드
-        recommendedWords.push(...categoryWords);
-      });
-    }
+    const run = async () => {
+      setLoading(true);
 
-    // 중복 제거
-    const uniqueWords = recommendedWords.filter((word, index, arr) => 
-      arr.findIndex(w => w.word === word.word) === index
-    );
+      // 로컬 더미 추천
+      const localRecommended = generateRecommendedWords(formData.keywords || []);
 
-    setTimeout(() => {
-      setWords(uniqueWords);
-      setLoading(false);
-    }, 500);
-  }, [formData.keywords, formData.selectedCategories, KEYWORDS_BY_CATEGORY]);
+      // 백엔드 추천 호출
+      try {
+        const storedUser = localStorage.getItem('user');
+        const userId = storedUser ? JSON.parse(storedUser).userId : null;
+        const level = (formData.level || 'B');
+        const apiRes = userId ? await fetchRecommendedWords({ userId, level, limit: 50 }) : null;
+        const apiWords = Array.isArray(apiRes?.words) ? apiRes.words.map(w => ({
+          word: w.word,
+          meaning: w.koreanMeaning || w.definition || '',
+          example: w.exampleSentence || '',
+          level: w.difficulty || level,
+          category: (w.category || '').toLowerCase()
+        })) : [];
+
+        const merged = [...apiWords, ...localRecommended];
+        const unique = merged.filter((word, index, arr) => 
+          arr.findIndex(w => w.word === word.word) === index
+        );
+
+        setWords(unique.slice(0, 60));
+      } catch {
+        setWords(localRecommended);
+      } finally {
+        setLoading(false);
+      }
+    };
+    run();
+  }, [formData.keywords, formData.selectedCategories, KEYWORDS_BY_CATEGORY, formData.level, scrollToTop]);
 
   // 필터링된 단어들
   const filteredWords = words.filter(word => {

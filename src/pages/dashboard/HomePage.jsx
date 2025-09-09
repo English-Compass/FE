@@ -10,6 +10,7 @@ import { WrongAnswerCard } from '../../components/home/WrongAnswerCard.jsx';
 import { ReviewQuizCard } from '../../components/home/ReviewQuizCard.jsx';
 import { ConversationCard } from '../../components/home/ConversationCard.jsx';
 import HistoryChart from '../../components/home/HistoryChart.jsx';
+import { fetchTodayWords } from '../../services/api.js';
 
 export default function HomePage() {
     const navigate = useNavigate();
@@ -412,26 +413,27 @@ export default function HomePage() {
         fetchWeaknessDistribution();
     }, [user, setUser]);
 
-    // API: 대시보드에 필요한 데이터(오늘의 단어, 복습 퀴즈 등)를 가져와야 합니다.
-    // const fetchDashboardData = async () => {
-    //   const response = await fetch('http://localhost:8080/api/dashboard', {
-    //     method: 'GET',
-    //     headers: {
-    //       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    //       'Content-Type': 'application/json'
-    //     }
-    //   });
-    //   return response.json();
-    // };
+    
 
     // 더미 데이터 (UI 확인용)
-    const todayWords = [
-        { word: 'comprehensive', meaning: '포괄적인, 종합적인', example: 'A comprehensive study of the problem' },
-        { word: 'substantial', meaning: '상당한, 실질적인', example: 'A substantial amount of money' },
-        { word: 'innovative', meaning: '혁신적인', example: 'An innovative approach to teaching' },
-        { word: 'collaborate', meaning: '협력하다', example: 'We need to collaborate on this project' },
-        { word: 'efficient', meaning: '효율적인', example: 'This is a very efficient method' }
-    ];
+    const [todayWords, setTodayWords] = useState([]);
+
+    // 오늘의 단어 - 백엔드 연결
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        const userId = storedUser ? JSON.parse(storedUser).userId : null;
+        if (!userId) return;
+        fetchTodayWords(userId)
+            .then((data) => {
+                const words = Array.isArray(data?.words) ? data.words : [];
+                setTodayWords(words.map(w => ({
+                    word: w.word || w.text || '',
+                    meaning: w.meaning || w.definition || '',
+                    example: w.example || ''
+                })));
+            })
+            .catch(() => {})
+    }, []);
 
     const reviewQuiz = [
         { id: 1, question: 'Fill in the blank: The meeting was very _____.', options: ['productive', 'produce', 'production'], correct: 0 },

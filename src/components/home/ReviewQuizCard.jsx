@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
+import { createReviewSession } from '../../services/api.js';
 
 export function ReviewQuizCard({ quiz, navigate }) {
 
@@ -35,7 +36,38 @@ export function ReviewQuizCard({ quiz, navigate }) {
           variant="outline"
           size="lg"
           className="w-full"
-          onClick={() => navigate('/dashboard/review')}
+          onClick={async () => {
+            try {
+              const storedUser = localStorage.getItem('user');
+              const userId = storedUser ? JSON.parse(storedUser).userId : null;
+              if (!userId) {
+                alert('로그인이 필요합니다.');
+                return;
+              }
+
+              // 복습세션 생성
+              const session = await createReviewSession({ 
+                userId, 
+                categories: ['study'] // 기본 카테고리
+              });
+              
+              if (session.sessionId) {
+                navigate(`/dashboard/review?sessionId=${session.sessionId}&type=review`);
+              } else {
+                navigate('/dashboard/review');
+              }
+            } catch (error) {
+              console.error('복습세션 생성 실패:', error);
+              // 사용자에게 구체적인 에러 메시지 표시
+              if (error.message.includes('422')) {
+                alert('복습할 문제가 없습니다. 먼저 문제를 풀어주세요!');
+              } else {
+                alert(`복습세션 생성 실패: ${error.message}`);
+              }
+              // 실패 시 기본 리뷰 페이지로
+              navigate('/dashboard/review');
+            }
+          }}
         >
           복습 퀴즈 풀러가기
         </Button>

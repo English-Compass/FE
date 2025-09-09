@@ -6,22 +6,16 @@ import { Button } from '../ui/button';
 
 export function TodayWordsCard({ words }) {
   const navigate = useNavigate();
-
-  // API: 서버에서 오늘의 추천 단어 목록을 가져와야 합니다.
-  // useEffect(() => { 
-  //   const fetchTodayWords = async () => {
-  //     const response = await fetch('http://localhost:8080/api/words/today', {
-  //       method: 'GET',
-  //       headers: {
-  //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  //         'Content-Type': 'application/json'
-  //       }
-  //     });
-  //     const data = await response.json();
-  //     setWords(data);
-  //   };
-  //   fetchTodayWords();
-  // }, []);
+  // 백엔드에서 전달된 words 중 무작위 3개만 표시
+  const sampleWords = React.useMemo(() => {
+    if (!Array.isArray(words) || words.length === 0) return [];
+    const idx = Array.from({ length: words.length }, (_, i) => i);
+    for (let i = idx.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [idx[i], idx[j]] = [idx[j], idx[i]];
+    }
+    return idx.slice(0, 3).map(i => words[i]);
+  }, [words]);
 
   const handleMoreWords = () => {
     navigate('/dashboard/wordbook');
@@ -36,7 +30,7 @@ export function TodayWordsCard({ words }) {
         </CardTitle>
       </CardHeader>
       <CardContent className='flex flex-col gap-2'>
-        {words.slice(0, 3).map((word, index) => (
+        {sampleWords.map((word, index) => (
           <div key={index} className="bg-gray-50 border border-gray-300 rounded-lg !p-4">
             <div className="flex justify-between">
               <h4>{word.word}</h4>

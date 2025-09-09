@@ -1,8 +1,9 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
 import { Badge } from '../ui/badge';
 import { useApp } from '../../context/AppContext';
+import { generateQuestions, createPracticeSession, startLearningSession, updateLearningSessionProgress, completeLearningSession } from '../../services/api.js';
 
 import { Word } from '../question-types/Word';
 import { Sentence } from '../question-types/Sentence';
@@ -13,80 +14,122 @@ export default function StudySession({ onStudyComplete }) {
 
         // --- 상태 관리 ---
     const [questions, setQuestions] = useState([]); // API로부터 받아온 문제 목록
-    const [isLoading, setIsLoading] = useState(true); // 로딩 상태
-    const [error, setError] = useState(null); // 에러 상태
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const abortRef = useRef(null);
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState('');
     const [answers, setAnswers] = useState([]);
     const [showResult, setShowResult] = useState(false);
+    const [sessionId, setSessionId] = useState(null);
 
      // --- 데이터 로딩 ---
     useEffect(() => {
-        // API: 선택된 카테고리, 키워드, 레벨을 기반으로 서버에서 학습 문제를 가져옵니다.
         const fetchQuestions = async () => {
-            // try {
-            //   const response = await fetch('http://localhost:8080/api/study/questions', {
-            //     method: 'POST',
-            //     headers: {
-            //       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            //       'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({
-            //       categories: formData.selectedCategories,
-            //       keywords: formData.keywords,
-            //       level: formData.level,
-            //       count: 10
-            //     })
-            //   });
-            //   const data = await response.json();
-            //   setQuestions(data);
-            // } catch (err) {
-            //   setError('문제를 불러오는 데 실패했습니다.');
-            // } finally {
-            //   setIsLoading(false);
-            // }
+            setIsLoading(true);
+            setError(null);
+            try {
+                const controller = new AbortController();
+                abortRef.current = controller;
 
-            // 더미 데이터로 임시 구현
-            const dummyQuestions = [
-                {
-                    id: 1,
-                    question: "The meeting was very _____ and productive.",
-                    options: ["boring", "efficient", "difficult"],
-                    correctAnswer: "efficient",
-                    type: "word",
-                    explanation: "Efficient fits the context of being productive."
-                },
-                {
-                    id: 2,
-                    question: "The project was ___challenging___ for the entire team.",
-                    options: ["The task was difficult for everyone.", "The work was easy for all.", "The job was simple for the group."],
-                    correctAnswer: "The task was difficult for everyone.",
-                    type: "sentence",
-                    explanation: "Challenging means difficult or demanding."
-                },
-                {
-                    id: 3,
-                    type: "conversation",
-                    difficulty: "초급",
-                    conversation: [
-                        { speaker: "A", dialogue: "How was your weekend?" },
-                        { speaker: "B", dialogue: "___" }
-                    ],
-                    options: ["It was great, thanks!", "Yes, I do.", "Next Monday."],
-                    correctAnswer: "It was great, thanks!",
-                    explanation: "This is the most natural response to a question about how someone's weekend was."
+                const level = (formData.level || 'B').toUpperCase();
+                const categoryMap = {
+                    business: '비즈니스',
+                    travel: '여행',
+                    daily: '일상생활',
+                    academic: '학업'
+                };
+                const majorCategory = categoryMap[selectedType] || '일상생활';
+
+                const toEnumType = (t) => ({
+                    word: 'WORD',
+                    sentence: 'SENTENCE',
+                    conversation: 'CONVERSATION'
+                })[t];
+
+                // conversation 포함 10문항 무작위 배분
+                const allTypes = ['word', 'sentence', 'conversation'];
+                const allocateCounts = (total) => {
+                    // 각 유형 최소 1문항 보장 후 나머지 랜덤 분배
+                    const counts = { word: 1, sentence: 1, conversation: 1 };
+                    let remaining = Math.max(total - 3, 0);
+                    while (remaining > 0) {
+                        const pick = allTypes[Math.floor(Math.random() * allTypes.length)];
+                        counts[pick] += 1;
+                        remaining -= 1;
+                    }
+                    return counts;
+                };
+                const counts = allocateCounts(10);
+
+                const requests = allTypes
+                    .filter((t) => counts[t] > 0)
+                    .map((t) => generateQuestions({
+                        questionType: toEnumType(t),
+                        difficulty: level,
+                        majorCategory,
+                        topics: formData.keywords || [],
+                        questionCount: counts[t]
+                    }, { signal: controller.signal }));
+
+                const results = await Promise.all(requests);
+
+                const mapped = results.flatMap((res, idx) => {
+                    const typeLower = allTypes[idx];
+                    const questionsArr = Array.isArray(res?.questions) ? res.questions : [];
+                    return questionsArr.map((q, i) => {
+                        const options = [q.optionA, q.optionB, q.optionC].filter(Boolean);
+                        const letterToIndex = { A: 0, B: 1, C: 2 };
+                        const answerIndex = letterToIndex[(q.correctAnswer || '').toUpperCase()] ?? -1;
+                        const correctValue = answerIndex >= 0 ? options[answerIndex] : (q.correctAnswer || '');
+                        return {
+                            id: `gen-${typeLower}-${i}`,
+                            question: q.questionText || '',
+                            options,
+                            correctAnswer: correctValue,
+                            type: typeLower,
+                            difficulty: q.difficulty || level,
+                            conversation: q.conversation || undefined
+                        };
+                    });
+                });
+
+                // 랜덤 셔플
+                for (let i = mapped.length - 1; i > 0; i -= 1) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [mapped[i], mapped[j]] = [mapped[j], mapped[i]];
                 }
-            ];
 
-            setTimeout(() => {
-                setQuestions(dummyQuestions);
+                // 최대 10개
+                setQuestions(mapped.slice(0, 10));
+
+                // 세션 생성 및 시작
+                try {
+                    const storedUser = localStorage.getItem('user');
+                    const userId = storedUser ? JSON.parse(storedUser).userId : null;
+                    if (userId) {
+                        const practice = await createPracticeSession({ userId, categories: [majorCategory] });
+                        if (practice?.sessionId) {
+                            setSessionId(practice.sessionId);
+                            try { await startLearningSession(practice.sessionId); } catch (e) { console.warn('세션 시작 실패:', e?.message || e); }
+                        }
+                    }
+                } catch (e) { console.warn('연습 세션 생성 실패:', e?.message || e); }
+            } catch (e) {
+                if (e.name === 'AbortError') return;
+                setError('문제를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.');
+            } finally {
                 setIsLoading(false);
-            }, 1000);
+                abortRef.current = null;
+            }
         };
 
         fetchQuestions();
-    }, [formData.selectedCategories, formData.keywords, formData.level]);
+        return () => {
+            if (abortRef.current) abortRef.current.abort();
+        };
+    }, [formData.selectedCategories, formData.keywords, formData.level, selectedType]);
 
     const totalQuestions = questions.length;
     const currentQuestion = questions[currentQuestionIndex];
@@ -94,7 +137,7 @@ export default function StudySession({ onStudyComplete }) {
     const studyType = STUDY_TYPES.find(type => type.id === selectedType);
     
     // 이벤트 핸들러
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!selectedAnswer) return;
         
         const newAnswer = {
@@ -107,10 +150,17 @@ export default function StudySession({ onStudyComplete }) {
         
         setAnswers([...answers, newAnswer]);
         setShowResult(true);
+
+        // 세션 진행 업데이트
+        try {
+            if (sessionId) {
+                await updateLearningSessionProgress({ sessionId, isCorrect: newAnswer.isCorrect });
+            }
+        } catch (e) { console.warn('세션 진행 업데이트 실패:', e?.message || e); }
     };
 
     // 다음 문제 또는 완료
-    const handleNext = () => {
+    const handleNext = async () => {
         if (currentQuestionIndex < totalQuestions - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
             setSelectedAnswer('');
@@ -122,6 +172,8 @@ export default function StudySession({ onStudyComplete }) {
                 correctAnswers: answers.filter(answer => answer.isCorrect).length,
                 answers: answers
             };
+            // 세션 완료 호출
+            try { if (sessionId) await completeLearningSession(sessionId); } catch (e) { console.warn('세션 완료 실패:', e?.message || e); }
             
             if (onStudyComplete) {
                 onStudyComplete(results);
@@ -153,11 +205,43 @@ export default function StudySession({ onStudyComplete }) {
     };
 
     if (isLoading) {
-        return <div className="text-center p-10"><h2>문제 로딩 중...</h2></div>;
+        return (
+            <div className="text-center !p-10">
+                <h2 className="!mb-4">문제 로딩 중...</h2>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 !mx-auto !mb-4"></div>
+                <div className="flex items-center justify-center gap-3">
+                    <Button
+                        variant="outline"
+                        onClick={() => { if (abortRef.current) abortRef.current.abort(); }}
+                    >
+                        취소
+                    </Button>
+                </div>
+            </div>
+        );
     }
 
     if (error) {
-        return <div className="text-center !p-10 text-red-600"><h2>오류</h2><p>{error}</p></div>;
+        return (
+            <div className="text-center !p-10">
+                <h2 className="text-red-600 !mb-2">오류</h2>
+                <p className="text-red-600 !mb-4">{error}</p>
+                <div className="flex items-center justify-center gap-3">
+                    <Button onClick={() => {
+                        // 재시도: 의존성 변경 트리거 위해 난수 상태 변경 대신 기존 이펙트 재호출용 상태 토글 가능
+                        setIsLoading(true);
+                        setError(null);
+                        // 간단 재로딩
+                        setTimeout(() => {
+                            setIsLoading(false);
+                            // 의존성 변경을 유도하지 않고 직접 재호출
+                            const evt = new Event('force-fetch');
+                            window.dispatchEvent(evt);
+                        }, 0);
+                    }}>다시 시도</Button>
+                </div>
+            </div>
+        );
     }
 
     return (
