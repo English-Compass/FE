@@ -19,9 +19,6 @@ export function DailyProgressCard({ studyProgress, dailyActivity, loading }) {
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
             <span>오늘의 학습 진행률</span>
-            <Badge variant="secondary" className="!bg-white/70">
-              {studyProgress.streak}일 연속
-            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-5">
@@ -38,15 +35,11 @@ export function DailyProgressCard({ studyProgress, dailyActivity, loading }) {
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span>오늘의 학습 진행률</span>
-          <Badge variant="secondary" className="!bg-white/70">
-            {studyProgress.streak}일 연속
-          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
-        <div className="flex justify-between text-lg/8">
-          <span>목표: {dailyGoal}분</span>
-          <span>{actualStudyTime}분 / {dailyGoal}분</span>
+        <div className="flex justify-end text-lg/8">
+          <span>오늘의 학습 시간 {actualStudyTime}분</span>
         </div>
         <Progress value={progressPercentage} className="!bg-white/20" />
         <Button onClick={() => navigate('/dashboard/study')} className="!bg-white/20 !border border-white/30">
