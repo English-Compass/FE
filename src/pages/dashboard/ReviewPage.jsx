@@ -4,7 +4,7 @@ import { QuickReview } from '../../components/review/QuickReview';
 import { ReviewList } from '../../components/review/ReviewList';
 import { ReviewQuiz } from '../../components/review/ReviewQuiz';
 import { useApp } from '../../context/AppContext';
-import { fetchWrongQuestions, fetchReviewQuiz, createQuestionAnswer, createLearningSession } from '../../services/api.js';
+import { fetchWrongQuestions, fetchReviewQuiz, createQuestionAnswer, createReviewSession } from '../../services/api.js';
 
 export default function ReviewPage() {
   const {
@@ -24,6 +24,7 @@ export default function ReviewPage() {
 
   // 실제 세션 동기화용 상태
   const [sessionId, setSessionId] = React.useState(null);
+  const [initialQuestionCount, setInitialQuestionCount] = React.useState(0);
 
   // 컴포넌트 마운트 시 복습 문제 데이터 로드 및 스크롤 리셋
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function ReviewPage() {
     if (!userId) return;
 
     // 리뷰 세션 생성 (실세션 동기화)
-    createLearningSession({ userId, sessionType: 'REVIEW', categories: [] })
+    createReviewSession({ userId })
       .then((session) => {
         if (session?.sessionId) setSessionId(session.sessionId);
       })
@@ -69,6 +70,7 @@ export default function ReviewPage() {
 
   // 퀴즈 시작
   const startReview = () => {
+    setInitialQuestionCount(reviewQuestions.length);
     setReviewMode(REVIEW_MODES.QUIZ);
     setCurrentReviewIndex(0);
     setReviewSelectedAnswer('');
@@ -181,7 +183,7 @@ export default function ReviewPage() {
       <ReviewQuiz
         question={currentQuestion}
         currentIndex={currentReviewIndex}
-        totalQuestions={reviewQuestions.length}
+        totalQuestions={initialQuestionCount}
         selectedAnswer={reviewSelectedAnswer}
         showResult={reviewShowResult}
         onAnswerSelect={handleAnswerSelect}
