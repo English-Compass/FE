@@ -3,7 +3,7 @@ import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
 import { Badge } from '../ui/badge';
 import { useApp } from '../../context/AppContext';
-import { generateQuestions, createPracticeSession, startLearningSession, updateLearningSessionProgress, completeLearningSession } from '../../services/api.js';
+import { generateQuestions, createLearningSession, startLearningSession, completeLearningSession } from '../../services/api.js';
 
 import { Word } from '../question-types/Word';
 import { Sentence } from '../question-types/Sentence';
@@ -109,7 +109,12 @@ export default function StudySession({ onStudyComplete }) {
                     const storedUser = localStorage.getItem('user');
                     const userId = storedUser ? JSON.parse(storedUser).userId : null;
                     if (userId) {
-                        const practice = await createPracticeSession({ userId, categories: [majorCategory] });
+                        const practice = await createLearningSession({ 
+                            userId, 
+                            sessionType: 'PRACTICE',
+                            sessionMetadata: 'practice',
+                            categories: [majorCategory] 
+                        });
                         if (practice?.sessionId) {
                             setSessionId(practice.sessionId);
                             try { await startLearningSession(practice.sessionId); } catch (e) { console.warn('세션 시작 실패:', e?.message || e); }
@@ -150,13 +155,6 @@ export default function StudySession({ onStudyComplete }) {
         
         setAnswers([...answers, newAnswer]);
         setShowResult(true);
-
-        // 세션 진행 업데이트
-        try {
-            if (sessionId) {
-                await updateLearningSessionProgress({ sessionId, isCorrect: newAnswer.isCorrect });
-            }
-        } catch (e) { console.warn('세션 진행 업데이트 실패:', e?.message || e); }
     };
 
     // 다음 문제 또는 완료

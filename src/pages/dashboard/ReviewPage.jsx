@@ -4,7 +4,7 @@ import { QuickReview } from '../../components/review/QuickReview';
 import { ReviewList } from '../../components/review/ReviewList';
 import { ReviewQuiz } from '../../components/review/ReviewQuiz';
 import { useApp } from '../../context/AppContext';
-import { fetchWrongQuestions, fetchReviewQuiz, createQuestionAnswer, createReviewSession, updateLearningSessionProgress } from '../../services/api.js';
+import { fetchWrongQuestions, fetchReviewQuiz, createQuestionAnswer, createLearningSession } from '../../services/api.js';
 
 export default function ReviewPage() {
   const {
@@ -34,7 +34,7 @@ export default function ReviewPage() {
     if (!userId) return;
 
     // 리뷰 세션 생성 (실세션 동기화)
-    createReviewSession({ userId, categories: [] })
+    createLearningSession({ userId, sessionType: 'REVIEW', categories: [] })
       .then((session) => {
         if (session?.sessionId) setSessionId(session.sessionId);
       })
@@ -104,13 +104,6 @@ export default function ReviewPage() {
         timeSpent: 0,
         solveCount: 1
       });
-
-      // 세션 진행률 업데이트
-      try {
-        await updateLearningSessionProgress({ sessionId: effectiveSessionId, isCorrect });
-      } catch (err) {
-        console.warn('세션 진행 업데이트 실패:', err?.message || err);
-      }
 
       // 정답이면 목록에서 제거
       if (isCorrect) {

@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { createReviewSession } from '../../services/api.js';
+import { createLearningSession } from '../../services/api.js';
 
 export function ReviewQuizCard({ quiz, navigate }) {
 
@@ -46,8 +46,10 @@ export function ReviewQuizCard({ quiz, navigate }) {
               }
 
               // 복습세션 생성
-              const session = await createReviewSession({ 
+              const session = await createLearningSession({ 
                 userId, 
+                sessionType: 'REVIEW',
+                sessionMetadata: 'review',
                 categories: ['study'] // 기본 카테고리
               });
               
