@@ -61,6 +61,41 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
+      },
+      '/api/generate': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/sessions': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/daily-activity': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/weekly-graph': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/question-type-accuracy': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/weakness-distribution': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/settings': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
       }
     }
   }

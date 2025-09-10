@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { fetchWrongQuestions, createWrongAnswerSession } from '../../services/api.js';
+import { fetchWrongQuestions, createLearningSession } from '../../services/api.js';
 
 export function WrongAnswerCard({ navigate }) {
   const [wrongQuizzes, setWrongQuizzes] = React.useState([]);
@@ -78,8 +78,10 @@ export function WrongAnswerCard({ navigate }) {
               }
 
               // 오답세션 생성
-              const session = await createWrongAnswerSession({ 
+              const session = await createLearningSession({ 
                 userId, 
+                sessionType: 'WRONG_ANSWER',
+                sessionMetadata: 'wrong-answer',
                 categories: ['study'] // 기본 카테고리
               });
               
