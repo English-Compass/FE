@@ -10,7 +10,7 @@ import { WrongAnswerCard } from '../../components/home/WrongAnswerCard.jsx';
 import { ReviewQuizCard } from '../../components/home/ReviewQuizCard.jsx';
 import { ConversationCard } from '../../components/home/ConversationCard.jsx';
 import HistoryChart from '../../components/home/HistoryChart.jsx';
-import { fetchTodayWords } from '../../services/api.js';
+import { fetchTodayWords, fetchReviewQuiz } from '../../services/api.js';
 
 export default function HomePage() {
     const navigate = useNavigate();
@@ -23,6 +23,7 @@ export default function HomePage() {
     const [weeklyLoading, setWeeklyLoading] = useState(true);
     const [accuracyLoading, setAccuracyLoading] = useState(true);
     const [weaknessLoading, setWeaknessLoading] = useState(true);
+    const [reviewQuiz, setReviewQuiz] = useState([]);
 
     // 오늘 날짜를 YYYY-MM-DD 형식으로 가져오는 함수
     const getTodayDate = () => {
@@ -435,13 +436,24 @@ export default function HomePage() {
             .catch(() => {})
     }, []);
 
-    const reviewQuiz = [
-        { id: 1, question: 'Fill in the blank: The meeting was very _____.', options: ['productive', 'produce', 'production'], correct: 0 },
-        { id: 2, question: 'What does "efficient" mean?', options: ['느린', '효율적인', '어려운'], correct: 1 },
-        { id: 3, question: 'Choose the correct sentence:', options: ['I go there yesterday', 'I went there yesterday', 'I goes there yesterday'], correct: 1 },
-        { id: 4, question: 'Select the synonym of "important":', options: ['insignificant', 'crucial', 'small'], correct: 1 },
-        { id: 5, question: 'Complete: She _____ to work every day.', options: ['go', 'goes', 'going'], correct: 1 }
-    ];
+    // 복습 퀴즈 - 백엔드 연결
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        const userId = storedUser ? JSON.parse(storedUser).userId : null;
+        if (!userId) return;
+        fetchReviewQuiz(userId)
+            .then((data) => {
+                const quizzes = Array.isArray(data) ? data : (data?.questions || []);
+                setReviewQuiz(quizzes.map((q, idx) => ({
+                    id: q.id || q.questionId || idx + 1,
+                    question: q.question || q.questionText || '',
+                    options: q.options || [q.optionA, q.optionB, q.optionC].filter(Boolean)
+                })));
+            })
+            .catch(() => {})
+    }, []);
+
+    
 
     return (
         <div className="home-page">

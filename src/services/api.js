@@ -42,7 +42,7 @@ export const fetchRecommendedWords = async (wordStudyRequestDto) => {
 
 // 복습/문제 관련
 export const fetchWrongQuestions = async (userId) => {
-  const url = `/api/quiz/user/${userId}/wrong-questions`;
+  const url = `/api/quiz/wrong-answers?userId=${userId}`;
   const res = await fetch(url, {
     method: 'GET',
     headers: defaultHeaders()
@@ -63,7 +63,7 @@ export const fetchReviewQuiz = async (userId) => {
 
 export const generateQuestions = async (questionGenerationRequestDto, options = {}) => {
   const { signal } = options; // AbortSignal 지원
-  const res = await fetch('/api/generate/questions', {
+  const res = await fetch('/api/questions/generate', {
     method: 'POST',
     headers: defaultHeaders(),
     body: JSON.stringify(questionGenerationRequestDto),
@@ -83,6 +83,45 @@ export const createQuestionAnswer = async (questionAnswerCreateDto) => {
   return res.json();
 };
 
+// 복습 세션 생성
+export const createReviewSession = async (sessionCreateDto) => {
+  console.log('복습 세션 생성 요청:', sessionCreateDto);
+  const res = await fetch('/api/sessions/review', {
+    method: 'POST',
+    headers: defaultHeaders(),
+    body: JSON.stringify(sessionCreateDto)
+  });
+  console.log('복습 세션 응답 상태:', res.status);
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('복습 세션 생성 실패:', res.status, errorText);
+    throw new Error(`복습 세션 생성 실패: ${res.status} - ${errorText}`);
+  }
+  const result = await res.json();
+  console.log('복습 세션 생성 성공:', result);
+  return result;
+};
+
+// 오답 세션 생성
+export const createWrongAnswerSession = async (sessionCreateDto) => {
+  console.log('오답 세션 생성 요청:', sessionCreateDto);
+  const res = await fetch('/api/sessions/wrong-answer', {
+    method: 'POST',
+    headers: defaultHeaders(),
+    body: JSON.stringify(sessionCreateDto)
+  });
+  console.log('오답 세션 응답 상태:', res.status);
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('오답 세션 생성 실패:', res.status, errorText);
+    throw new Error(`오답 세션 생성 실패: ${res.status} - ${errorText}`);
+  }
+  const result = await res.json();
+  console.log('오답 세션 생성 성공:', result);
+  return result;
+};
+
+// 일반 학습 세션 생성 (기존 함수 유지)
 export const createLearningSession = async (learningSessionCreateDto) => {
   console.log('세션 생성 요청:', learningSessionCreateDto);
   const res = await fetch('/api/learning-sessions', {
@@ -137,7 +176,7 @@ export const completeLearningSession = async (sessionId) => {
 // 세션의 문제 조회 - generateQuestions 사용
 export const fetchSessionQuestions = async (questionGenerationRequestDto, options = {}) => {
   const { signal } = options;
-  const res = await fetch('/api/generate/questions', {
+  const res = await fetch('/api/questions/generate', {
     method: 'POST',
     headers: defaultHeaders(),
     body: JSON.stringify(questionGenerationRequestDto),
