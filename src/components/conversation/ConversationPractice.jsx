@@ -17,6 +17,22 @@ export function ConversationPractice({
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [sessionFeedback, setSessionFeedback] = useState(null);
   const mediaRecorderRef = useRef(null);
+  const messagesEndRef = useRef(null);
+
+  // 자동 스크롤 함수 - 채팅 영역 내에서만 스크롤
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      const chatContainer = messagesEndRef.current.closest('.overflow-y-auto');
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    }
+  };
+
+  // 대화가 업데이트될 때마다 자동 스크롤
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversation]);
 
   useEffect(() => {
     // API: 컴포넌트가 마운트될 때, 새로운 대화 세션을 시작합니다.
@@ -261,7 +277,8 @@ const handleSendAudio = async (audioBlob) => {
               variant="outline"
               size="sm"
               onClick={handleEndSession}
-              className="text-red-600 border-red-200 hover:bg-red-50"
+              className="!text-blue-600 !border-blue-300 hover:!bg-blue-50 hover:!text-blue-700 font-medium"
+              style={{ color: '#2563eb', borderColor: '#93c5fd' }}
             >
               세션 종료
             </Button>
@@ -270,7 +287,7 @@ const handleSendAudio = async (audioBlob) => {
       </div>
 
       {/* Chat Interface */}
-      <Card className="flex h-[26rem] flex-col rounded-lg border bg-white shadow-sm">
+      <Card className="flex h-[28rem] flex-col rounded-lg border bg-white shadow-sm">
         <CardHeader className="border-b !p-4">
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
@@ -317,7 +334,7 @@ const handleSendAudio = async (audioBlob) => {
         </CardHeader>
         
         <CardContent className="flex flex-1 flex-col !space-y-4">
-         <div className='flex-1 overflow-y-auto !space-y-4 !max-h-72'>
+         <div className='flex-1 overflow-y-auto !space-y-4 !max-h-80'>
             {conversation.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center text-gray-500">
@@ -354,32 +371,36 @@ const handleSendAudio = async (audioBlob) => {
                 </div>
               ))
             )}
-          </div>
-
-          {/* Input Area - Mic Button with Text */}
-          <div className='flex justify-center items-center !pt-2'>
-            <Button
-              onClick={toggleListening}
-              className={`!w-80 h-16 rounded-full flex items-center gap-3 ${
-                isListening 
-                  ? 'bg-red-500 hover:bg-red-600' 
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}
-            >
-              {isListening ? (
-                <>
-                  <MicOff className="w-6 h-6" />
-                  <span className="text-lg font-medium">말하기 종료</span>
-                </>
-              ) : (
-                <>
-                  <Mic className="w-6 h-6" />
-                  <span className="text-lg font-medium">말하기</span>
-                </>
-              )}
-            </Button>
+            {/* 자동 스크롤을 위한 마커 */}
+            <div ref={messagesEndRef} />
           </div>
         </CardContent>
+      </Card>
+
+      {/* Fixed Input Area - Mic Button */}
+      <Card className="!p-4 bg-white border rounded-lg shadow-sm">
+        <div className='flex justify-center items-center'>
+          <Button
+            onClick={toggleListening}
+            className={`!w-80 h-16 rounded-full flex items-center gap-3 ${
+              isListening 
+                ? 'bg-red-500 hover:bg-red-600' 
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+          >
+            {isListening ? (
+              <>
+                <MicOff className="w-6 h-6" />
+                <span className="text-lg font-medium">말하기 종료</span>
+              </>
+            ) : (
+              <>
+                <Mic className="w-6 h-6" />
+                <span className="text-lg font-medium">말하기</span>
+              </>
+            )}
+          </Button>
+        </div>
       </Card>
 
       {/* Practice Tips */}
