@@ -3,22 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
+import { wordDatabase } from '../../data/wordDatabase.js';
 
 export function TodayWordsCard({ words }) {
   const navigate = useNavigate();
-  // 백엔드에서 전달된 words 중 무작위 3개만 표시
+  
+  // 프론트엔드에서 랜덤으로 3개 단어 선택
   const sampleWords = React.useMemo(() => {
-    if (!Array.isArray(words) || words.length === 0) return [];
-    const idx = Array.from({ length: words.length }, (_, i) => i);
-    for (let i = idx.length - 1; i > 0; i--) {
+    // 모든 단어를 하나의 배열로 합치기
+    const allWords = [];
+    Object.values(wordDatabase).forEach(categoryWords => {
+      allWords.push(...categoryWords);
+    });
+    
+    // 랜덤하게 섞기
+    const shuffled = [...allWords];
+    for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [idx[i], idx[j]] = [idx[j], idx[i]];
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    return idx.slice(0, 3).map(i => words[i]);
-  }, [words]);
+    
+    // 처음 3개 선택
+    return shuffled.slice(0, 3);
+  }, []); // 빈 의존성 배열로 컴포넌트 마운트 시에만 실행
 
   const handleMoreWords = () => {
-    navigate('/dashboard/wordbook');
+    navigate('/dashboard/word-study');
   };
   return (
     <Card>

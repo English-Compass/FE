@@ -13,10 +13,10 @@ const STUDY_TYPES = [
 
 // 백엔드 CategoryMapper와 일치하는 키워드 분류
 const KEYWORDS_BY_CATEGORY = {
-  STUDY: ['수업 듣기', '학과 대화', '과제 시험'],
-  BUSINESS: ['회의 컨퍼런스', '고객 서비스', '이메일 보고서'],
-  TRAVEL: ['배낭여행', '가족여행', '친구여행'],
-  DAILY_LIFE: ['쇼핑 식당', '병원 방문', '대중교통']
+  STUDY: ['수업 듣기', '학과 대화', '과제 시험', '도서관 이용'],
+  BUSINESS: ['회의 컨퍼런스', '고객 서비스', '이메일 보고서', '전화 통화'],
+  TRAVEL: ['배낭여행', '가족여행', '친구여행', '공항 호텔'],
+  DAILY_LIFE: ['쇼핑 식당', '병원 방문', '대중교통', '은행 업무']
 };
 
 // 사용자의 학습 통계 데이터를 가져오는 예시 (현재 비활성)
@@ -112,6 +112,21 @@ export const useApp = () => {
     throw new Error('useApp must be used within AppProvider');
   }
   return context;
+};
+
+const getKeywordCategoryKey = (categoryId) => {
+  switch (categoryId) {
+    case 'academic':
+      return 'STUDY';
+    case 'daily':
+      return 'DAILY_LIFE';
+    case 'business':
+      return 'BUSINESS';
+    case 'travel':
+      return 'TRAVEL';
+    default:
+      return '';
+  }
 };
 
 export const AppProvider = ({ children }) => {
@@ -275,9 +290,10 @@ export const AppProvider = ({ children }) => {
       
       // 선택된 카테고리에 속하지 않는 키워드들 제거
       const validKeywords = prev.keywords.filter(keyword => {
-        return newCategories.some(catId => 
-          KEYWORDS_BY_CATEGORY[catId]?.includes(keyword)
-        );
+        return newCategories.some(catId => {
+          const key = getKeywordCategoryKey(catId);
+          return KEYWORDS_BY_CATEGORY[key]?.includes(keyword)
+        });
       });
       
       return {
@@ -374,6 +390,7 @@ export const AppProvider = ({ children }) => {
 
     // 헬퍼 함수
     getDifficultyText,
+    getKeywordCategoryKey,
     handleCategoryToggle,
     handleKeywordToggle,
     resetAdditionalInfo,

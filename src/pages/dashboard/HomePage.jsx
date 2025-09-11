@@ -119,7 +119,7 @@ export default function HomePage() {
         try {
             setWeeklyLoading(true);
             const today = getTodayDate();
-            const apiUrl = `/learning-analytics/users/${userId}/weekly-graph?weekStartDate=${today}`;
+            const apiUrl = `/api/weekly-graph?weekStartDate=${today}`;
             
             console.log('📈 [WeeklyGraph API] 요청 시작:', {
                 userId,
@@ -193,7 +193,7 @@ export default function HomePage() {
 
         try {
             setAccuracyLoading(true);
-            const apiUrl = `/learning-analytics/users/${userId}/question-type-accuracy`;
+            const apiUrl = `/api/question-type-accuracy`;
             
             console.log('🎯 [QuestionTypeAccuracy API] 요청 시작:', {
                 userId,
@@ -271,7 +271,7 @@ export default function HomePage() {
 
         try {
             setWeaknessLoading(true);
-            const apiUrl = `/learning-analytics/users/${userId}/weakness-distribution`;
+            const apiUrl = `/api/weakness-distribution`;
             
             console.log('🎯 [WeaknessDistribution API] 요청 시작:', {
                 userId,
@@ -419,21 +419,10 @@ export default function HomePage() {
     // 더미 데이터 (UI 확인용)
     const [todayWords, setTodayWords] = useState([]);
 
-    // 오늘의 단어 - 백엔드 연결
+    // 오늘의 단어 - 프론트엔드에서 생성 (TodayWordsCard에서 처리됨)
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        const userId = storedUser ? JSON.parse(storedUser).userId : null;
-        if (!userId) return;
-        fetchTodayWords(userId)
-            .then((data) => {
-                const words = Array.isArray(data?.words) ? data.words : [];
-                setTodayWords(words.map(w => ({
-                    word: w.word || w.text || '',
-                    meaning: w.meaning || w.definition || '',
-                    example: w.example || ''
-                })));
-            })
-            .catch(() => {})
+        // TodayWordsCard에서 프론트엔드 랜덤 단어를 표시하므로 여기서는 빈 배열로 설정
+        setTodayWords([]);
     }, []);
 
     // 복습 퀴즈 - 백엔드 연결

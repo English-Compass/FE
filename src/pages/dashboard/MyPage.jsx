@@ -44,7 +44,7 @@ export default function MyPage() {
     try {
       setStatsLoading(true);
       const today = getTodayDate();
-      const apiUrl = `/learning-analytics/users/${userId}/weekly-stats/recent?weeks=1`;
+      const apiUrl = `/api/weekly-stats/recent?weeks=1`;
       
       console.log('📊 [MyPage WeeklyStats API] 요청 시작:', {
         userId,

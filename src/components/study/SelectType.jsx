@@ -18,7 +18,8 @@ export function SelectType({ onTypeSelected }) {
         KEYWORDS_BY_CATEGORY,
         formData,
         handleCategoryToggle,
-        handleKeywordToggle 
+        handleKeywordToggle,
+        getKeywordCategoryKey 
     } = useContext(AppContext);
 
     // 타입 선택 핸들러 (대분류)
@@ -115,7 +116,8 @@ export function SelectType({ onTypeSelected }) {
                             
                             {formData.selectedCategories.map((categoryId) => {
                                 const category = STUDY_TYPES.find(t => t.id === categoryId);
-                                const keywords = KEYWORDS_BY_CATEGORY[categoryId] || [];
+                                const key = getKeywordCategoryKey(categoryId);
+                                const keywords = KEYWORDS_BY_CATEGORY[key] || [];
                                 
                                 return (
                                     <div key={categoryId} className="!mb-6">

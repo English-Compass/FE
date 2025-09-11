@@ -109,8 +109,8 @@ export default function KakaoCallback() {
             
             // 쿼리 파라미터가 전혀 없는 경우 (일반적인 홈 접근)
             if (!window.location.search) {
-                console.log('쿼리 파라미터가 없습니다. 홈으로 리다이렉트');
-                navigate('/dashboard/home');
+                console.log('쿼리 파라미터가 없습니다. 랜딩 페이지로 리다이렉트');
+                navigate('/landing');
                 return;
             }
             
@@ -234,7 +234,7 @@ export default function KakaoCallback() {
                     return;
                 }
                 
-                navigate('/dashboard/home');
+                navigate('/add-info');
             } 
         } catch (error) {
             console.error('Token save error:', error);

@@ -6,6 +6,7 @@ import { Badge } from '../../components/ui/badge';
 import { ArrowLeft, BookOpen, Search, Filter } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { fetchRecommendedWords } from '../../services/api.js';
+import { wordDatabase } from '../../data/wordDatabase.js';
 
 export default function WordbookPage() {
   const navigate = useNavigate();
@@ -24,61 +25,6 @@ export default function WordbookPage() {
 
   // 키워드 기반 단어 추천 (로컬 더미 + API 결과 병합)
   const generateRecommendedWords = (keywords) => {
-    const wordDatabase = {
-      // 여행 관련 단어
-      '배낭여행': [
-        { word: 'backpack', meaning: '배낭', example: 'I packed my backpack for the trip.', level: 'A', category: 'travel' },
-        { word: 'hostel', meaning: '호스텔, 저렴한 숙소', example: 'We stayed at a hostel in Paris.', level: 'B', category: 'travel' },
-        { word: 'itinerary', meaning: '여행 일정', example: 'Our itinerary includes five cities.', level: 'C', category: 'travel' }
-      ],
-      '가족여행': [
-        { word: 'vacation', meaning: '휴가', example: 'We went on vacation to Hawaii.', level: 'A', category: 'travel' },
-        { word: 'resort', meaning: '리조트', example: 'The family resort has many activities.', level: 'B', category: 'travel' },
-        { word: 'sightseeing', meaning: '관광', example: 'We spent the day sightseeing in Rome.', level: 'B', category: 'travel' }
-      ],
-      '해외여행': [
-        { word: 'passport', meaning: '여권', example: 'Don\'t forget your passport at the airport.', level: 'A', category: 'travel' },
-        { word: 'customs', meaning: '세관', example: 'We had to go through customs.', level: 'B', category: 'travel' },
-        { word: 'jet lag', meaning: '시차병', example: 'I\'m still suffering from jet lag.', level: 'C', category: 'travel' }
-      ],
-
-      // 비즈니스 관련 단어
-      '회사업무': [
-        { word: 'meeting', meaning: '회의', example: 'We have a meeting at 3 PM.', level: 'A', category: 'business' },
-        { word: 'deadline', meaning: '마감일', example: 'The deadline for this project is Friday.', level: 'B', category: 'business' },
-        { word: 'colleague', meaning: '동료', example: 'My colleague helped me with the report.', level: 'B', category: 'business' }
-      ],
-      '미팅': [
-        { word: 'agenda', meaning: '안건, 의제', example: 'What\'s on the agenda for today\'s meeting?', level: 'C', category: 'business' },
-        { word: 'presentation', meaning: '발표', example: 'She gave an excellent presentation.', level: 'B', category: 'business' },
-        { word: 'negotiate', meaning: '협상하다', example: 'We need to negotiate the contract terms.', level: 'C', category: 'business' }
-      ],
-
-      // 일상 관련 단어
-      '가족': [
-        { word: 'family', meaning: '가족', example: 'I love spending time with my family.', level: 'A', category: 'daily' },
-        { word: 'relative', meaning: '친척', example: 'All my relatives came to the wedding.', level: 'B', category: 'daily' },
-        { word: 'sibling', meaning: '형제자매', example: 'I have two siblings.', level: 'B', category: 'daily' }
-      ],
-      '친구': [
-        { word: 'friendship', meaning: '우정', example: 'Our friendship has lasted for years.', level: 'B', category: 'daily' },
-        { word: 'companion', meaning: '동반자, 친구', example: 'He was my traveling companion.', level: 'C', category: 'daily' },
-        { word: 'buddy', meaning: '친구, 버디', example: 'He\'s been my workout buddy for months.', level: 'A', category: 'daily' }
-      ],
-
-      // 학술 관련 단어
-      '대학교': [
-        { word: 'campus', meaning: '캠퍼스', example: 'The university campus is beautiful.', level: 'B', category: 'academic' },
-        { word: 'semester', meaning: '학기', example: 'This semester I\'m taking five courses.', level: 'B', category: 'academic' },
-        { word: 'lecture', meaning: '강의', example: 'The professor\'s lecture was very interesting.', level: 'B', category: 'academic' }
-      ],
-      '연구': [
-        { word: 'research', meaning: '연구', example: 'She is conducting research on climate change.', level: 'B', category: 'academic' },
-        { word: 'hypothesis', meaning: '가설', example: 'Our hypothesis was proven correct.', level: 'C', category: 'academic' },
-        { word: 'methodology', meaning: '방법론', example: 'The research methodology was well-designed.', level: 'C', category: 'academic' }
-      ]
-    };
-
     let recommendedWords = [];
     
     keywords.forEach(keyword => {
@@ -92,7 +38,7 @@ export default function WordbookPage() {
       arr.findIndex(w => w.word === word.word) === index
     );
 
-    return uniqueWords.slice(0, 30); // 최대 30개 단어
+    return uniqueWords.slice(0, 60); // 최대 60개 단어로 증가
   };
 
   useEffect(() => {

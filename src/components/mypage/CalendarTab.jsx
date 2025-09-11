@@ -46,7 +46,7 @@ export default function LearningCalendarTab() {
       
       const year = currentMonth.getFullYear();
       const month = currentMonth.getMonth() + 1; // JavaScript month는 0부터 시작
-      const apiUrl = `/learning-analytics/users/${userId}/calendar-heatmap?year=${year}&month=${month}`;
+      const apiUrl = `/api/calendar-heatmap?year=${year}&month=${month}`;
       
       console.log('📅 [Calendar API] 요청 시작:', {
         userId,

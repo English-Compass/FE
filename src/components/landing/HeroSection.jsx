@@ -5,7 +5,7 @@ export default function HeroSection() {
 
     const handleLogin = () => {
         // 백엔드의 카카오 로그인 엔드포인트로 직접 이동
-        window.location.href = 'http://localhost:8080/oauth2/authorization/kakao';
+        window.location.href = 'http://54.180.60.200:8080/oauth2/authorization/kakao';
     }
     
     return (

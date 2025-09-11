@@ -12,6 +12,9 @@ import MyPage from "../pages/dashboard/MyPage";
 import ConversationPage from "../pages/dashboard/ConversationPage";
 import WordbookPage from "../pages/dashboard/WordbookPage";
 
+// study components
+import WordStudy from "../components/study/WordStudy";
+
 // auth
 import LandingPage from "../pages/landing/LandingPage";
 import KakaoCallback from "../pages/landing/KaKaoCallback";
@@ -26,8 +29,8 @@ const AllRoutes = () => {
             <Route path="/login/oauth2/code/kakao" element={<KakaoCallback />} />
             <Route path="/login/success" element={<KakaoCallback />} />
             <Route element={<Layout />}>
-                {/* 기본 경로 - 쿼리 파라미터가 있으면 KaKaoCallback, 없으면 홈으로 리다이렉트 */}
-                <Route path="/" element={<KakaoCallback />} />
+                {/* 기본 경로 - 홈으로 리다이렉트 */}
+                <Route path="/" element={<Navigate to="/dashboard/home" replace />} />
                 
                 {/* dashboard routes */}
                 <Route path="/dashboard/home" element={<HomePage />} />
@@ -37,6 +40,7 @@ const AllRoutes = () => {
                 <Route path="/dashboard/my" element={<MyPage />} />
                 <Route path="/dashboard/conversation" element={<ConversationPage />} />
                 <Route path="/dashboard/wordbook" element={<WordbookPage />} />
+                <Route path="/dashboard/word-study" element={<WordStudy />} />
             </Route>
         </Routes>
     );
