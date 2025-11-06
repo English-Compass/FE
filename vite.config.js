@@ -13,12 +13,12 @@ export default defineConfig({
         secure: false
       },
       '/login': {
-        target: 'http://localhost:8088',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
       },
       '/auth': {
-        target: 'http://localhost:8088',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
       },
