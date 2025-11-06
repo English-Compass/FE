@@ -4,8 +4,14 @@ import { Button } from '../ui/button';
 export default function HeroSection() {
 
     const handleLogin = () => {
-        // 백엔드의 카카오 로그인 엔드포인트로 직접 이동
-        window.location.href = 'http://54.180.60.200:8080/oauth2/authorization/kakao';
+        // 백엔드의 카카오 로그인 엔드포인트로 리다이렉트
+        // 프록시를 통해 백엔드로 요청이 전달됨 (vite.config.js 참고)
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || '';
+        const loginEndpoint = backendUrl 
+            ? `${backendUrl}/oauth2/authorization/kakao`
+            : '/oauth2/authorization/kakao'; // 프록시 사용 시 상대 경로
+        
+        window.location.href = loginEndpoint;
     }
     
     return (

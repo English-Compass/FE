@@ -30,7 +30,7 @@ export default function ProfileTab() {
       }
 
       console.log('ProfileTab - 백엔드에서 사용자 설정 조회 시작');
-      const response = await fetch('/user/settings', {
+      const response = await fetch('/tings', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`

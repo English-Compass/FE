@@ -115,7 +115,7 @@ export const useApp = () => {
 };
 
 export const AppProvider = ({ children }) => {
-  const [user, setUser] = useState({
+  const [user, setUserState] = useState({
     id: 'test-user-016',
     name: '김영희',
     email: 'test@example.com',
@@ -161,7 +161,7 @@ export const AppProvider = ({ children }) => {
         };
 
         // 사용자 설정 정보는 API에서 조회
-        const response = await fetch('/user/settings', {
+        const response = await fetch('/tings', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`

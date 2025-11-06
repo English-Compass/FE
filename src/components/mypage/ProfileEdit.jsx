@@ -134,16 +134,41 @@ export default function ProfileEdit({ user, editForm, setEditForm, onSave }) {
       const levelMapping = { 'A': 1, 'B': 2, 'C': 3 };
       const difficultyLevel = levelMapping[editForm.level] || 2; // 기본값: 중급
 
-      // 프론트엔드 키워드를 CategoryRequestDto 형식으로 변환
+      // 한글 키워드를 영어 enum으로 매핑
+      const keywordToEnumMap = {
+        '수업 듣기': 'CLASS_LISTENING',
+        '학과 대화': 'DEPARTMENT_CONVERSATION',
+        '과제 시험': 'ASSIGNMENT_EXAM',
+        '회의 컨퍼런스': 'MEETING_CONFERENCE',
+        '고객 서비스': 'CUSTOMER_SERVICE',
+        '이메일 보고서': 'EMAIL_REPORT',
+        '배낭여행': 'BACKPACKING',
+        '가족여행': 'FAMILY_TRIP',
+        '친구여행': 'FRIEND_TRIP',
+        '쇼핑 식당': 'SHOPPING_DINING',
+        '병원 방문': 'HOSPITAL_VISIT',
+        '대중교통': 'PUBLIC_TRANSPORT'
+      };
+
+      // 프론트엔드 키워드를 CategoryRequestDto 형식으로 변환 (영어 enum 사용)
       const categoriesMap = {};
       editForm.keywords.forEach(keyword => {
+        // 한글 키워드를 영어 enum으로 변환
+        const enumKeyword = keywordToEnumMap[keyword];
+        
+        if (!enumKeyword) {
+          console.warn(`키워드 매핑을 찾을 수 없습니다: ${keyword}`);
+          return;
+        }
+
         // 각 키워드가 어느 카테고리에 속하는지 찾기
         for (const [categoryKey, categoryKeywords] of Object.entries(KEYWORDS_BY_CATEGORY)) {
           if (categoryKeywords.includes(keyword)) {
             if (!categoriesMap[categoryKey]) {
               categoriesMap[categoryKey] = [];
             }
-            categoriesMap[categoryKey].push(keyword);
+            // 영어 enum 값으로 저장
+            categoriesMap[categoryKey].push(enumKeyword);
             break;
           }
         }
@@ -177,6 +202,9 @@ export default function ProfileEdit({ user, editForm, setEditForm, onSave }) {
       }
 
       // 2. 카테고리 설정 업데이트
+      console.log('카테고리 업데이트 요청 URL:', '/user/settings/categories');
+      console.log('카테고리 업데이트 요청 데이터:', JSON.stringify(categoryRequestData, null, 2));
+      
       const categoryResponse = await fetch('/user/settings/categories', {
         method: 'POST',
         headers: {
@@ -186,8 +214,18 @@ export default function ProfileEdit({ user, editForm, setEditForm, onSave }) {
         body: JSON.stringify(categoryRequestData)
       });
 
+      console.log('카테고리 업데이트 응답 상태:', categoryResponse.status, categoryResponse.statusText);
+
       if (!categoryResponse.ok) {
-        throw new Error(`카테고리 업데이트 실패: ${categoryResponse.status}`);
+        // 에러 응답 상세 정보 로깅
+        let errorText = '';
+        try {
+          errorText = await categoryResponse.text();
+          console.error('카테고리 업데이트 에러 응답:', errorText);
+        } catch (e) {
+          console.error('에러 응답 읽기 실패:', e);
+        }
+        throw new Error(`카테고리 업데이트 실패: ${categoryResponse.status} - ${errorText || categoryResponse.statusText}`);
       }
 
       const response = categoryResponse; // 마지막 응답을 사용
