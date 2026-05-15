@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Badge } from '../ui/badge';
 
-const API_BASE_URL = '/api/v1';
+const API_BASE_URL = '/api/speech';
 
 const DIFFICULTY_LEVELS = [
   { id: 'BEGINNER', title: '초급', description: '기본 어휘, 짧은 문장, 현재시제', color: 'bg-green-100 text-green-800' },

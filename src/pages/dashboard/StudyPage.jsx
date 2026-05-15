@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SelectType } from '../../components/study/SelectType';
 import StudySession from '../../components/study/StudySession';
 import { StudyCompleteSummary } from '../../components/study/StudyCompleteSummary';
 import { useApp } from '../../context/AppContext';
@@ -9,8 +8,7 @@ export default function StudyPage() {
   const navigate = useNavigate();
   const { 
     currentStep, 
-    setCurrentStep, 
-    setSelectedType,
+    setCurrentStep,
     studyResults,
     setStudyResults,
     scrollToTop
@@ -19,11 +17,6 @@ export default function StudyPage() {
   useEffect(() => {
     scrollToTop();
   }, []);
-
-  // 학습 유형 선택 완료 후 학습 세션 화면으로 이동
-  const handleTypeSelected = () => {
-    setCurrentStep('studysession');
-  };
 
   // 학습 완료 후 결과 화면으로 이동
   const handleStudyComplete = (results) => {
@@ -36,8 +29,7 @@ export default function StudyPage() {
 
   // 다시 학습하기
   const handleRestart = () => {
-    setCurrentStep('type');
-    setSelectedType('');
+    setCurrentStep('studysession');
     setStudyResults({
       totalQuestions: 0,
       correctAnswers: 0,
@@ -49,8 +41,7 @@ export default function StudyPage() {
   const handleGoHome = () => {
     navigate('/dashboard/home');
     // 상태 초기화
-    setCurrentStep('type');
-    setSelectedType('');
+    setCurrentStep('studysession');
     setStudyResults({
       totalQuestions: 0,
       correctAnswers: 0,
@@ -60,22 +51,16 @@ export default function StudyPage() {
 
   // 현재 단계에 따른 컴포넌트 렌더링
   const renderCurrentStep = () => {
-    switch (currentStep) {
-      case 'type':
-        return <SelectType onTypeSelected={handleTypeSelected} />;
-      case 'studysession':
-        return <StudySession onStudyComplete={handleStudyComplete} />;
-      case 'complete':
-        return (
-          <StudyCompleteSummary 
-            studyResults={studyResults}
-            onRestart={handleRestart}
-            onGoHome={handleGoHome}
-          />
-        );
-      default:
-        return <SelectType onTypeSelected={handleTypeSelected} />;
+    if (currentStep === 'complete') {
+      return (
+        <StudyCompleteSummary 
+          studyResults={studyResults}
+          onRestart={handleRestart}
+          onGoHome={handleGoHome}
+        />
+      );
     }
+    return <StudySession onStudyComplete={handleStudyComplete} />;
   };
 
   return (

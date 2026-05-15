@@ -26,27 +26,10 @@ export default function AddInfoPage() {
     useEffect(() => {
         scrollToTop();
         
-        // AddInfoPage 마운트 시 토큰 상태 확인 (localStorage + sessionStorage)
-        let token = localStorage.getItem('token');
-        const sessionToken = sessionStorage.getItem('token');
-        
-        console.log('AddInfoPage - 마운트 시 토큰 확인:');
-        console.log('- localStorage token:', token);
-        console.log('- sessionStorage token:', sessionToken);
-        
-        // localStorage에 토큰이 없으면 sessionStorage에서 복구 시도
-        if (!token && sessionToken) {
-            console.log('localStorage에 토큰이 없어서 sessionStorage에서 복구합니다.');
-            localStorage.setItem('token', sessionToken);
-            token = sessionToken;
-        }
-        
-        if (!token) {
-            console.error('AddInfoPage - 모든 저장소에서 토큰이 없습니다!');
-            console.log('토큰이 없으므로 랜딩 페이지로 리다이렉트합니다.');
-            navigate('/landing');
-            return;
-        }
+        // HttpOnly 쿠키(access_token)가 있으면 자동으로 전송됨
+        // localStorage에서 토큰을 읽을 필요 없음
+        // 쿠키가 없으면 Gateway에서 401을 반환하므로 여기서는 확인하지 않음
+        console.log('AddInfoPage - 마운트 완료 (HttpOnly 쿠키 사용)');
     }, []);
 
     // 사용자 정보 완성 및 대시보드로 이동
@@ -54,41 +37,49 @@ export default function AddInfoPage() {
         if (formData.keywords.length > 0) {
             setIsSaving(true);
             try {
-                let token = localStorage.getItem('token');
-                const sessionToken = sessionStorage.getItem('token');
-                
-                console.log('AddInfoPage - 저장 시도 중 토큰 확인:');
-                console.log('- localStorage token:', token);
-                console.log('- sessionStorage token:', sessionToken);
-                
-                // localStorage에 토큰이 없으면 sessionStorage에서 복구 시도
-                if (!token && sessionToken) {
-                    console.log('localStorage에 토큰이 없어서 sessionStorage에서 복구합니다.');
-                    localStorage.setItem('token', sessionToken);
-                    token = sessionToken;
-                }
-                
-                if (!token) {
-                    console.error('AddInfoPage - 모든 저장소에서 토큰이 없습니다!');
-                    alert('로그인이 필요합니다.');
-                    navigate('/landing');
-                    return;
-                }
+                // HttpOnly 쿠키(access_token)가 있으면 자동으로 전송됨
+                // localStorage에서 토큰을 읽을 필요 없음
+                console.log('AddInfoPage - 저장 시도 중 (HttpOnly 쿠키 사용)');
 
                 // 프론트엔드 레벨(A, B, C)을 백엔드 레벨(1, 2, 3)로 변환
                 const levelMapping = { 'A': 1, 'B': 2, 'C': 3 };
                 const difficultyLevel = levelMapping[formData.level] || 2; // 기본값: 중급
 
-                // 프론트엔드 키워드를 CategoryRequestDto 형식으로 변환
+                // 한글 키워드를 영어 enum으로 매핑
+       const keywordToEnumMap = {
+           '수업 참여': 'CLASS_LISTENING',
+           '학과 대화': 'DEPARTMENT_CONVERSATION',
+           '과제 시험': 'ASSIGNMENT_EXAM',
+           '회의': 'MEETING_CONFERENCE',
+           '고객 서비스': 'CUSTOMER_SERVICE',
+           '이메일 보고서': 'EMAIL_REPORT',
+           '배낭여행': 'BACKPACKING',
+           '가족여행': 'FAMILY_TRIP',
+           '친구와 여행': 'FRIEND_TRIP',
+           '쇼핑 외식': 'SHOPPING_DINING',
+           '병원 이용': 'HOSPITAL_VISIT',
+           '대중교통 이용': 'PUBLIC_TRANSPORT'
+       };
+
+                // 프론트엔드 키워드를 CategoryRequestDto 형식으로 변환 (영어 enum 사용)
                 const categoriesMap = {};
                 formData.keywords.forEach(keyword => {
+                    // 한글 키워드를 영어 enum으로 변환
+                    const enumKeyword = keywordToEnumMap[keyword];
+                    
+                    if (!enumKeyword) {
+                        console.warn(`키워드 매핑을 찾을 수 없습니다: ${keyword}`);
+                        return;
+                    }
+
                     // 각 키워드가 어느 카테고리에 속하는지 찾기
                     for (const [categoryKey, categoryKeywords] of Object.entries(KEYWORDS_BY_CATEGORY)) {
                         if (categoryKeywords.includes(keyword)) {
                             if (!categoriesMap[categoryKey]) {
                                 categoriesMap[categoryKey] = [];
                             }
-                            categoriesMap[categoryKey].push(keyword);
+                            // 영어 enum 값으로 저장
+                            categoriesMap[categoryKey].push(enumKeyword);
                             break;
                         }
                     }
@@ -108,14 +99,19 @@ export default function AddInfoPage() {
                 console.log('난이도 설정 요청:', difficultyRequestData);
 
                 // 1. 난이도 설정 저장
-                const difficultyResponse = await fetch('/user/settings/difficulty', {
+                console.log('🔵 [AddInfoPage] POST 요청 시작 - /api/user/settings/difficulty');
+                console.log('🔵 [AddInfoPage] 요청 데이터:', JSON.stringify(difficultyRequestData, null, 2));
+                
+                const difficultyResponse = await fetch('/api/user/settings/difficulty', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
+                    credentials: 'include', // 쿠키 전달 필수! (HttpOnly 쿠키 포함)
                     body: JSON.stringify(difficultyRequestData)
                 });
+                
+                console.log('🔵 [AddInfoPage] POST 응답 상태:', difficultyResponse.status, difficultyResponse.statusText);
 
                 if (!difficultyResponse.ok) {
                     const errorText = await difficultyResponse.text();
@@ -123,15 +119,20 @@ export default function AddInfoPage() {
                     throw new Error(`난이도 설정 실패: ${difficultyResponse.status} - ${errorText}`);
                 }
 
-                // 2. 카테고리 설정 저장
-                const categoryResponse = await fetch('/user/settings/categories', {
-                    method: 'POST',
+                // 2. 카테고리 설정 저장 (PUT 방식으로 전체 교체)
+                console.log('🟢 [AddInfoPage] PUT 요청 시작 - /api/user/settings/categories');
+                console.log('🟢 [AddInfoPage] 요청 데이터:', JSON.stringify(categoryRequestData, null, 2));
+                
+                const categoryResponse = await fetch('/api/user/settings/categories', {
+                    method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
+                    credentials: 'include', // 쿠키 전달 필수! (HttpOnly 쿠키 포함)
                     body: JSON.stringify(categoryRequestData)
                 });
+                
+                console.log('🟢 [AddInfoPage] PUT 응답 상태:', categoryResponse.status, categoryResponse.statusText);
 
                 if (!categoryResponse.ok) {
                     const errorText = await categoryResponse.text();
@@ -163,13 +164,7 @@ export default function AddInfoPage() {
                         keywords: formData.keywords
                     });
                     
-                    // localStorage의 user 정보도 업데이트
-                    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    localStorage.setItem('user', JSON.stringify({
-                        ...storedUser,
-                        level: formData.level,
-                        keywords: formData.keywords
-                    }));
+                    // 사용자 정보는 전역 상태에만 저장 (localStorage에 저장하지 않음)
                     
                     // 사용자 설정 완료 (백엔드에서 자동으로 처리됨)
                     

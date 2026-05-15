@@ -19,20 +19,19 @@ export function QuickReview({ reviewQuestions, onStartReview, onStartWeakTypeRev
     };
 
     reviewQuestions.forEach(question => {
-      const questionType = question.questionType || question.category || 'word';
-      const mappedType = QUESTION_TYPE_MAPPING[questionType] || questionType;
-      
-      if (!typeCount[mappedType]) {
-        typeCount[mappedType] = {
-          count: 0,
-          displayName: typeNames[mappedType] || mappedType,
-          icon: mappedType === 'word' ? '📝' : 
-                mappedType === 'sentence' ? '📖' :
-                mappedType === 'conversation' ? '🗣️' : '❓'
+      // 내부 key(word/sentence/conversation)를 그대로 사용 — startWeakTypeReview와 일치시키기 위해
+      const internalType = question.questionType || question.category || question.type || 'word';
 
+      if (!typeCount[internalType]) {
+        typeCount[internalType] = {
+          count: 0,
+          displayName: typeNames[internalType] || QUESTION_TYPE_MAPPING[internalType] || internalType,
+          icon: internalType === 'word' ? '📝' :
+                internalType === 'sentence' ? '📖' :
+                internalType === 'conversation' ? '🗣️' : '❓'
         };
       }
-      typeCount[mappedType].count++;
+      typeCount[internalType].count++;
     });
 
     return Object.entries(typeCount)

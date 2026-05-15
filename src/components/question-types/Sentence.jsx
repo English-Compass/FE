@@ -90,7 +90,7 @@ export function Sentence({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              📝 {isStudyMode ? '문법 학습' : currentQuestion.category}
+              📝 {isStudyMode ? '동의어 학습' : currentQuestion.category}
             </Badge>
             {studyType && (
               <Badge variant="secondary">
@@ -122,9 +122,9 @@ export function Sentence({
 
         {/* Sentence specific: blank highlighting */}
         <div className="bg-blue-50 !p-4 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-700 font-medium !mb-2">📝 문법 문제</p>
+          <p className="text-sm text-blue-700 font-medium !mb-2">📝 동의어 문제</p>
           <p className="text-blue-800">
-            빈칸에 들어갈 가장 적절한 답을 선택하세요.
+            밑줄친 문장과 동일한 의미의 숙어를 선택하세요.
           </p>
         </div>
 

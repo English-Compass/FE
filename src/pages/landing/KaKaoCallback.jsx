@@ -62,6 +62,62 @@ export default function KakaoCallback() {
         
         // URL에서 쿼리 파라미터 추출
         const urlParams = new URLSearchParams(window.location.search);
+        
+        // oauth2_success=true 플래그가 있으면 API 호출
+        if (urlParams.get('oauth2_success') === 'true') {
+            console.log('✅ oauth2_success=true 플래그 감지 - API 호출 시작');
+            handleKakaoCallback();
+            return;
+        }
+        
+        // API Gateway 콜백 처리 (token, name, profileImage, redirect 파라미터)
+        const gatewayToken = urlParams.get('token');
+        const gatewayName = urlParams.get('name');
+        const gatewayProfileImage = urlParams.get('profileImage');
+        const redirect = urlParams.get('redirect');
+        
+        if (gatewayToken) {
+            console.log('✅ Gateway 콜백 감지 - token, redirect 처리');
+            
+            // Gateway에서 받은 토큰을 localStorage에 저장 (토큰만 저장)
+            localStorage.setItem('jwt_token', gatewayToken);
+            sessionStorage.setItem('jwt_token', gatewayToken);
+            
+            // JWT 토큰에서 사용자 정보 추출
+            const decodedToken = decodeJWT(gatewayToken);
+            console.log('JWT 토큰 디코딩 결과:', decodedToken);
+            
+            // URL 파라미터에서 사용자 정보가 있으면 우선 사용 (JWT에 없을 경우 대비)
+            const userName = gatewayName ? decodeURIComponent(gatewayName) : (decodedToken?.name || decodedToken?.username);
+            const userProfileImage = gatewayProfileImage ? decodeURIComponent(gatewayProfileImage) : decodedToken?.profileImage;
+            const userId = decodedToken?.userId || decodedToken?.id || decodedToken?.sub;
+            
+            // 사용자 정보를 전역 상태(React Context)에만 저장 (localStorage에 저장하지 않음)
+            // 앱 로드 시 API로 최신 정보를 조회하므로 여기서는 임시로만 설정
+            if (userName || userProfileImage || userId) {
+                setUser(prevUser => ({
+                    ...prevUser,
+                    id: userId || prevUser.id,
+                    name: userName || prevUser.name,
+                    profileImage: userProfileImage || prevUser.profileImage,
+                    email: decodedToken?.email || prevUser.email
+                }));
+            }
+            
+            // redirect 파라미터가 있으면 해당 경로로 이동
+            if (redirect) {
+                console.log('Gateway redirect 경로로 이동:', redirect);
+                window.location.href = redirect;
+                return;
+            } else {
+                // redirect가 없으면 기본 경로로 이동
+                console.log('Gateway redirect 없음 - 대시보드로 이동');
+                navigate('/dashboard/home');
+                return;
+            }
+        }
+        
+        // 기존 로직 (기존 파라미터 처리)
         const token = urlParams.get('token');
         const userId = urlParams.get('userId');
         const username = urlParams.get('username');
@@ -118,7 +174,76 @@ export default function KakaoCallback() {
             alert(`로그인 처리 중 오류가 발생했습니다.\n토큰: ${token || '없음'}\n사용자ID: ${userId || '없음'}\n사용자명: ${username || '없음'}\n\n전체 URL: ${window.location.href}`);
             navigate('/landing');
         }
-    }, [navigate]);
+    }, [navigate, setUser]);
+
+    // /login/oauth2/code/kakao API 호출로 사용자 정보 조회
+    const handleKakaoCallback = async () => {
+        try {
+            console.log('✅ /login/oauth2/code/kakao API 호출 시작');
+            
+            // Gateway를 통한 API 경로
+            const apiUrl = '/api/auth/login/oauth2/code/kakao';
+            
+            console.log('API 요청 URL:', apiUrl);
+            console.log('쿠키 포함 요청 (credentials: include)');
+            
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include' // 쿠키 전달 필수! (HttpOnly 쿠키 포함)
+            });
+
+            if (response.ok) {
+                const responseData = await response.json();
+                console.log('✅ 사용자 정보 조회 성공:', responseData);
+                
+                // 응답에서 사용자 정보 추출 (data.userId, data.name, data.profileImage 형식)
+                const userId = responseData.userId || responseData.id || null;
+                const userName = responseData.name || responseData.username || null;
+                const userProfileImage = responseData.profileImage || responseData.profileImg || null;
+                const userEmail = responseData.email || null;
+                
+                // JWT 토큰은 HttpOnly 쿠키에 저장되어 있으므로 localStorage에 저장하지 않음
+                // 필요시 응답에서 토큰을 받을 수 있음
+                const token = responseData.token || responseData.accessToken;
+                if (token) {
+                    // 토큰이 응답에 포함되어 있으면 저장 (선택적)
+                    localStorage.setItem('jwt_token', token);
+                    sessionStorage.setItem('jwt_token', token);
+                }
+                
+                // 사용자 정보를 전역 상태에 저장
+                if (userId || userName || userProfileImage) {
+                    setUser({
+                        id: userId || null,
+                        name: userName || null,
+                        email: userEmail || null,
+                        profileImage: userProfileImage || null,
+                        level: null, // API로 조회
+                        joinDate: null, // API로 조회
+                        streak: 0,
+                        keywords: []
+                    });
+                }
+                
+                // redirect 처리
+                const redirect = responseData.redirect || '/dashboard/home';
+                console.log('리다이렉트 경로:', redirect);
+                navigate(redirect);
+            } else {
+                const errorData = await response.text();
+                console.error('❌ 사용자 정보 조회 실패:', response.status, errorData);
+                alert('로그인에 실패했습니다.');
+                navigate('/landing');
+            }
+        } catch (error) {
+            console.error('❌ API 호출 오류:', error);
+            alert('로그인 처리 중 오류가 발생했습니다.');
+            navigate('/landing');
+        }
+    };
 
     const handleKakaoLoginSuccess = async (token, userId, username, profileImage) => {
         try {
@@ -131,13 +256,13 @@ export default function KakaoCallback() {
             // 토큰 저장을 더 안전하게 처리 (localStorage + sessionStorage 이중 저장)
             try {
                 // localStorage에 저장
-                localStorage.setItem('token', token);
+                localStorage.setItem('jwt_token', token);
                 // sessionStorage에도 백업 저장
-                sessionStorage.setItem('token', token);
+                sessionStorage.setItem('jwt_token', token);
                 
                 // 저장 후 즉시 확인
-                const savedToken = localStorage.getItem('token');
-                const sessionToken = sessionStorage.getItem('token');
+                const savedToken = localStorage.getItem('jwt_token');
+                const sessionToken = sessionStorage.getItem('jwt_token');
                 console.log('KaKaoCallback - localStorage 토큰 확인:', savedToken);
                 console.log('KaKaoCallback - sessionStorage 토큰 확인:', sessionToken);
                 
@@ -153,8 +278,8 @@ export default function KakaoCallback() {
                 
                 // 추가 검증: 잠시 후 다시 확인
                 setTimeout(() => {
-                    const delayedToken = localStorage.getItem('token');
-                    const delayedSessionToken = sessionStorage.getItem('token');
+                    const delayedToken = localStorage.getItem('jwt_token');
+                    const delayedSessionToken = sessionStorage.getItem('jwt_token');
                     console.log('KaKaoCallback - 지연된 localStorage 토큰 확인:', delayedToken);
                     console.log('KaKaoCallback - 지연된 sessionStorage 토큰 확인:', delayedSessionToken);
                     
@@ -176,12 +301,8 @@ export default function KakaoCallback() {
             console.log('- decodedUsername:', decodedUsername);
             console.log('- decodedProfileImage:', decodedProfileImage);
             
-            // 사용자 정보를 localStorage에 저장
-            localStorage.setItem('user', JSON.stringify({
-                userId: userId === 'null' ? null : userId, // null 문자열을 실제 null로 변환
-                username: decodedUsername, 
-                profileImage: decodedProfileImage
-            }));
+            // 사용자 정보는 JWT 토큰에서 추출하므로 localStorage에 저장하지 않음
+            // (필요시 API로 조회)
             
             // AppContext의 사용자 정보 직접 업데이트
             const userData = {
@@ -206,7 +327,7 @@ export default function KakaoCallback() {
                 console.log('🆕 새로운 사용자 - add-info 페이지로 이동');
                 
                 // 네비게이션 전 토큰 상태 재확인
-                const tokenBeforeNav = localStorage.getItem('token');
+                const tokenBeforeNav = localStorage.getItem('jwt_token');
                 console.log('네비게이션 전 토큰 확인:', tokenBeforeNav);
                 
                 if (!tokenBeforeNav) {
@@ -224,7 +345,7 @@ export default function KakaoCallback() {
                 console.log('기존 사용자 정보 저장 중...');
                 
                 // 네비게이션 전 토큰 상태 재확인
-                const tokenBeforeNav = localStorage.getItem('token');
+                const tokenBeforeNav = localStorage.getItem('jwt_token');
                 console.log('기존 사용자 - 네비게이션 전 토큰 확인:', tokenBeforeNav);
                 
                 if (!tokenBeforeNav) {

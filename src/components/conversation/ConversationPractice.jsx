@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ArrowLeft, MessageCircle, Mic, MicOff, X, Star, TrendingUp, Clock } from 'lucide-react';
 
-const API_BASE_URL = '/api/v1';
+const API_BASE_URL = '/api/speech';
 
 export function ConversationPractice({
   user,
@@ -23,7 +23,7 @@ export function ConversationPractice({
     const startSession = async () => {
       try {
         let requestBody = {
-          userId: parseInt(user.id),
+          userId: user.id,
           difficultyLevel: conversationConfig?.difficultyLevel || 'INTERMEDIATE',
         };
 

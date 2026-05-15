@@ -17,12 +17,13 @@ export function ReviewQuiz({
   onNext, 
   onBackToList 
 }) {
-  const progress = ((currentIndex + 1) / totalQuestions) * 100;
+  const safeTotal = totalQuestions > 0 ? totalQuestions : 1;
+  const progress = ((currentIndex + 1) / safeTotal) * 100;
 
   
   // 문제 타입에 따른 컴포넌트 매핑
   const getQuestionComponent = () => {
-    const questionType = question.questionType || question.category || 'word';
+    const questionType = question.questionType || question.category || question.type || 'word';
     
     const commonProps = {
       question,
@@ -91,7 +92,7 @@ export function ReviewQuiz({
             onClick={onNext}
             className="w-1/2 !px-4 !py-6 bg-green-600 hover:bg-green-700 text-white"
             >
-            {currentIndex < totalQuestions - 1 ? '다음 문제' : '복습 완료'}
+            {currentIndex < safeTotal - 1 ? '다음 문제' : '복습 완료'}
             </Button>
         )}
         </div>

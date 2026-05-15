@@ -189,17 +189,6 @@ export default function MediaPage() {
         showHistory={showHistory}
       />
       
-      {showGenreSelection && (
-        <GenreSelection
-          availableGenres={availableGenres}
-          selectedGenres={selectedGenres}
-          onGenreSelection={handleGenreSelection}
-          onGenerate={handleGenerateRecommendationsWithGenres}
-          onCancel={() => setShowGenreSelection(false)}
-          loading={loading}
-        />
-      )}
-      
       <LearningTips />
       
       <MediaGrid 

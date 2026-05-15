@@ -21,20 +21,8 @@ export default function MyPage() {
   // 주간 학습량 통계 데이터 가져오기
   const fetchWeeklyStats = useCallback(async () => {
     console.log('🚀 [MyPage] fetchWeeklyStats 함수 호출됨');
-    
-    // 로컬 스토리지에서 사용자 ID 가져오기
-    const storedUser = localStorage.getItem('user');
-    console.log('📋 [MyPage] localStorage user data:', storedUser);
-    
-    if (!storedUser) {
-      console.log('User data not found in localStorage, skipping weekly stats fetch');
-      setStatsLoading(false);
-      return;
-    }
 
-    const userData = JSON.parse(storedUser);
-    const userId = userData.userId;
-    
+    const userId = user?.id;
     if (!userId) {
       console.log('User ID not available, skipping weekly stats fetch');
       setStatsLoading(false);
@@ -44,7 +32,7 @@ export default function MyPage() {
     try {
       setStatsLoading(true);
       const today = getTodayDate();
-      const apiUrl = `/learning-analytics/users/${userId}/weekly-stats/recent?weeks=1`;
+      const apiUrl = `/api/analysis/users/${userId}/weekly-stats/recent?weeks=1`;
       
       console.log('📊 [MyPage WeeklyStats API] 요청 시작:', {
         userId,
@@ -53,7 +41,9 @@ export default function MyPage() {
         timestamp: new Date().toISOString()
       });
       
-      const response = await fetch(apiUrl);
+      const response = await fetch(apiUrl, {
+        credentials: 'include'
+      });
       
       if (response.ok) {
         const data = await response.json();
@@ -86,11 +76,13 @@ export default function MyPage() {
         timestamp: new Date().toISOString()
       });
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     scrollToTop();
-    
+  }, [scrollToTop]);
+
+  useEffect(() => {
     // URL에 토큰과 사용자 정보가 있으면 저장 (백엔드에서 직접 리다이렉트된 경우)
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
@@ -102,18 +94,12 @@ export default function MyPage() {
       console.log('MyPage - URL에서 사용자 정보 발견, 저장 중...');
       
       // 토큰 저장
-      localStorage.setItem('token', token);
-      sessionStorage.setItem('token', token);
+      localStorage.setItem('jwt_token', token);
+      sessionStorage.setItem('jwt_token', token);
       
-      // 사용자 정보 저장
+      // 사용자 정보 저장 (전역 상태에만 저장, localStorage에 저장하지 않음)
       const decodedUsername = decodeURIComponent(username || '');
       const decodedProfileImage = decodeURIComponent(profileImage || '');
-      
-      localStorage.setItem('user', JSON.stringify({
-        userId: userId === 'null' ? null : userId,
-        username: decodedUsername,
-        profileImage: decodedProfileImage
-      }));
       
       // AppContext 업데이트
       const userData = {
@@ -130,11 +116,18 @@ export default function MyPage() {
       // URL에서 쿼리 파라미터 제거
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+  }, [setUser]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      console.log('⏳ [MyPage] 사용자 ID를 기다리는 중...');
+      return;
+    }
 
     // 주간 학습량 통계 데이터 가져오기
-    console.log('🔄 [MyPage] useEffect에서 fetchWeeklyStats 호출');
+    console.log('🔄 [MyPage] 사용자 ID 변경으로 fetchWeeklyStats 호출');
     fetchWeeklyStats();
-  }, [setUser, fetchWeeklyStats]);
+  }, [user?.id, fetchWeeklyStats]);
 
   // 통계 탭이 선택될 때 API 호출
   useEffect(() => {

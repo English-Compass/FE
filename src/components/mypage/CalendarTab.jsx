@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
 
 export default function LearningCalendarTab() {
+  const { user } = useApp();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarData, setCalendarData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,28 +17,24 @@ export default function LearningCalendarTab() {
     setCurrentMonth(newDate);
   };
 
-  // 색상 강도 계산 함수
-  const getColorIntensity = (sessionCount) => {
-    if (sessionCount === 0) return '#f3f4f6'; // 회색 (학습 없음)
-    if (sessionCount <= 2) return '#bbf7d0'; // 연한 녹색
-    if (sessionCount <= 4) return '#86efac'; // 중간 녹색
-    if (sessionCount <= 6) return '#4ade80'; // 진한 녹색
-    return '#22c55e'; // 가장 진한 녹색
+  // 색상 강도 계산 함수 (activityLevel 또는 questionsAnswered 기준)
+  const getColorIntensity = (activityLevel, questionsAnswered) => {
+    // activityLevel이 있으면 우선 사용, 없으면 questionsAnswered 사용
+    const level = activityLevel !== undefined ? activityLevel : (questionsAnswered > 0 ? Math.min(Math.ceil(questionsAnswered / 5), 4) : 0);
+    
+    if (level === 0) return '#e5e7eb'; // 회색 (학습 없음) - 더 진하게
+    if (level === 1) return '#86efac'; // 연한 녹색 - 더 진하게
+    if (level === 2) return '#4ade80'; // 중간 녹색 - 더 진하게
+    if (level === 3) return '#22c55e'; // 진한 녹색
+    return '#16a34a'; // 가장 진한 녹색 (level 4 이상)
   };
 
   // API에서 캘린더 데이터 가져오기
   const fetchCalendarData = useCallback(async () => {
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) {
-      setError('사용자 정보를 찾을 수 없습니다.');
-      return;
-    }
-
-    const userData = JSON.parse(storedUser);
-    const userId = userData.userId;
+    const userId = user?.id;
     
     if (!userId) {
-      setError('사용자 ID를 찾을 수 없습니다.');
+      setError('사용자 정보를 찾을 수 없습니다.');
       return;
     }
 
@@ -46,7 +44,7 @@ export default function LearningCalendarTab() {
       
       const year = currentMonth.getFullYear();
       const month = currentMonth.getMonth() + 1; // JavaScript month는 0부터 시작
-      const apiUrl = `/learning-analytics/users/${userId}/calendar-heatmap?year=${year}&month=${month}`;
+      const apiUrl = `/api/analysis/users/${userId}/calendar-heatmap?year=${year}&month=${month}`;
       
       console.log('📅 [Calendar API] 요청 시작:', {
         userId,
@@ -56,7 +54,9 @@ export default function LearningCalendarTab() {
         timestamp: new Date().toISOString()
       });
       
-      const response = await fetch(apiUrl);
+      const response = await fetch(apiUrl, {
+        credentials: 'include'
+      });
       
       if (response.ok) {
         const data = await response.json();
@@ -87,7 +87,7 @@ export default function LearningCalendarTab() {
     } finally {
       setLoading(false);
     }
-  }, [currentMonth]);
+  }, [currentMonth, user?.id]);
 
   useEffect(() => {
     fetchCalendarData();
@@ -121,12 +121,18 @@ export default function LearningCalendarTab() {
     // 해당 월의 날짜 채우기
     for (let day = 1; day <= daysInMonth; day++) {
       const dayData = dataByDate[day];
+      const questionsAnswered = dayData?.questionsAnswered || 0;
+      const activityLevel = dayData?.activityLevel !== undefined ? dayData.activityLevel : (questionsAnswered > 0 ? Math.min(Math.ceil(questionsAnswered / 5), 4) : 0);
+      const hasActivity = dayData?.hasActivity || questionsAnswered > 0;
+      
       calendarGrid.push({
         day,
-        completedSessionCount: dayData?.completedSessionCount || 0,
-        totalLearningTimeSeconds: dayData?.totalLearningTimeSeconds || 0,
-        totalQuestions: dayData?.totalQuestions || 0,
-        hasActivity: (dayData?.completedSessionCount || 0) > 0
+        questionsAnswered: questionsAnswered,
+        activityLevel: activityLevel,
+        correctAnswers: dayData?.correctAnswers || 0,
+        accuracyRate: dayData?.accuracyRate || 0,
+        studyTimeMinutes: dayData?.studyTimeMinutes || 0,
+        hasActivity: hasActivity
       });
     }
     
@@ -223,10 +229,10 @@ export default function LearningCalendarTab() {
                   <div
                     className="calendar-tab-content-day-cell"
                     style={{ 
-                      backgroundColor: getColorIntensity(dayData.completedSessionCount)
+                      backgroundColor: getColorIntensity(dayData.activityLevel, dayData.questionsAnswered)
                     }}
                     title={dayData.hasActivity 
-                      ? `${dayData.day}일: ${dayData.completedSessionCount}개 세션 완료, ${Math.round(dayData.totalLearningTimeSeconds / 60)}분 학습, ${dayData.totalQuestions}문제` 
+                      ? `${dayData.day}일: ${dayData.questionsAnswered}문제 풀이, 정답률 ${dayData.accuracyRate?.toFixed(1) || 0}%, 학습시간 ${dayData.studyTimeMinutes || 0}분` 
                       : `${dayData.day}일: 학습 없음`}
                   >
                     <span className={`calendar-tab-content-day-cell-number${
@@ -248,11 +254,11 @@ export default function LearningCalendarTab() {
             <div className="calendar-tab-legend-activity">
               <span>적음</span>
               <div className="calendar-tab-legend-activity-scale">
-                <div className="calendar-tab-legend-activity-scale-item" style={{backgroundColor: '#f3f4f6'}}></div>
-                <div className="calendar-tab-legend-activity-scale-item" style={{backgroundColor: '#bbf7d0'}}></div>
+                <div className="calendar-tab-legend-activity-scale-item" style={{backgroundColor: '#e5e7eb'}}></div>
                 <div className="calendar-tab-legend-activity-scale-item" style={{backgroundColor: '#86efac'}}></div>
                 <div className="calendar-tab-legend-activity-scale-item" style={{backgroundColor: '#4ade80'}}></div>
                 <div className="calendar-tab-legend-activity-scale-item" style={{backgroundColor: '#22c55e'}}></div>
+                <div className="calendar-tab-legend-activity-scale-item" style={{backgroundColor: '#16a34a'}}></div>
               </div>
               <span>많음</span>
             </div>

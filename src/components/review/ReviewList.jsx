@@ -57,8 +57,8 @@ export function ReviewList({ reviewQuestions, onQuestionRetry }) {
                     </TabsContent>
                     
                     <TabsContent value="sentence" className="!space-y-4 !mt-4">
-                        {reviewQuestions.filter(q => q.category === 'sentence').length > 0 ? (
-                            reviewQuestions.filter(q => q.category === 'sentence').map((question) => (
+                        {reviewQuestions.filter(q => (q.questionType || q.category || q.type) === 'sentence').length > 0 ? (
+                            reviewQuestions.filter(q => (q.questionType || q.category || q.type) === 'sentence').map((question) => (
                                 <ReviewQuestionItem
                                     key={question.id}
                                     question={question}
@@ -72,8 +72,8 @@ export function ReviewList({ reviewQuestions, onQuestionRetry }) {
                     </TabsContent>
                     
                     <TabsContent value="word" className="!space-y-4 !mt-4">
-                        {reviewQuestions.filter(q => q.category === 'word').length > 0 ? (
-                            reviewQuestions.filter(q => q.category === 'word').map((question) => (
+                        {reviewQuestions.filter(q => (q.questionType || q.category || q.type) === 'word').length > 0 ? (
+                            reviewQuestions.filter(q => (q.questionType || q.category || q.type) === 'word').map((question) => (
                                 <ReviewQuestionItem
                                     key={question.id}
                                     question={question}
@@ -87,8 +87,8 @@ export function ReviewList({ reviewQuestions, onQuestionRetry }) {
                     </TabsContent>
 
                     <TabsContent value="conversation" className="!space-y-4 !mt-4">
-                        {reviewQuestions.filter(q => q.category === 'conversation').length > 0 ? (
-                            reviewQuestions.filter(q => q.category === 'conversation').map((question) => (
+                        {reviewQuestions.filter(q => (q.questionType || q.category || q.type) === 'conversation').length > 0 ? (
+                            reviewQuestions.filter(q => (q.questionType || q.category || q.type) === 'conversation').map((question) => (
                                 <ReviewQuestionItem
                                     key={question.id}
                                     question={question}

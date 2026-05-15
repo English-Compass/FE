@@ -15,7 +15,7 @@ const GenreSelection = ({ isOpen, onClose, onConfirm }) => {
         throw new Error('장르 목록을 불러올 수 없습니다.');
       }
       const data = await response.json();
-      setAvailableGenres(data.genres || []);
+      setAvailableGenres(Array.isArray(data) ? data : (data.genres || []));
     } catch (error) {
       console.error('장르 목록 조회 오류:', error);
       // 백엔드에서 제공하는 기본 장르 목록 사용

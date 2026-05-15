@@ -13,10 +13,52 @@ const STUDY_TYPES = [
 
 // 백엔드 CategoryMapper와 일치하는 키워드 분류
 const KEYWORDS_BY_CATEGORY = {
-  STUDY: ['수업 듣기', '학과 대화', '과제 시험'],
-  BUSINESS: ['회의 컨퍼런스', '고객 서비스', '이메일 보고서'],
-  TRAVEL: ['배낭여행', '가족여행', '친구여행'],
-  DAILY_LIFE: ['쇼핑 식당', '병원 방문', '대중교통']
+  BUSINESS: ['고객 서비스', '이메일 보고서', '회의'],
+  TRAVEL: ['배낭여행', '가족여행', '친구와 여행'],
+  STUDY: ['과제 시험', '학과 대화', '수업 참여'],
+  DAILY_LIFE: ['병원 이용', '대중교통 이용', '쇼핑 외식']
+};
+
+const CATEGORY_LABELS = {
+  BUSINESS: '비즈니스',
+  TRAVEL: '여행',
+  STUDY: '학업',
+  DAILY_LIFE: '일상생활'
+};
+
+const KEYWORD_TO_CATEGORY_LABEL = Object.entries(KEYWORDS_BY_CATEGORY).reduce((acc, [categoryKey, keywordList]) => {
+  const label = CATEGORY_LABELS[categoryKey] || categoryKey;
+  keywordList.forEach((keyword) => {
+    acc[keyword] = label;
+  });
+  return acc;
+}, {});
+
+const CATEGORY_KEY_TO_STUDY_TYPE = {
+  BUSINESS: 'business',
+  TRAVEL: 'travel',
+  STUDY: 'academic',
+  DAILY_LIFE: 'daily'
+};
+
+const STUDY_TYPE_TO_CATEGORY_KEY = {
+  business: 'BUSINESS',
+  travel: 'TRAVEL',
+  academic: 'STUDY',
+  daily: 'DAILY_LIFE'
+};
+
+const deriveCategoriesFromKeywords = (keywords = []) => {
+  const categories = new Set();
+  keywords.forEach((keyword) => {
+    Object.entries(KEYWORDS_BY_CATEGORY).forEach(([categoryKey, keywordList]) => {
+      if (keywordList.includes(keyword)) {
+        const studyTypeId = CATEGORY_KEY_TO_STUDY_TYPE[categoryKey] || categoryKey.toLowerCase();
+        categories.add(studyTypeId);
+      }
+    });
+  });
+  return Array.from(categories);
 };
 
 // 사용자의 학습 통계 데이터를 가져오는 예시 (현재 비활성)
@@ -24,7 +66,7 @@ const KEYWORDS_BY_CATEGORY = {
 //   const response = await fetch('http://localhost:8080/api/user/statistics', {
 //     method: 'GET',
 //     headers: {
-//       'Authorization': `Bearer ${localStorage.getItem('token')}`,
+//       'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
 //       'Content-Type': 'application/json'
 //     }
 //   });
@@ -114,14 +156,36 @@ export const useApp = () => {
   return context;
 };
 
+// JWT 토큰에서 사용자 정보를 추출하는 함수
+const decodeJWT = (token) => {
+  try {
+    if (!token) return null;
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid JWT token format');
+    }
+    const payload = parts[1];
+    const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+    const decodedPayload = atob(paddedPayload);
+    return JSON.parse(decodedPayload);
+  } catch (error) {
+    console.error('JWT 디코딩 실패:', error);
+    return null;
+  }
+};
+
 export const AppProvider = ({ children }) => {
+  // 초기값: 빈 상태로 시작 (localStorage에 저장하지 않음)
+  // 앱 로드 시 API로 최신 사용자 정보 조회
   const [user, setUserState] = useState({
-    id: 'test-user-016',
-    name: '김영희',
-    email: 'test@example.com',
-    level: 'B',
-    joinDate: '2024-01-15',
-    streak: 7
+    id: null,
+    name: null,
+    email: null,
+    profileImage: null,
+    level: null,
+    joinDate: null,
+    streak: 0,
+    keywords: []
   });
   
   // setUser 함수를 useCallback으로 최적화
@@ -135,71 +199,83 @@ export const AppProvider = ({ children }) => {
     console.log('AppContext user state updated:', user);
   }, [user]);
 
-  // AppContext 마운트 시 API 호출로 사용자 정보 조회
+  // AppContext 마운트 시 API 호출로 사용자 정보 조회 (표준 방식)
+  // HttpOnly 쿠키(access_token)가 있으면 자동으로 전송됨
+  // Gateway가 쿠키에서 토큰을 추출하여 검증하므로 Authorization 헤더 불필요
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
+        console.log('AppContext - 앱 로드 시 사용자 정보 조회 시작');
         
-        if (!token || !storedUser) {
-          console.log('AppContext - 토큰 또는 사용자 정보가 없습니다.');
-          return;
-        }
-
-        console.log('AppContext - 마운트 시 사용자 정보 조회 시작');
-        
-        // 기본 사용자 정보는 localStorage에서 가져오기
-        const userData = JSON.parse(storedUser);
-        const basicUserInfo = {
-          id: userData.userId || null,
-          name: userData.username,
-          profileImage: userData.profileImage,
-          level: null, // API에서 조회
-          joinDate: null, // API에서 조회
-          streak: null // API에서 조회
-        };
-
-        // 사용자 설정 정보는 API에서 조회
-        const response = await fetch('/tings', {
+        // 1. 사용자 프로필 정보 조회 (이름, 프로필 이미지 등)
+        // HttpOnly 쿠키(access_token)가 있으면 자동으로 전송됨
+        // Gateway가 쿠키에서 토큰을 추출하여 검증
+        const profileResponse = await fetch('/api/user/settings', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include' // 쿠키 전달 필수! (HttpOnly 쿠키 포함)
         });
 
-        if (response.ok) {
-          const contentType = response.headers.get('content-type');
+        if (profileResponse.ok) {
+          const contentType = profileResponse.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
-            const responseData = await response.json();
-            console.log('AppContext - 사용자 설정 조회 응답:', responseData);
+            const responseData = await profileResponse.json();
+            console.log('AppContext - 사용자 정보 조회 응답:', responseData);
             
             // 백엔드 레벨(1, 2, 3)을 프론트엔드 레벨(A, B, C)로 변환
             const levelMapping = { 1: 'A', 2: 'B', 3: 'C' };
             const frontendLevel = levelMapping[responseData.difficultyLevel] || null;
             
-            // 백엔드 카테고리 Map을 프론트엔드 키워드 배열로 변환
+            // 영어 enum을 한글 키워드로 매핑
+            const enumToKeywordMap = {
+              'CLASS_LISTENING': '수업 참여',
+              'DEPARTMENT_CONVERSATION': '학과 대화',
+              'ASSIGNMENT_EXAM': '과제 시험',
+              'MEETING_CONFERENCE': '회의',
+              'CUSTOMER_SERVICE': '고객 서비스',
+              'EMAIL_REPORT': '이메일 보고서',
+              'BACKPACKING': '배낭여행',
+              'FAMILY_TRIP': '가족여행',
+              'FRIEND_TRIP': '친구와 여행',
+              'SHOPPING_DINING': '쇼핑 외식',
+              'HOSPITAL_VISIT': '병원 이용',
+              'PUBLIC_TRANSPORT': '대중교통 이용'
+            };
+            
+            // 백엔드 카테고리 Map을 프론트엔드 키워드 배열로 변환 (영어 enum → 한글 키워드)
             const keywordsArray = [];
             if (responseData.categories) {
               Object.values(responseData.categories).forEach(categoryKeywords => {
-                keywordsArray.push(...categoryKeywords);
+                categoryKeywords.forEach(enumKeyword => {
+                  const koreanKeyword = enumToKeywordMap[enumKeyword];
+                  if (koreanKeyword) {
+                    keywordsArray.push(koreanKeyword);
+                  }
+                });
               });
             }
 
+            // API 응답에서 사용자 정보 추출
+            // 백엔드에서 profileImage, name, difficultyLevel, categories, createdAt, updatedAt 반환
             const completeUserInfo = {
-              ...basicUserInfo,
+              id: responseData.userId || null,
+              name: responseData.name || null, // 백엔드에서 name 반환
+              email: responseData.email || null,
+              profileImage: responseData.profileImage || null, // 백엔드에서 profileImage 반환
               level: frontendLevel,
               keywords: keywordsArray,
               joinDate: responseData.createdAt ? new Date(responseData.createdAt).toISOString().split('T')[0] : null,
-              streak: 7 // 기본값 또는 API에서 조회
+              streak: 0 // 기본값 또는 API에서 조회
             };
 
-            console.log('AppContext - 완전한 사용자 정보:', completeUserInfo);
+            console.log('AppContext - 최신 사용자 정보 (전역 상태에 저장):', completeUserInfo);
             setUserState(completeUserInfo);
           }
         } else {
-          console.log('AppContext - 사용자 설정 조회 실패, 기본 정보만 사용');
-          setUserState(basicUserInfo);
+          console.log('AppContext - 사용자 정보 조회 실패:', profileResponse.status);
+          // API 조회 실패 시 빈 상태 유지
         }
       } catch (error) {
         console.error('AppContext - 사용자 정보 조회 오류:', error);
@@ -215,7 +291,7 @@ export const AppProvider = ({ children }) => {
   });
 
   // 학습 관련 상태들
-  const [currentStep, setCurrentStep] = useState('type'); // type, studysession, complete
+  const [currentStep, setCurrentStep] = useState('studysession'); // studysession, complete
   const [selectedType, setSelectedType] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState(3);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -245,6 +321,27 @@ export const AppProvider = ({ children }) => {
     keywords: []
   });
 
+  // 사용자의 저장된 키워드가 있을 경우 자동으로 학습 설정 동기화
+  useEffect(() => {
+    if (!user?.keywords || user.keywords.length === 0) return;
+
+    const derivedCategories = deriveCategoriesFromKeywords(user.keywords);
+
+    setFormData(prev => ({
+      ...prev,
+      level: user.level || prev.level,
+      selectedCategories: derivedCategories.length ? derivedCategories : prev.selectedCategories,
+      keywords: user.keywords
+    }));
+
+    if (derivedCategories.length) {
+      setSelectedType(prev => {
+        if (!prev) return derivedCategories[0];
+        return derivedCategories.includes(prev) ? prev : derivedCategories[0];
+      });
+    }
+  }, [user?.keywords, user?.level]);
+
   // 난이도 선택 함수
   const getDifficultyText = (level) => {
     const levels = {
@@ -256,6 +353,11 @@ export const AppProvider = ({ children }) => {
   };
 
   // 대분류 토글 함수 (최대 2개)
+  const getKeywordsForCategory = (categoryId) => {
+    const categoryKey = STUDY_TYPE_TO_CATEGORY_KEY[categoryId] || categoryId;
+    return KEYWORDS_BY_CATEGORY[categoryKey] || [];
+  };
+
   const handleCategoryToggle = (categoryId) => {
     setFormData(prev => {
       const isSelected = prev.selectedCategories.includes(categoryId);
@@ -275,7 +377,7 @@ export const AppProvider = ({ children }) => {
       // 선택된 카테고리에 속하지 않는 키워드들 제거
       const validKeywords = prev.keywords.filter(keyword => {
         return newCategories.some(catId => 
-          KEYWORDS_BY_CATEGORY[catId]?.includes(keyword)
+          getKeywordsForCategory(catId).includes(keyword)
         );
       });
       
@@ -296,6 +398,43 @@ export const AppProvider = ({ children }) => {
         : [...prev.keywords, keyword]
     }));
   };
+
+  const buildSessionMetadata = useCallback(({ keywords = [], selectedCategories = [], level = 'B', questionCount = 10 } = {}) => {
+    const categoriesPayload = {};
+
+    selectedCategories.forEach((categoryId) => {
+      const categoryKey = STUDY_TYPE_TO_CATEGORY_KEY[categoryId];
+      const label = CATEGORY_LABELS[categoryKey];
+      if (label && !categoriesPayload[label]) {
+        categoriesPayload[label] = [];
+      }
+    });
+
+    keywords.forEach((keyword) => {
+      const label = KEYWORD_TO_CATEGORY_LABEL[keyword];
+      if (!label) return;
+      if (!categoriesPayload[label]) {
+        categoriesPayload[label] = [];
+      }
+      if (!categoriesPayload[label].includes(keyword)) {
+        categoriesPayload[label].push(keyword);
+      }
+    });
+
+    if (Object.keys(categoriesPayload).length === 0) {
+      categoriesPayload['일상생활'] = [];
+    }
+
+    const levelMapping = { A: '1', B: '2', C: '3', '1': '1', '2': '2', '3': '3' };
+    const normalizedLevel = (level || 'B').toString().toUpperCase();
+    const numericLevel = levelMapping[normalizedLevel] || levelMapping['B'];
+
+    return JSON.stringify({
+      categories: categoriesPayload,
+      level: numericLevel,
+      questionCount: questionCount || 10
+    });
+  }, []);
 
   // 추가 정보 초기화 함수 
   const resetAdditionalInfo = () => {
@@ -375,6 +514,7 @@ export const AppProvider = ({ children }) => {
     getDifficultyText,
     handleCategoryToggle,
     handleKeywordToggle,
+    buildSessionMetadata,
     resetAdditionalInfo,
     scrollToTop,
   };

@@ -5,11 +5,11 @@ export default function HeroSection() {
 
     const handleLogin = () => {
         // 백엔드의 카카오 로그인 엔드포인트로 리다이렉트
-        // 프록시를 통해 백엔드로 요청이 전달됨 (vite.config.js 참고)
+        // Gateway를 통해 /api/auth/** 경로로 라우팅됨
         const backendUrl = import.meta.env.VITE_BACKEND_URL || '';
         const loginEndpoint = backendUrl 
-            ? `${backendUrl}/oauth2/authorization/kakao`
-            : '/oauth2/authorization/kakao'; // 프록시 사용 시 상대 경로
+            ? `${backendUrl}/api/auth/oauth2/authorization/kakao`
+            : '/api/auth/oauth2/authorization/kakao'; // Gateway를 통한 라우팅
         
         window.location.href = loginEndpoint;
     }

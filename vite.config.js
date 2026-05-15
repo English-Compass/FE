@@ -5,95 +5,17 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // 환경 변수 정의 (백엔드 URL)
+  define: {
+    'import.meta.env.VITE_BACKEND_URL': JSON.stringify('http://localhost:8080') // Gateway URL
+  },
   server: {
     proxy: {
-      '/api/v1': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/login': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        secure: false
-      },
-      '/auth': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        secure: false
-      },
-      '/oauth2': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        secure: false
-      },
-      '/user/settings': {
-        target: 'http://localhost:8080',      
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/recommendations': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/word-study': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/quiz': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/questions': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/learning-sessions': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/question-answers': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/learning-analytics': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/sessions': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/daily-activity': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/weekly-graph': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/question-type-accuracy': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/weakness-distribution': {
-        target: 'http://localhost:8088',
-        changeOrigin: true,
-        secure: false
-      },
-      '/api/settings': {
-        target: 'http://localhost:8088',
+      // Gateway를 통해 모든 API 요청 라우팅
+      // Gateway는 보통 8080 포트에서 실행
+      // 모든 경로를 /api/{service-name}/** 형식으로 통일
+      '/api': {
+        target: 'http://localhost:8080', // Gateway 포트
         changeOrigin: true,
         secure: false
       }

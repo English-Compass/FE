@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { createReviewSession } from '../../services/api.js';
+import { useApp } from '../../context/AppContext';
 
 export function ReviewQuizCard({ quiz, navigate }) {
+  const { user, formData, buildSessionMetadata } = useApp();
 
   return (
     <Card>
@@ -38,16 +40,23 @@ export function ReviewQuizCard({ quiz, navigate }) {
           className="w-full"
           onClick={async () => {
             try {
-              const storedUser = localStorage.getItem('user');
-              const userId = storedUser ? JSON.parse(storedUser).userId : null;
+              const userId = user?.id;
               if (!userId) {
                 alert('로그인이 필요합니다.');
                 return;
               }
 
+              const sessionMetadata = buildSessionMetadata({
+                keywords: formData?.keywords || [],
+                selectedCategories: formData?.selectedCategories || [],
+                level: formData?.level || 'B',
+                questionCount: quiz?.length > 0 ? quiz.length : 5
+              });
+
               // 복습세션 생성
               const session = await createReviewSession({ 
-                userId
+                userId,
+                sessionMetadata
               });
               
               if (session.sessionId) {

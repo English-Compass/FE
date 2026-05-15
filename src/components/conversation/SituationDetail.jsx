@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Badge } from '../ui/badge';
 
-const API_BASE_URL = '/api/v1';
+const API_BASE_URL = '/api/speech';
 
 export function SituationDetail({ 
   selectedScenario, 
@@ -30,7 +30,7 @@ export function SituationDetail({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: parseInt(user.id),
+          userId: user.id,
           difficultyLevel: difficultyLevel,
           scenarioId: selectedScenario.id
         }),

@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ArrowLeft, Star, Clock, MessageCircle, Calendar } from 'lucide-react';
 
-const API_BASE_URL = '/api/v1';
+const API_BASE_URL = '/api/speech';
 
 export function FeedbackHistory({ user, onBack }) {
   const [feedbacks, setFeedbacks] = useState([]);

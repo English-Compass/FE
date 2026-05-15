@@ -21,20 +21,17 @@ export default function ProfileTab() {
   const fetchUserSettings = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        console.log('ProfileTab - 토큰이 없습니다. 기본값을 사용합니다.');
-        setIsLoading(false);
-        return;
-      }
-
       console.log('ProfileTab - 백엔드에서 사용자 설정 조회 시작');
-      const response = await fetch('/tings', {
+      console.log('ProfileTab - HttpOnly 쿠키(access_token) 자동 전송 (credentials: include)');
+      
+      // HttpOnly 쿠키(access_token)가 있으면 자동으로 전송됨
+      // Gateway가 쿠키에서 토큰을 추출하여 검증하므로 Authorization 헤더 불필요
+      const response = await fetch('/api/user/settings', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include' // 쿠키 전달 필수! (HttpOnly 쿠키 포함)
       });
 
       console.log('ProfileTab - API 응답 상태:', response.status, response.statusText);
@@ -57,11 +54,35 @@ export default function ProfileTab() {
             const levelMapping = { 1: 'A', 2: 'B', 3: 'C' };
             const frontendLevel = levelMapping[userData.difficultyLevel] || 'B';
             
-            // 백엔드 카테고리 Map을 프론트엔드 키워드 배열로 변환
+            // 영어 enum을 한글 키워드로 매핑
+            const enumToKeywordMap = {
+              'CLASS_LISTENING': '수업 참여',
+              'DEPARTMENT_CONVERSATION': '학과 대화',
+              'ASSIGNMENT_EXAM': '과제 시험',
+              'MEETING_CONFERENCE': '회의',
+              'CUSTOMER_SERVICE': '고객 서비스',
+              'EMAIL_REPORT': '이메일 보고서',
+              'BACKPACKING': '배낭여행',
+              'FAMILY_TRIP': '가족여행',
+              'FRIEND_TRIP': '친구와 여행',
+              'SHOPPING_DINING': '쇼핑 외식',
+              'HOSPITAL_VISIT': '병원 이용',
+              'PUBLIC_TRANSPORT': '대중교통 이용'
+            };
+            
+            // 백엔드 카테고리 Map을 프론트엔드 키워드 배열로 변환 (영어 enum → 한글 키워드)
             const keywordsArray = [];
             if (userData.categories) {
               Object.values(userData.categories).forEach(categoryKeywords => {
-                keywordsArray.push(...categoryKeywords);
+                // 영어 enum을 한글 키워드로 변환
+                categoryKeywords.forEach(enumKeyword => {
+                  const koreanKeyword = enumToKeywordMap[enumKeyword];
+                  if (koreanKeyword) {
+                    keywordsArray.push(koreanKeyword);
+                  } else {
+                    console.warn(`알 수 없는 enum 키워드: ${enumKeyword}`);
+                  }
+                });
               });
             }
             
@@ -71,8 +92,11 @@ export default function ProfileTab() {
             });
             
             // AppContext의 user 상태 업데이트
+            // 백엔드에서 profileImage, name도 함께 반환하므로 함께 업데이트
             setUser(prevUser => ({
               ...prevUser,
+              name: userData.name || prevUser.name || null, // 백엔드에서 name 반환
+              profileImage: userData.profileImage || prevUser.profileImage || null, // 백엔드에서 profileImage 반환
               level: frontendLevel,
               keywords: keywordsArray
             }));
@@ -109,9 +133,11 @@ export default function ProfileTab() {
     fetchUserSettings();
   }, []);
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     // ProfileEdit 컴포넌트에서 API 호출을 처리하므로 여기서는 편집 모드만 종료
     setIsEditing(false);
+    // 저장 후 최신 데이터를 다시 조회하여 상태 동기화
+    await fetchUserSettings();
   };
 
   const handleEditToggle = async () => {

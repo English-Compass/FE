@@ -64,10 +64,13 @@ export function Conversation({
     }
   };
 
-  // 학습 모드에서 문제 로드
+  // question prop이 변경되면 currentQuestion 업데이트
   useEffect(() => {
-    // question prop이 없으면 학습 모드로 간주하고 새 문제를 가져옵니다.
-    if (!question) {
+    if (question) {
+      // question prop이 있으면 StudySession에서 전달된 문제 사용
+      setCurrentQuestion(question);
+    } else {
+      // question prop이 없으면 학습 모드로 간주하고 새 문제를 가져옵니다.
       fetchConversationQuestion();
     }
   }, [question]);

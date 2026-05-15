@@ -134,7 +134,7 @@ export function Word({
           <div className="bg-green-50 !p-4 rounded-lg border border-green-200">
             <p className="text-sm text-green-700 font-medium !mb-2">💭 단어 의미 문제</p>
             <p className="text-green-800">
-              주어진 단어의 의미로 가장 적절한 것을 선택하세요.
+              빈칸에 들어갈 올바른 단어를 선택하세요.
             </p>
           </div>
         )}
