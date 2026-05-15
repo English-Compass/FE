@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from '../ui/Input';
-import { Label } from '../ui/label';
+import { Label } from '../ui/label.jsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';

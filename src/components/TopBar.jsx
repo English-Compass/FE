@@ -2,8 +2,8 @@ import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
-import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar.jsx';
-import { Button } from './ui/button.jsx';
+import { Avatar, AvatarImage, AvatarFallback } from './ui/Avatar';
+import { Button } from './ui/Button';
 import '../styles/components/_topbar.scss';
 
 const TopBar = memo(() => {
