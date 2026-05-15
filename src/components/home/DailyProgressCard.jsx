@@ -1,8 +1,8 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Progress } from '../ui/progress';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import { Progress } from '../ui/Progress';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 import { useNavigate } from 'react-router-dom';
 
 export function DailyProgressCard({ studyProgress, dailyActivity, loading }) {

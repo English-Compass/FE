@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import { Button } from '../ui/Button';
 import { ArrowLeft } from 'lucide-react';
-import { Badge } from '../ui/badge';
+import { Badge } from '../ui/Badge';
 
 const API_BASE_URL = '/api/speech';
 

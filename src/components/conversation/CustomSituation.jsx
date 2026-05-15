@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Textarea } from '../ui/Textarea';
 import { ArrowLeft } from 'lucide-react';
-import { Badge } from '../ui/badge';
+import { Badge } from '../ui/Badge';
 
 const DIFFICULTY_LEVELS = [
   { id: 'BEGINNER', title: '초급', description: '기본 어휘, 짧은 문장, 현재시제', color: 'bg-green-100 text-green-800' },

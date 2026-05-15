@@ -1,6 +1,6 @@
 import React from 'react';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
 
 export function MediaHeader({ user, searchTerm, onSearchChange, getLevelText, onGenerateRecommendations, onViewHistory, loading, showHistory }) {
   return (

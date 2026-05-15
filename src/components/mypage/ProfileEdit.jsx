@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Input } from '../ui/input';
+import { Input } from '../ui/Input';
 import { Label } from '../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select';
+import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 import { X } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/Avatar';
 import { useApp } from '../../context/AppContext';
 
 export default function ProfileEdit({ user, editForm, setEditForm, onSave }) {

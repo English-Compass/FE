@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent } from '../../components/ui/card';
+import { Card, CardContent } from '../../components/ui/Card';
 import { useApp } from '../../context/AppContext';
 
 export function ReviewStats({ reviewQuestions }) {
