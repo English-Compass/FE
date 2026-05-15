@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card, CardContent } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
+import { Card, CardContent } from '../ui/Card';
+import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 
 export function MediaCard({ content, getLevelColor, getLevelText, onWatchContent }) {
   // 백엔드 응답 구조에 맞게 필드 매핑

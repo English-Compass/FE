@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button } from '../../components/ui/button';
-import { Progress } from '../../components/ui/progress';
+import { Button } from '../../components/ui/Button';
+import { Progress } from '../../components/ui/Progress';
 
 import { Word } from '../question-types/Word';
 import { Sentence } from '../question-types/Sentence';

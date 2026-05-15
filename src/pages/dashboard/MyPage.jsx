@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
 import ProfileTab from '../../components/mypage/ProfileTab';
 import StatsTab from '../../components/mypage/StatsTab';
 import CalendarTab from '../../components/mypage/CalendarTab';

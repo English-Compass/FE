@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card, CardContent } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+import { Card, CardContent } from '../ui/Card';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 import { ArrowLeft } from 'lucide-react';
 
 export function ScenarioSelection({ 

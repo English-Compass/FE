@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
-import { Card, CardContent } from '../ui/card';
-import { Badge } from '../ui/badge'
-import { Button } from '../ui/button';
+import { Card, CardContent } from '../ui/Card';
+import { Badge } from '../ui/Badge'
+import { Button } from '../ui/Button';
 import { ArrowLeft } from "lucide-react";
 import AppContext from "../../context/AppContext";
 import { useNavigate } from "react-router-dom";

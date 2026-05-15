@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
+import { Button } from "../ui/Button";
+import { Badge } from "../ui/Badge";
 import { X } from "lucide-react";
 
 // API: 컴포넌트가 마운트될 때 서버로부터 키워드 목록을 가져와야 합니다.

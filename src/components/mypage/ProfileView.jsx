@@ -1,6 +1,6 @@
 import React from 'react';
-import { Badge } from '../../components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
+import { Badge } from '../../components/ui/Badge';
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/Avatar';
 
 // API: 서버에서 현재 로그인된 사용자의 프로필 정보를 가져와야 합니다.
 // 예: useEffect(() => { fetch('/api/user/profile').then(res => res.json()).then(data => setUser(data)); }, []);

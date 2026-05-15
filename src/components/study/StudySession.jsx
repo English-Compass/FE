@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '../ui/button';
-import { Progress } from '../ui/progress';
-import { Badge } from '../ui/badge';
+import { Button } from '../ui/Button';
+import { Progress } from '../ui/Progress';
+import { Badge } from '../ui/Badge';
 import { useApp } from '../../context/AppContext';
 import { createLearningSessionWithQuestions, fetchSessionQuestions, submitAnswer, completeLearningSession } from '../../services/api.js';
 import { useNavigate } from 'react-router-dom';
