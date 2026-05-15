@@ -1,0 +1,44 @@
+.media-page {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  
+  // 모바일 대응
+  @media (max-width: 640px) {
+    padding: 2.5rem;
+  }
+  
+  // 미디어 그리드
+  .media-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}
+
+// 레벨별 색상 유틸리티
+.level-color-1 { background-color: #10b981 !important; }
+.level-color-2 { background-color: #34d399 !important; }
+.level-color-3 { background-color: #eab308 !important; }
+.level-color-4 { background-color: #f97316 !important; }
+.level-color-5 { background-color: #ef4444 !important; }
+.level-color-6 { background-color: #a855f7 !important; }
+
+// 반응형 디자인
+@media (max-width: 768px) {
+  .media-page {
+    .media-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+}
